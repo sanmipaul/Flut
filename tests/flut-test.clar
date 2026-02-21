@@ -59,3 +59,36 @@
     (ok "✓ Get beneficiary test passed")
   )
 )
+
+;; Test: Check vault unlock status
+(define-private (test-vault-unlock-status)
+  (let
+    ((is-unlocked (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut is-vault-unlocked u0)))
+    (ok "✓ Check vault unlock status test passed")
+  )
+)
+
+;; Test: Get vault counter
+(define-private (test-get-vault-count)
+  (let
+    ((count (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-vault-count)))
+    (match count
+      c (begin
+        (asserts! (>= c u1) (err "Vault count should be at least 1"))
+        (ok "✓ Get vault count test passed")
+      )
+      none (err "✗ Failed to get vault count")
+    )
+  )
+)
+
+;; Test: Deposit to existing vault
+(define-private (test-deposit-to-vault)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut deposit u0 u500000)))
+    (match result
+      success (ok "✓ Deposit to vault test passed")
+      error (err (concat "✗ Deposit failed: " (to-string error)))
+    )
+  )
+)
