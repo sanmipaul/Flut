@@ -63,3 +63,34 @@
     (ok vault-id)
   )
 )
+
+;; Withdraw from a vault
+(define-public (withdraw (vault-id uint))
+  (let
+    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
+     (recipient (match (get beneficiary vault) 
+                   beneficiary beneficiary
+                   (get creator vault)))
+    )
+    
+    ;; Verify caller is vault creator
+    (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
+    
+    ;; Verify vault is unlocked
+    (asserts! (>= block-height (get unlock-height vault)) ERR-NOT-UNLOCKED)
+    
+    ;; Verify hasn't been withdrawn
+    (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+    
+    ;; Transfer funds to recipient (beneficiary or creator)
+    (try! (as-contract (stx-transfer? (get amount vault) tx-sender recipient)))
+    
+    ;; Mark as withdrawn
+    (map-set vaults
+      { vault-id: vault-id }
+      (merge vault { is-withdrawn: true })
+    )
+    
+    (ok true)
+  )
+)
