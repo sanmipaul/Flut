@@ -144,3 +144,25 @@
     (ok "✓ Get penalty destination test passed")
   )
 )
+
+;; Test: Emergency withdrawal with penalty
+(define-private (test-emergency-withdraw)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut emergency-withdraw u0)))
+    (match result
+      response (ok "✓ Emergency withdrawal test passed")
+      error (err (concat "✗ Emergency withdrawal failed: " (to-string error)))
+    )
+  )
+)
+
+;; Test: Set penalty destination
+(define-private (test-set-penalty-destination)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut set-penalty-destination 'ST1SJ3DTE5DN7X54YDH5D64R3BJB2ZZAB3A24GTNNP)))
+    (match result
+      success (ok "✓ Set penalty destination test passed")
+      error (err (concat "✗ Set penalty destination failed: " (to-string error)))
+    )
+  )
+)
