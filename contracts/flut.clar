@@ -31,6 +31,7 @@
 (define-constant ERR-INVALID-AMOUNT (err u5))
 (define-constant ERR-INVALID-HEIGHT (err u6))
 (define-constant ERR-INVALID-PENALTY-RATE (err u7))
+(define-constant ERR-NOT-PENALTY-OWNER (err u8))
 
 ;; Penalty configuration
 (define-constant PENALTY_RATE u10)
@@ -222,5 +223,17 @@
     )
     
     (ok { user-amount: user-amount, penalty: penalty-amount })
+  )
+)
+
+;; Set the penalty destination address (contract owner only)
+(define-public (set-penalty-destination (new-destination principal))
+  (begin
+    ;; In a real contract, this would check contract ownership
+    ;; For this implementation, we allow the current penalty-destination to update
+    (asserts! (is-eq tx-sender (var-get penalty-destination)) (err u8))
+    
+    (var-set penalty-destination new-destination)
+    (ok true)
   )
 )
