@@ -275,11 +275,13 @@
     
     ;; Verify vault hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
-    
-    ;; Verify vault is still locked (allows early withdrawal)
-    ;; Note: This should fail if already unlocked to preserve incentive for normal withdrawal
-    ;; Optional: allow emergency-withdraw at any time for flexibility
-    
+
+    ;; Revoke stacking delegation before transferring funds out
+    (if (get stacking-enabled vault)
+      (try-revoke-stacking)
+      false
+    )
+
     ;; Transfer user amount to recipient
     (try! (as-contract (stx-transfer? user-amount tx-sender recipient)))
     
