@@ -160,6 +160,17 @@
   )
 )
 
+;; Get NFT token ID for a vault
+(define-read-only (get-vault-nft-token-id (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (get nft-token-id v)
+      none
+    )
+  )
+)
+
 ;; Deposit additional funds into an existing vault
 (define-public (deposit (vault-id uint) (amount uint))
   (let
