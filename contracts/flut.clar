@@ -340,6 +340,40 @@
   )
 )
 
+;; Allow vault owner to change the stacking pool (revokes old delegation and re-delegates).
+;; Can also be used to enable stacking on an existing non-stacking vault.
+(define-public (update-stacking-pool (vault-id uint) (new-pool principal))
+  (let
+    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND)))
+
+    ;; Only vault creator may update the pool
+    (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
+
+    ;; Vault must still be active
+    (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+
+    ;; Revoke any existing delegation before switching pools
+    (if (get stacking-enabled vault)
+      (try-revoke-stacking)
+      false
+    )
+
+    ;; Update stacking fields on the vault
+    (map-set vaults
+      { vault-id: vault-id }
+      (merge vault {
+        stacking-enabled: true,
+        stacking-pool: (some new-pool)
+      })
+    )
+
+    ;; Delegate to the new pool
+    (try-delegate-stacking (get amount vault) new-pool)
+
+    (ok true)
+  )
+)
+
 ;; Get penalty rate
 (define-read-only (get-penalty-rate)
   PENALTY_RATE
