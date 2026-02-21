@@ -10,6 +10,7 @@ export interface VaultData {
   createdAt: bigint;
   isWithdrawn: boolean;
   beneficiary?: string;
+  nftTokenId?: number;
 }
 
 /**
@@ -207,6 +208,130 @@ export class VaultContractAPI {
 
     console.log(`Calling ${functionName} with args:`, args);
     return true; // Placeholder
+  }
+
+  // ============================================================================
+  // NFT Methods (SIP-009 NFT Receipt)
+  // ============================================================================
+
+  /**
+   * Get NFT token ID associated with a vault
+   * @param vaultId - The vault ID
+   */
+  async getVaultNFTTokenId(vaultId: number): Promise<number | null> {
+    const functionName = 'get-vault-nft-token-id';
+    const args = [`u${vaultId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return null; // Placeholder
+  }
+
+  /**
+   * Get NFT metadata for a specific token
+   * @param tokenId - The NFT token ID
+   */
+  async getNFTMetadata(tokenId: number): Promise<any | null> {
+    const functionName = 'get-nft-metadata';
+    const args = [`u${tokenId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return null; // Placeholder
+  }
+
+  /**
+   * Get owner of an NFT token
+   * @param tokenId - The NFT token ID
+   */
+  async getNFTOwner(tokenId: number): Promise<string | null> {
+    const functionName = 'get-owner';
+    const args = [`u${tokenId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return null; // Placeholder
+  }
+
+  /**
+   * Get NFT balance for an address
+   * @param owner - The owner principal address
+   */
+  async getNFTBalance(owner: string): Promise<number> {
+    const functionName = 'get-balance';
+    const args = [`'${owner}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return 0; // Placeholder
+  }
+
+  /**
+   * Transfer an NFT to another address
+   * @param tokenId - The NFT token ID
+   * @param recipient - The recipient principal address
+   */
+  async transferNFT(tokenId: number, recipient: string): Promise<boolean> {
+    const functionName = 'transfer';
+    const args = [
+      `u${tokenId}`,
+      `'${recipient}`,
+    ];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return true; // Placeholder
+  }
+
+  /**
+   * Get token URI for an NFT
+   * @param tokenId - The NFT token ID
+   */
+  async getTokenURI(tokenId: number): Promise<string | null> {
+    const functionName = 'get-token-uri';
+    const args = [`u${tokenId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return null; // Placeholder
+  }
+
+  /**
+   * Get metadata URI for an NFT (returns data URI with JSON)
+   * @param tokenId - The NFT token ID
+   */
+  async getMetadataURI(tokenId: number): Promise<string | null> {
+    const functionName = 'get-metadata-uri';
+    const args = [`u${tokenId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return null; // Placeholder
+  }
+
+  /**
+   * Check if an NFT token exists
+   * @param tokenId - The NFT token ID
+   */
+  async tokenExists(tokenId: number): Promise<boolean> {
+    const functionName = 'token-exists';
+    const args = [`u${tokenId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return false; // Placeholder
+  }
+
+  /**
+   * Get last minted NFT token ID
+   */
+  async getLastTokenId(): Promise<number | null> {
+    const functionName = 'get-last-token-id';
+
+    console.log(`Calling ${functionName}`);
+    return null; // Placeholder
+  }
+
+  /**
+   * Get total NFT token count
+   */
+  async getTokenCount(): Promise<number> {
+    const functionName = 'get-token-count';
+
+    console.log(`Calling ${functionName}`);
+    return 0; // Placeholder
   }
 }
 
