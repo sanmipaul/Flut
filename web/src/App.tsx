@@ -101,6 +101,25 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleEmergencyWithdraw = async (vaultId: number) => {
+    try {
+      setLoading(true);
+      setError('');
+
+      // Call smart contract emergency-withdraw function
+      console.log(`Emergency withdrawing from vault ${vaultId}`);
+
+      const updatedVaults = vaults.map((v) =>
+        v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
+      );
+      setVaults(updatedVaults);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to process emergency withdrawal');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleFetchVault = async (vaultId: number): Promise<Vault> => {
     const vault = vaults.find((v) => v.vaultId === vaultId);
     if (!vault) {
@@ -160,6 +179,8 @@ export const App: React.FC = () => {
               onWithdraw={handleWithdraw}
               onSetBeneficiary={handleSetBeneficiary}
               onFetchVault={handleFetchVault}
+              onEmergencyWithdraw={handleEmergencyWithdraw}
+              penaltyRate={10}
             />
           ) : (
             <div className="empty-content">
