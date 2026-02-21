@@ -269,3 +269,93 @@
     )
   )
 )
+
+;; Test: NFT token existence check
+(define-private (test-nft-token-exists)
+  (let
+    ((exists (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft token-exists u0)))
+    (match exists
+      result (ok "✓ NFT token existence check test passed")
+      none (err "✗ Failed to check token existence")
+    )
+  )
+)
+
+;; Test: NFT owner verification
+(define-private (test-nft-owner-verification)
+  (let
+    ((owner (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-owner u0)))
+    (match owner
+      owner-result (ok "✓ NFT owner verification test passed")
+      none (err "✗ Failed to get NFT owner")
+    )
+  )
+)
+
+;; Test: Token URI retrieval
+(define-private (test-token-uri-retrieval)
+  (let
+    ((uri (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-token-uri u0)))
+    (match uri
+      token-uri (ok "✓ Token URI retrieval test passed")
+      error (err (concat "✗ Failed to get token URI: " (to-string error)))
+    )
+  )
+)
+
+;; Test: Metadata URI retrieval
+(define-private (test-metadata-uri-retrieval)
+  (let
+    ((uri (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-metadata-uri u0)))
+    (match uri
+      metadata-uri (ok "✓ Metadata URI retrieval test passed")
+      error (err (concat "✗ Failed to get metadata URI: " (to-string error)))
+    )
+  )
+)
+
+;; Test: Get last token ID
+(define-private (test-get-last-token-id)
+  (let
+    ((token-id (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-last-token-id)))
+    (match token-id
+      id (ok "✓ Get last token ID test passed")
+      error (err (concat "✗ Failed to get last token ID: " (to-string error)))
+    )
+  )
+)
+
+;; Test: Get token count
+(define-private (test-get-token-count)
+  (let
+    ((count (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-token-count)))
+    (match count
+      total (ok "✓ Get token count test passed")
+      error (err (concat "✗ Failed to get token count: " (to-string error)))
+    )
+  )
+)
+
+;; Test: NFT transfer between addresses
+(define-private (test-nft-transfer)
+  (let
+    ((transfer-result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft 
+      transfer u0 tx-sender 'ST1SJ3DTE5DN7X54YDH5D64R3BJB2ZZAB3A24GTNNP)))
+    (match transfer-result
+      success (ok "✓ NFT transfer test passed")
+      error (err (concat "✗ NFT transfer failed: " (to-string error)))
+    )
+  )
+)
+
+;; Test: NFT burning on vault withdrawal
+(define-private (test-nft-burn-on-withdrawal)
+  (let
+    ((burn-result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft 
+      burn-vault-receipt u0 tx-sender)))
+    (match burn-result
+      success (ok "✓ NFT burning on withdrawal test passed")
+      error (err (concat "✗ NFT burning failed: " (to-string error)))
+    )
+  )
+)
