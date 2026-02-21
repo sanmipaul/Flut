@@ -30,6 +30,11 @@
 (define-constant ERR-ALREADY-WITHDRAWN (err u4))
 (define-constant ERR-INVALID-AMOUNT (err u5))
 (define-constant ERR-INVALID-HEIGHT (err u6))
+(define-constant ERR-INVALID-PENALTY-RATE (err u7))
+
+;; Penalty configuration
+(define-constant PENALTY_RATE u10)
+(define-data-var penalty-destination principal tx-sender)
 
 ;; Create a new vault
 (define-public (create-vault (lock-duration uint) (initial-amount uint))
