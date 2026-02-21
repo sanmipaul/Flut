@@ -39,16 +39,22 @@ export class VaultContractAPI {
    * @param lockDuration - Duration in blocks
    * @param initialAmount - Initial deposit in microSTX
    * @param beneficiary - Optional beneficiary principal
+   * @param enableStacking - Opt-in to PoX stacking while locked
+   * @param stackingPool - Pool principal (required when enableStacking is true)
    */
   async createVault(
     lockDuration: number,
     initialAmount: bigint,
-    beneficiary?: string
+    beneficiary?: string,
+    enableStacking: boolean = false,
+    stackingPool?: string
   ): Promise<string> {
     const functionName = 'create-vault';
     const args = [
       `u${lockDuration}`,
       `u${initialAmount}`,
+      enableStacking ? 'true' : 'false',
+      stackingPool ? `(some '${stackingPool})` : 'none',
     ];
 
     if (beneficiary) {
