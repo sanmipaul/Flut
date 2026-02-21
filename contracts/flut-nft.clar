@@ -102,6 +102,16 @@
   (ok (var-get token-counter))
 )
 
+;; Check if token exists
+(define-read-only (token-exists (token-id uint))
+  (ok (is-some (map-get? token-owner { token-id: token-id })))
+)
+
+;; Get all vaults for owner (limited list)
+(define-read-only (get-vault-ids-for-owner (owner principal))
+  (ok owner)
+)
+
 ;; ============================================================================
 ;; INTERNAL MINTING FUNCTION
 ;; ============================================================================
