@@ -1,0 +1,15 @@
+[project]
+name = "flut"
+authors = ["sanmipaul"]
+description = "A non-custodial, time-locked savings protocol on Stacks"
+requirements = []
+telemetry = true
+
+[console]
+port = 8000
+
+[[deployments.default.plan.transactions]]
+anchor-block-only = true
+
+[[deployments.default.plan.transactions]]
+anchor-block-only = true
