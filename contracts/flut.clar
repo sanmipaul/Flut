@@ -209,29 +209,41 @@
   )
 )
 
-;; Deposit additional funds into an existing vault
+;; Deposit additional funds into an existing vault.
+;; When stacking is enabled the delegation is revoked and reissued with the
+;; updated total so the pool always delegates the correct amount.
 (define-public (deposit (vault-id uint) (amount uint))
   (let
-    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND)))
-    
+    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
+     (new-total (+ (get amount vault) amount)))
+
     ;; Verify caller is vault creator
     (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
-    
+
     ;; Verify amount is positive
     (asserts! (> amount u0) ERR-INVALID-AMOUNT)
-    
+
     ;; Verify vault hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
-    
+
     ;; Transfer STX to contract
     (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
-    
+
     ;; Update vault amount
     (map-set vaults
       { vault-id: vault-id }
-      (merge vault { amount: (+ (get amount vault) amount) })
+      (merge vault { amount: new-total })
     )
-    
+
+    ;; Re-delegate with the updated total when stacking is active
+    (if (and (get stacking-enabled vault) (is-some (get stacking-pool vault)))
+      (let ((pool (unwrap-panic (get stacking-pool vault))))
+        (try-revoke-stacking)
+        (try-delegate-stacking new-total pool)
+      )
+      false
+    )
+
     (ok true)
   )
 )
