@@ -147,3 +147,30 @@
     )
   )
 )
+
+;; Deposit additional funds into an existing vault
+(define-public (deposit (vault-id uint) (amount uint))
+  (let
+    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND)))
+    
+    ;; Verify caller is vault creator
+    (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
+    
+    ;; Verify amount is positive
+    (asserts! (> amount u0) ERR-INVALID-AMOUNT)
+    
+    ;; Verify vault hasn't been withdrawn
+    (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+    
+    ;; Transfer STX to contract
+    (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
+    
+    ;; Update vault amount
+    (map-set vaults
+      { vault-id: vault-id }
+      (merge vault { amount: (+ (get amount vault) amount) })
+    )
+    
+    (ok true)
+  )
+)
