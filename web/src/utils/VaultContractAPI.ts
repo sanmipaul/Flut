@@ -10,6 +10,16 @@ export interface VaultData {
   createdAt: bigint;
   isWithdrawn: boolean;
   beneficiary?: string;
+  stackingEnabled: boolean;
+  stackingPool?: string;
+}
+
+export interface StackingInfo {
+  enabled: boolean;
+  pool?: string;
+  amount: bigint;
+  unlockHeight: bigint;
+  estimatedApyPercent: number;
 }
 
 /**
