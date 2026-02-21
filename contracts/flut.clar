@@ -60,6 +60,22 @@
   )
 )
 
+;; Private: revoke an existing stacking delegation via pox-4.
+;; Returns true on success, false if there was no active delegation or any error.
+;; Graceful — a failed revocation must never block withdrawal.
+(define-private (try-revoke-stacking)
+  (match (as-contract (contract-call? 'ST000000000000000000002AMW42H.pox-4 revoke-delegate-stx))
+    _success (begin
+      (print { event: "stacking-revoked" })
+      true
+    )
+    _err (begin
+      (print { event: "stacking-revoke-failed" })
+      false
+    )
+  )
+)
+
 ;; Create a new vault
 (define-public (create-vault (lock-duration uint) (initial-amount uint))
   (let
