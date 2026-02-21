@@ -139,6 +139,75 @@ export class VaultContractAPI {
     console.log(`Calling ${functionName} with args:`, args);
     return true; // Placeholder
   }
+
+  /**
+   * Emergency withdraw before unlock with penalty
+   * @param vaultId - The vault ID
+   */
+  async emergencyWithdraw(vaultId: number): Promise<{ userAmount: bigint; penalty: bigint }> {
+    const functionName = 'emergency-withdraw';
+    const args = [`u${vaultId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    // This would return the actual response from the contract
+    return { userAmount: BigInt(0), penalty: BigInt(0) }; // Placeholder
+  }
+
+  /**
+   * Get penalty rate
+   */
+  async getPenaltyRate(): Promise<number> {
+    const functionName = 'get-penalty-rate';
+
+    console.log(`Calling ${functionName}`);
+    return 10; // Placeholder
+  }
+
+  /**
+   * Get penalty destination
+   */
+  async getPenaltyDestination(): Promise<string> {
+    const functionName = 'get-penalty-destination';
+
+    console.log(`Calling ${functionName}`);
+    return ''; // Placeholder
+  }
+
+  /**
+   * Get penalty amount for a vault
+   * @param vaultId - The vault ID
+   */
+  async getPenaltyAmount(vaultId: number): Promise<bigint> {
+    const functionName = 'get-penalty-amount';
+    const args = [`u${vaultId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return BigInt(0); // Placeholder
+  }
+
+  /**
+   * Get emergency withdrawal amount (after penalty)
+   * @param vaultId - The vault ID
+   */
+  async getEmergencyWithdrawalAmount(vaultId: number): Promise<bigint> {
+    const functionName = 'get-emergency-withdrawal-amount';
+    const args = [`u${vaultId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return BigInt(0); // Placeholder
+  }
+
+  /**
+   * Set penalty destination (owner only)
+   * @param newDestination - New penalty destination principal
+   */
+  async setPenaltyDestination(newDestination: string): Promise<boolean> {
+    const functionName = 'set-penalty-destination';
+    const args = [`'${newDestination}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return true; // Placeholder
+  }
 }
 
 export default VaultContractAPI;
