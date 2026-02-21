@@ -44,6 +44,22 @@
 (define-constant PENALTY_RATE u10)
 (define-data-var penalty-destination principal tx-sender)
 
+;; Private: attempt to delegate vault STX to a stacking pool via pox-4.
+;; Returns true on success, false on any delegation error (graceful fallback —
+;; a delegation failure must never block vault creation or deposit).
+(define-private (try-delegate-stacking (amount uint) (pool principal))
+  (match (as-contract (contract-call? 'ST000000000000000000002AMW42H.pox-4 delegate-stx amount pool none none))
+    _success (begin
+      (print { event: "stacking-delegated", amount: amount, pool: pool })
+      true
+    )
+    _err (begin
+      (print { event: "stacking-delegation-failed", pool: pool })
+      false
+    )
+  )
+)
+
 ;; Create a new vault
 (define-public (create-vault (lock-duration uint) (initial-amount uint))
   (let
