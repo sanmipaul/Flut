@@ -115,3 +115,35 @@
     (ok true)
   )
 )
+
+;; Get vault details
+(define-read-only (get-vault (vault-id uint))
+  (map-get? vaults { vault-id: vault-id })
+)
+
+;; Get total vault count
+(define-read-only (get-vault-count)
+  (var-get vault-counter)
+)
+
+;; Check if vault is unlocked
+(define-read-only (is-vault-unlocked (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (>= block-height (get unlock-height v))
+      false
+    )
+  )
+)
+
+;; Get vault beneficiary
+(define-read-only (get-vault-beneficiary (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (get beneficiary v)
+      none
+    )
+  )
+)
