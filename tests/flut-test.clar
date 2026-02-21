@@ -92,3 +92,55 @@
     )
   )
 )
+
+;; Test: Get penalty rate
+(define-private (test-get-penalty-rate)
+  (let
+    ((rate (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-rate)))
+    (match rate
+      r (begin
+        (asserts! (is-eq r u10) (err "Penalty rate should be 10"))
+        (ok "✓ Get penalty rate test passed")
+      )
+      none (err "✗ Failed to get penalty rate")
+    )
+  )
+)
+
+;; Test: Calculate penalty amount
+(define-private (test-get-penalty-amount)
+  (let
+    ((penalty (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-amount u0)))
+    (match penalty
+      p (begin
+        ;; For u1000000, 10% penalty should be u100000
+        (asserts! (is-eq p u100000) (err (concat "Expected penalty u100000, got " (to-string p))))
+        (ok "✓ Penalty calculation test passed")
+      )
+      none (err "✗ Failed to calculate penalty")
+    )
+  )
+)
+
+;; Test: Get emergency withdrawal amount
+(define-private (test-get-emergency-withdrawal-amount)
+  (let
+    ((amount (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-emergency-withdrawal-amount u0)))
+    (match amount
+      a (begin
+        ;; For u1000000, after 10% penalty should be u900000
+        (asserts! (is-eq a u900000) (err (concat "Expected amount u900000, got " (to-string a))))
+        (ok "✓ Emergency withdrawal amount test passed")
+      )
+      none (err "✗ Failed to get emergency withdrawal amount")
+    )
+  )
+)
+
+;; Test: Get penalty destination
+(define-private (test-get-penalty-destination)
+  (let
+    ((destination (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-destination)))
+    (ok "✓ Get penalty destination test passed")
+  )
+)
