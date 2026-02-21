@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import PenaltyWarningModal from './PenaltyWarningModal';
+import PenaltyWarningModal from './PenaltyWarningModal';
 
 interface Vault {
   vaultId: number;
@@ -16,6 +18,8 @@ interface VaultDetailProps {
   onWithdraw: (vaultId: number) => Promise<void>;
   onSetBeneficiary: (vaultId: number, beneficiary: string) => Promise<void>;
   onFetchVault: (vaultId: number) => Promise<Vault>;
+  onEmergencyWithdraw?: (vaultId: number) => Promise<void>;
+  penaltyRate?: number;
 }
 
 export const VaultDetail: React.FC<VaultDetailProps> = ({
@@ -23,6 +27,8 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   onWithdraw,
   onSetBeneficiary,
   onFetchVault,
+  onEmergencyWithdraw,
+  penaltyRate = 10,
 }) => {
   const [vault, setVault] = useState<Vault | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -30,6 +36,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   const [newBeneficiary, setNewBeneficiary] = useState<string>('');
   const [showBeneficiaryForm, setShowBeneficiaryForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [showPenaltyModal, setShowPenaltyModal] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchVault = async () => {
@@ -211,7 +218,50 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
         </section>
       )}
 
+      {!isUnlocked && !vault.isWithdrawn && (
+        <section className="vault-actions emergency-section">
+          <button
+            className="btn-danger"
+            onClick={() => setShowPenaltyModal(true)}
+            disabled={submitting}
+          >
+            Emergency Withdraw
+          </button>
+          <p className="warning-text">
+            Withdraw before unlock date with a {penaltyRate}% penalty fee
+          </p>
+        </section>
+      )}
+
       {error && <div className="error-message">{error}</div>}
+
+      {vault && (
+        <PenaltyWarningModal
+          isOpen={showPenaltyModal}
+          vaultId={vault.vaultId}
+          vaultAmount={vault.amount}
+          penaltyRate={penaltyRate}
+          penaltyAmount={Math.floor((vault.amount * penaltyRate) / 100)}
+          userReceiveAmount={vault.amount - Math.floor((vault.amount * penaltyRate) / 100)}
+          onConfirm={async (id) => {
+            try {
+              setSubmitting(true);
+              if (onEmergencyWithdraw) {
+                await onEmergencyWithdraw(id);
+              }
+              setShowPenaltyModal(false);
+              // Refresh vault data
+              const updated = await onFetchVault(vaultId);
+              setVault(updated);
+            } catch (err) {
+              setError(err instanceof Error ? err.message : 'Failed to process emergency withdrawal');
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+          onCancel={() => setShowPenaltyModal(false)}
+        />
+      )}
     </div>
   );
 };
