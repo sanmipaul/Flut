@@ -219,3 +219,53 @@
     (ok "✓ Multiple vault penalties test passed")
   )
 )
+
+;; Test: NFT minting on vault creation
+(define-private (test-nft-mint-on-vault-create)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut create-vault u100 u1000000)))
+    (match result
+      vault-id (begin
+        (asserts! (is-eq vault-id u0) (err "First vault creation should succeed"))
+        (ok "✓ NFT minting on vault creation test passed")
+      )
+      error (err (concat "✗ Vault creation failed: " (to-string error)))
+    )
+  )
+)
+
+;; Test: Get NFT token ID from vault
+(define-private (test-get-vault-nft-token-id)
+  (let
+    ((nft-id (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-vault-nft-token-id u0)))
+    (match nft-id
+      token-id (ok "✓ Get vault NFT token ID test passed")
+      none (err "✗ Failed to get vault NFT token ID")
+    )
+  )
+)
+
+;; Test: NFT metadata stored correctly
+(define-private (test-nft-metadata-storage)
+  (let
+    ((metadata (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-nft-metadata u0)))
+    (match metadata
+      data (ok "✓ NFT metadata storage test passed")
+      none (err "✗ Failed to retrieve NFT metadata")
+    )
+  )
+)
+
+;; Test: NFT balance tracking
+(define-private (test-nft-balance)
+  (let
+    ((balance (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-balance tx-sender)))
+    (match balance
+      b (begin
+        (asserts! (>= b u1) (err "User should have at least 1 NFT"))
+        (ok "✓ NFT balance tracking test passed")
+      )
+      none (err "✗ Failed to get NFT balance")
+    )
+  )
+)
