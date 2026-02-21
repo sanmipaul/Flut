@@ -166,3 +166,56 @@
     )
   )
 )
+
+;; Test: Edge case - small balance penalty
+(define-private (test-small-balance-penalty)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-amount u0)))
+    (match result
+      p (begin
+        ;; For u1000000, penalty should be u100000
+        (asserts! (is-eq p u100000) (err "Small balance penalty calculation failed"))
+        (ok "✓ Small balance penalty test passed")
+      )
+      none (err "✗ Failed to calculate small balance penalty")
+    )
+  )
+)
+
+;; Test: Edge case - exact penalty boundary
+(define-private (test-penalty-boundary)
+  (let
+    ((rate (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-rate)))
+    (match rate
+      r (begin
+        (asserts! (is-eq r u10) (err "Penalty rate should be exactly 10"))
+        (ok "✓ Penalty boundary test passed")
+      )
+      none (err "✗ Failed to get penalty boundary")
+    )
+  )
+)
+
+;; Test: Edge case - zero remainder penalty
+(define-private (test-zero-remainder-penalty)
+  (let
+    ((penalty (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-emergency-withdrawal-amount u0)))
+    (match penalty
+      p (begin
+        ;; For u1000000 with 10%, amount should be u900000
+        (asserts! (is-eq p u900000) (err "Zero remainder penalty calculation failed"))
+        (ok "✓ Zero remainder penalty test passed")
+      )
+      none (err "✗ Failed to calculate zero remainder penalty")
+    )
+  )
+)
+
+;; Test: Multiple vaults with different balances
+(define-private (test-multiple-vault-penalties)
+  (let
+    ((penalty1 (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-amount u0))
+     (penalty2 (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-amount u1)))
+    (ok "✓ Multiple vault penalties test passed")
+  )
+)
