@@ -10,7 +10,8 @@
     unlock-height: uint,
     created-at: uint,
     is-withdrawn: bool,
-    beneficiary: (optional principal)
+    beneficiary: (optional principal),
+    nft-token-id: (optional uint)
   }
 )
 
@@ -41,7 +42,8 @@
 (define-public (create-vault (lock-duration uint) (initial-amount uint))
   (let
     ((vault-id (var-get vault-counter))
-     (unlock-height (+ lock-duration block-height)))
+     (unlock-height (+ lock-duration block-height))
+     (nft-token-id (try! (contract-call? 'ST1VAULT_NFT_ADDRESS.flut-nft mint-vault-receipt vault-id tx-sender initial-amount unlock-height))))
     
     ;; Validate inputs
     (asserts! (> initial-amount u0) ERR-INVALID-AMOUNT)
@@ -50,7 +52,7 @@
     ;; Transfer STX to contract
     (try! (stx-transfer? initial-amount tx-sender (as-contract tx-sender)))
     
-    ;; Create vault
+    ;; Create vault with NFT reference
     (map-set vaults
       { vault-id: vault-id }
       {
@@ -59,7 +61,8 @@
         unlock-height: unlock-height,
         created-at: block-height,
         is-withdrawn: false,
-        beneficiary: none
+        beneficiary: none,
+        nft-token-id: (some nft-token-id)
       }
     )
     
@@ -96,6 +99,9 @@
       { vault-id: vault-id }
       (merge vault { is-withdrawn: true })
     )
+    
+    ;; Burn NFT receipt on successful withdrawal
+    (try! (contract-call? 'ST1VAULT_NFT_ADDRESS.flut-nft burn-vault-receipt vault-id (get creator vault)))
     
     (ok true)
   )
@@ -221,6 +227,9 @@
       { vault-id: vault-id }
       (merge vault { is-withdrawn: true })
     )
+    
+    ;; Burn NFT receipt on emergency withdrawal
+    (try! (contract-call? 'ST1VAULT_NFT_ADDRESS.flut-nft burn-vault-receipt vault-id (get creator vault)))
     
     (ok { user-amount: user-amount, penalty: penalty-amount })
   )
