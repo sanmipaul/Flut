@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
-import PenaltyWarningModal from './PenaltyWarningModal';
+import NFTBadge from './NFTBadge';
 
 interface Vault {
   vaultId: number;
@@ -11,6 +11,7 @@ interface Vault {
   isWithdrawn: boolean;
   beneficiary?: string;
   currentBlockHeight: number;
+  nftTokenId?: number;
 }
 
 interface VaultDetailProps {
@@ -146,6 +147,12 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
           )}
         </div>
       </section>
+
+      {vault.nftTokenId !== undefined && (
+        <section className="nft-receipt-section">
+          <NFTBadge tokenId={vault.nftTokenId} vaultId={vault.vaultId} />
+        </section>
+      )}
 
       {vault.beneficiary && (
         <section className="beneficiary-info">
