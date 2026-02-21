@@ -142,7 +142,13 @@
     
     ;; Verify hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
-    
+
+    ;; Revoke stacking delegation before transferring funds out
+    (if (get stacking-enabled vault)
+      (try-revoke-stacking)
+      false
+    )
+
     ;; Transfer funds to recipient (beneficiary or creator)
     (try! (as-contract (stx-transfer? (get amount vault) tx-sender recipient)))
     
