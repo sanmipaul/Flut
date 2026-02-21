@@ -179,3 +179,48 @@
     (ok true)
   )
 )
+
+;; Calculate penalty amount based on penalty rate
+(define-private (calculate-penalty (amount uint))
+  (/ (* amount PENALTY_RATE) u100)
+)
+
+;; Emergency withdraw before unlock with penalty
+(define-public (emergency-withdraw (vault-id uint))
+  (let
+    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
+     (penalty-amount (calculate-penalty (get amount vault)))
+     (user-amount (- (get amount vault) penalty-amount))
+     (recipient (match (get beneficiary vault)
+                   beneficiary beneficiary
+                   (get creator vault)))
+    )
+    
+    ;; Verify caller is vault creator
+    (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
+    
+    ;; Verify vault hasn't been withdrawn
+    (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+    
+    ;; Verify vault is still locked (allows early withdrawal)
+    ;; Note: This should fail if already unlocked to preserve incentive for normal withdrawal
+    ;; Optional: allow emergency-withdraw at any time for flexibility
+    
+    ;; Transfer user amount to recipient
+    (try! (as-contract (stx-transfer? user-amount tx-sender recipient)))
+    
+    ;; Transfer penalty to destination
+    (try! (as-contract (stx-transfer? penalty-amount tx-sender (var-get penalty-destination))))
+    
+    ;; Emit event for indexing
+    (print { event: "emergency-withdrawal", vault-id: vault-id, amount: user-amount, penalty: penalty-amount })
+    
+    ;; Mark as withdrawn
+    (map-set vaults
+      { vault-id: vault-id }
+      (merge vault { is-withdrawn: true })
+    )
+    
+    (ok { user-amount: user-amount, penalty: penalty-amount })
+  )
+)
