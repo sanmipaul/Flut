@@ -94,3 +94,24 @@
     (ok true)
   )
 )
+
+;; Set beneficiary for a vault (only owner can call)
+(define-public (set-beneficiary (vault-id uint) (beneficiary principal))
+  (let
+    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND)))
+    
+    ;; Verify caller is vault creator
+    (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
+    
+    ;; Verify vault hasn't been withdrawn
+    (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+    
+    ;; Set beneficiary
+    (map-set vaults
+      { vault-id: vault-id }
+      (merge vault { beneficiary: (some beneficiary) })
+    )
+    
+    (ok true)
+  )
+)
