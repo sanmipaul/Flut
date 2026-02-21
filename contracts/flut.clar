@@ -237,3 +237,35 @@
     (ok true)
   )
 )
+
+;; Get penalty rate
+(define-read-only (get-penalty-rate)
+  PENALTY_RATE
+)
+
+;; Get penalty destination
+(define-read-only (get-penalty-destination)
+  (var-get penalty-destination)
+)
+
+;; Calculate penalty for a given amount
+(define-read-only (get-penalty-amount (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (calculate-penalty (get amount v))
+      u0
+    )
+  )
+)
+
+;; Get user withdrawal amount after penalty
+(define-read-only (get-emergency-withdrawal-amount (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (- (get amount v) (calculate-penalty (get amount v)))
+      u0
+    )
+  )
+)
