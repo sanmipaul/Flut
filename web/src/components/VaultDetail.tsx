@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
-import PenaltyWarningModal from './PenaltyWarningModal';
 
 interface Vault {
   vaultId: number;
