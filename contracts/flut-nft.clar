@@ -97,9 +97,40 @@
   (ok (map-get? nft-metadata { token-id: token-id }))
 )
 
-;; Get token URI (returns contract+token-id reference)
+;; Get token URI for metadata access
 (define-read-only (get-token-uri (token-id uint))
-  (ok (var-get token-counter))
+  (match (map-get? nft-metadata { token-id: token-id })
+    metadata
+      (let ((vault-id (get vault-id metadata))
+            (owner (get owner metadata))
+            (vault-amount (get vault-amount metadata))
+            (unlock-height (get unlock-height metadata)))
+        (ok (concat
+          "https://ipfs.io/ipfs/flut-vault-nft/"
+          (uint-to-string token-id)
+        ))
+      )
+    (err ERR-NOT-FOUND)
+  )
+)
+
+;; Helper function to convert uint to string
+(define-read-only (uint-to-string (value uint))
+  (if (is-eq value u0)
+    "0"
+    (if (< value u10)
+      (if (is-eq value u1) "1"
+      (if (is-eq value u2) "2"
+      (if (is-eq value u3) "3"
+      (if (is-eq value u4) "4"
+      (if (is-eq value u5) "5"
+      (if (is-eq value u6) "6"
+      (if (is-eq value u7) "7"
+      (if (is-eq value u8) "8"
+      (if (is-eq value u9) "9" "0")))))))))
+      "num"
+    )
+  )
 )
 
 ;; Check if token exists
@@ -110,6 +141,18 @@
 ;; Get all vaults for owner (limited list)
 (define-read-only (get-vault-ids-for-owner (owner principal))
   (ok owner)
+)
+
+;; Get detailed metadata URI for token
+(define-read-only (get-metadata-uri (token-id uint))
+  (match (map-get? nft-metadata { token-id: token-id })
+    metadata
+      (ok (concat
+        "data:application/json;base64,"
+        "eyJuYW1lIjoiRmx1dCBWYXVsdCBSZWNlaXB0ICMiLCJkZXNjcmlwdGlvbiI6IkZsdXQgdmF1bHQgcmVjZWlwdCBORlQgcmVwcmVzZW50aW5nIHZhdWx0IG93bmVyc2hpcCBhbmQgcmVjZWlwdCBvZiBsb2NrZWQgU1RYIGZ1bmRzIiwiaW1hZ2UiOiJpcGZzOi8vUW1lY3l2V0s2SkY3QVdQUlo5TUFTa1laekhrUHRjb3QycFVuVHoySFE0OTJzNHQifQ=="
+      ))
+    (err ERR-NOT-FOUND)
+  )
 )
 
 ;; ============================================================================
