@@ -254,6 +254,33 @@
   )
 )
 
+;; Check whether stacking is enabled for a vault
+(define-read-only (is-stacking-enabled (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (get stacking-enabled v)
+      false
+    )
+  )
+)
+
+;; Get stacking configuration for a vault
+(define-read-only (get-stacking-info (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (some {
+          enabled: (get stacking-enabled v),
+          pool: (get stacking-pool v),
+          amount: (get amount v),
+          unlock-height: (get unlock-height v)
+        })
+      none
+    )
+  )
+)
+
 ;; Calculate penalty amount based on penalty rate
 (define-private (calculate-penalty (amount uint))
   (/ (* amount PENALTY_RATE) u100)
