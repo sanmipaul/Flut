@@ -214,6 +214,55 @@ export class VaultContractAPI {
   }
 
   /**
+   * Delegate STX to a stacking pool via pox-4
+   * @param amount - Amount in microSTX to delegate
+   * @param pool - Pool principal to delegate to
+   */
+  async delegateStx(amount: bigint, pool: string): Promise<boolean> {
+    const functionName = 'delegate-stx';
+    const args = [`u${amount}`, `'${pool}`, 'none', 'none'];
+
+    console.log(`Calling pox-4 ${functionName} with args:`, args);
+    return true; // Placeholder
+  }
+
+  /**
+   * Revoke STX stacking delegation via pox-4
+   */
+  async revokeDelegateStx(): Promise<boolean> {
+    const functionName = 'revoke-delegate-stx';
+
+    console.log(`Calling pox-4 ${functionName}`);
+    return true; // Placeholder
+  }
+
+  /**
+   * Get stacking configuration and status for a vault
+   * @param vaultId - The vault ID
+   */
+  async getStackingInfo(vaultId: number): Promise<StackingInfo | null> {
+    const functionName = 'get-stacking-info';
+    const args = [`u${vaultId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    // Placeholder — real implementation would parse the contract response
+    return null;
+  }
+
+  /**
+   * Update the stacking pool for an existing vault (owner only)
+   * @param vaultId - The vault ID
+   * @param newPool - New pool principal
+   */
+  async updateStackingPool(vaultId: number, newPool: string): Promise<boolean> {
+    const functionName = 'update-stacking-pool';
+    const args = [`u${vaultId}`, `'${newPool}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return true; // Placeholder
+  }
+
+  /**
    * Set penalty destination (owner only)
    * @param newDestination - New penalty destination principal
    */
