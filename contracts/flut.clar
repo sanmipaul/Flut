@@ -76,20 +76,34 @@
   )
 )
 
-;; Create a new vault
-(define-public (create-vault (lock-duration uint) (initial-amount uint))
+;; Create a new vault.
+;; enable-stacking: opt-in to PoX delegation while funds are locked.
+;; stacking-pool: pool principal to delegate to (required when enable-stacking is true).
+(define-public (create-vault (lock-duration uint) (initial-amount uint) (enable-stacking bool) (stacking-pool (optional principal)))
   (let
     ((vault-id (var-get vault-counter))
      (unlock-height (+ lock-duration block-height)))
-    
+
     ;; Validate inputs
     (asserts! (> initial-amount u0) ERR-INVALID-AMOUNT)
     (asserts! (> lock-duration u0) ERR-INVALID-HEIGHT)
-    
+
+    ;; A pool address is mandatory when stacking opt-in is requested
+    (if enable-stacking
+      (asserts! (is-some stacking-pool) ERR-STACKING-NO-POOL)
+      true
+    )
+
     ;; Transfer STX to contract
     (try! (stx-transfer? initial-amount tx-sender (as-contract tx-sender)))
-    
-    ;; Create vault
+
+    ;; Attempt stacking delegation — graceful fallback on failure
+    (if (and enable-stacking (is-some stacking-pool))
+      (try-delegate-stacking initial-amount (unwrap-panic stacking-pool))
+      false
+    )
+
+    ;; Create vault record
     (map-set vaults
       { vault-id: vault-id }
       {
@@ -98,13 +112,15 @@
         unlock-height: unlock-height,
         created-at: block-height,
         is-withdrawn: false,
-        beneficiary: none
+        beneficiary: none,
+        stacking-enabled: enable-stacking,
+        stacking-pool: stacking-pool
       }
     )
-    
+
     ;; Increment counter
     (var-set vault-counter (+ vault-id u1))
-    
+
     (ok vault-id)
   )
 )
