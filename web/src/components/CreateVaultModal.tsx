@@ -144,18 +144,32 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
         </div>
 
         {enableStacking && (
-          <div className="form-group">
-            <label htmlFor="stackingPool">Stacking Pool Address</label>
-            <input
-              id="stackingPool"
-              type="text"
-              value={stackingPool}
-              onChange={(e) => setStackingPool(e.target.value)}
-              placeholder="SP... stacking pool principal"
-              disabled={loading}
-            />
-            <small>Your STX will be delegated to this pool via pox-4 while the vault is locked</small>
-          </div>
+          <>
+            <div className="form-group">
+              <label htmlFor="stackingPool">Stacking Pool Address</label>
+              <input
+                id="stackingPool"
+                type="text"
+                value={stackingPool}
+                onChange={(e) => setStackingPool(e.target.value)}
+                placeholder="SP... stacking pool principal"
+                disabled={loading}
+              />
+              <small>Your STX will be delegated to this pool via pox-4 while the vault is locked</small>
+            </div>
+
+            <div className="stacking-apy-banner">
+              <div className="apy-info">
+                <span className="apy-label">Estimated BTC Yield APY</span>
+                <span className="apy-value">~8–12%</span>
+              </div>
+              <p className="apy-note">
+                BTC rewards are distributed each Stacking cycle (~2 weeks). Actual APY varies
+                with network participation. Rewards accrue to the pool and are claimable
+                separately from your STX principal.
+              </p>
+            </div>
+          </>
         )}
 
         {error && <div className="error-message">{error}</div>}
