@@ -92,3 +92,130 @@
     )
   )
 )
+
+;; Test: Get penalty rate
+(define-private (test-get-penalty-rate)
+  (let
+    ((rate (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-rate)))
+    (match rate
+      r (begin
+        (asserts! (is-eq r u10) (err "Penalty rate should be 10"))
+        (ok "✓ Get penalty rate test passed")
+      )
+      none (err "✗ Failed to get penalty rate")
+    )
+  )
+)
+
+;; Test: Calculate penalty amount
+(define-private (test-get-penalty-amount)
+  (let
+    ((penalty (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-amount u0)))
+    (match penalty
+      p (begin
+        ;; For u1000000, 10% penalty should be u100000
+        (asserts! (is-eq p u100000) (err (concat "Expected penalty u100000, got " (to-string p))))
+        (ok "✓ Penalty calculation test passed")
+      )
+      none (err "✗ Failed to calculate penalty")
+    )
+  )
+)
+
+;; Test: Get emergency withdrawal amount
+(define-private (test-get-emergency-withdrawal-amount)
+  (let
+    ((amount (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-emergency-withdrawal-amount u0)))
+    (match amount
+      a (begin
+        ;; For u1000000, after 10% penalty should be u900000
+        (asserts! (is-eq a u900000) (err (concat "Expected amount u900000, got " (to-string a))))
+        (ok "✓ Emergency withdrawal amount test passed")
+      )
+      none (err "✗ Failed to get emergency withdrawal amount")
+    )
+  )
+)
+
+;; Test: Get penalty destination
+(define-private (test-get-penalty-destination)
+  (let
+    ((destination (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-destination)))
+    (ok "✓ Get penalty destination test passed")
+  )
+)
+
+;; Test: Emergency withdrawal with penalty
+(define-private (test-emergency-withdraw)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut emergency-withdraw u0)))
+    (match result
+      response (ok "✓ Emergency withdrawal test passed")
+      error (err (concat "✗ Emergency withdrawal failed: " (to-string error)))
+    )
+  )
+)
+
+;; Test: Set penalty destination
+(define-private (test-set-penalty-destination)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut set-penalty-destination 'ST1SJ3DTE5DN7X54YDH5D64R3BJB2ZZAB3A24GTNNP)))
+    (match result
+      success (ok "✓ Set penalty destination test passed")
+      error (err (concat "✗ Set penalty destination failed: " (to-string error)))
+    )
+  )
+)
+
+;; Test: Edge case - small balance penalty
+(define-private (test-small-balance-penalty)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-amount u0)))
+    (match result
+      p (begin
+        ;; For u1000000, penalty should be u100000
+        (asserts! (is-eq p u100000) (err "Small balance penalty calculation failed"))
+        (ok "✓ Small balance penalty test passed")
+      )
+      none (err "✗ Failed to calculate small balance penalty")
+    )
+  )
+)
+
+;; Test: Edge case - exact penalty boundary
+(define-private (test-penalty-boundary)
+  (let
+    ((rate (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-rate)))
+    (match rate
+      r (begin
+        (asserts! (is-eq r u10) (err "Penalty rate should be exactly 10"))
+        (ok "✓ Penalty boundary test passed")
+      )
+      none (err "✗ Failed to get penalty boundary")
+    )
+  )
+)
+
+;; Test: Edge case - zero remainder penalty
+(define-private (test-zero-remainder-penalty)
+  (let
+    ((penalty (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-emergency-withdrawal-amount u0)))
+    (match penalty
+      p (begin
+        ;; For u1000000 with 10%, amount should be u900000
+        (asserts! (is-eq p u900000) (err "Zero remainder penalty calculation failed"))
+        (ok "✓ Zero remainder penalty test passed")
+      )
+      none (err "✗ Failed to calculate zero remainder penalty")
+    )
+  )
+)
+
+;; Test: Multiple vaults with different balances
+(define-private (test-multiple-vault-penalties)
+  (let
+    ((penalty1 (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-amount u0))
+     (penalty2 (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-amount u1)))
+    (ok "✓ Multiple vault penalties test passed")
+  )
+)

@@ -327,6 +327,18 @@ body {
   border: 2px solid rgba(28, 184, 69, 0.3);
 }
 
+.vault-actions.emergency-section {
+  background-color: rgba(220, 53, 69, 0.05);
+  border: 2px solid rgba(220, 53, 69, 0.3);
+}
+
+.warning-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #ff9800;
+  font-style: italic;
+}
+
 /* Modal */
 .modal-overlay {
   position: fixed;
@@ -354,6 +366,135 @@ body {
 
 .modal-content h2 {
   margin-top: 0;
+}
+
+.penalty-warning {
+  max-width: 600px;
+}
+
+.warning-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--error-color);
+}
+
+.warning-icon {
+  font-size: 2rem;
+}
+
+.penalty-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.penalty-calculation {
+  background-color: var(--secondary-color);
+  padding: var(--spacing-md);
+  border-radius: 6px;
+  border-left: 4px solid var(--error-color);
+}
+
+.calc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  font-size: 0.95rem;
+}
+
+.calc-label {
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.calc-value {
+  font-weight: 600;
+  text-align: right;
+}
+
+.penalty-row .calc-value {
+  color: var(--error-color);
+  font-weight: 700;
+}
+
+.penalty-value {
+  color: var(--error-color);
+  font-weight: 700;
+}
+
+.calc-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: var(--spacing-sm) 0;
+}
+
+.total-row {
+  background-color: rgba(28, 184, 69, 0.1);
+  padding: var(--spacing-sm);
+  border-radius: 4px;
+  margin-top: var(--spacing-sm);
+}
+
+.green-text {
+  color: var(--success-color);
+  font-weight: 700;
+}
+
+.red-text {
+  color: var(--error-color);
+  font-weight: 700;
+}
+
+.penalty-amount {
+  color: var(--error-color);
+}
+
+.penalty-info {
+  background-color: rgba(220, 53, 69, 0.05);
+  padding: var(--spacing-md);
+  border-radius: 6px;
+  border-left: 4px solid var(--error-color);
+}
+
+.penalty-info h3 {
+  margin-top: 0;
+  color: var(--error-color);
+  font-size: 1rem;
+}
+
+.penalty-info ul {
+  margin: var(--spacing-sm) 0 0 0;
+  padding-left: var(--spacing-lg);
+}
+
+.penalty-info li {
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.confirmation-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--secondary-color);
+  border-radius: 6px;
+}
+
+.confirmation-checkbox input[type='checkbox'] {
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.confirmation-checkbox label {
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 /* Form Groups */
@@ -449,6 +590,29 @@ body {
 
 .btn-secondary:hover:not(:disabled) {
   background-color: #e0e0e0;
+}
+
+.btn-danger {
+  background-color: var(--error-color);
+  color: white;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #bb2d3b;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btn-danger.btn-large {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 1rem;
+  width: 100%;
 }
 
 .btn-small {
