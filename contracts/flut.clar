@@ -34,6 +34,11 @@
 (define-constant ERR-INVALID-HEIGHT (err u6))
 (define-constant ERR-INVALID-PENALTY-RATE (err u7))
 (define-constant ERR-NOT-PENALTY-OWNER (err u8))
+(define-constant ERR-STACKING-NO-POOL (err u9))
+(define-constant ERR-STACKING-NOT-ENABLED (err u10))
+
+;; pox-4 contract reference (testnet — swap to SP000000000000000000002Q6VF78.pox-4 on mainnet)
+(define-constant POX4-PRINCIPAL 'ST000000000000000000002AMW42H.pox-4)
 
 ;; Penalty configuration
 (define-constant PENALTY_RATE u10)
