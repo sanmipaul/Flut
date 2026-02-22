@@ -11,6 +11,8 @@ interface Vault {
   isWithdrawn: boolean;
   beneficiary?: string;
   currentBlockHeight: number;
+  stackingEnabled?: boolean;
+  stackingPool?: string;
 }
 
 export const App: React.FC = () => {
@@ -36,7 +38,7 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string) => {
+  const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string, enableStacking?: boolean, stackingPool?: string) => {
     try {
       setLoading(true);
       setError('');
@@ -52,6 +54,8 @@ export const App: React.FC = () => {
         isWithdrawn: false,
         beneficiary,
         currentBlockHeight: 0,
+        stackingEnabled: enableStacking ?? false,
+        stackingPool,
       };
 
       setVaults([...vaults, newVault]);

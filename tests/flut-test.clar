@@ -219,3 +219,74 @@
     (ok "✓ Multiple vault penalties test passed")
   )
 )
+
+;; ===== Stacking Integration Tests =====
+
+;; Test: Create vault without stacking
+(define-private (test-create-vault-no-stacking)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut create-vault u100 u1000000 false none)))
+    (match result
+      vault-id (ok "✓ Create vault without stacking test passed")
+      error (err (concat "✗ Create vault without stacking failed: " (to-string error)))
+    )
+  )
+)
+
+;; Test: Create vault with stacking enabled and a pool address
+(define-private (test-create-vault-with-stacking)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut create-vault u200 u2000000 true (some 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG))))
+    (match result
+      vault-id (ok "✓ Create vault with stacking test passed")
+      error (err (concat "✗ Create vault with stacking failed: " (to-string error)))
+    )
+  )
+)
+
+;; Test: Stacking enabled flag requires a pool address
+(define-private (test-stacking-requires-pool)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut create-vault u100 u1000000 true none)))
+    (match result
+      vault-id (err "✗ Should have failed — stacking without pool must return ERR-STACKING-NO-POOL")
+      error (ok "✓ Stacking-requires-pool validation test passed")
+    )
+  )
+)
+
+;; Test: is-stacking-enabled returns false for non-stacking vault
+(define-private (test-is-stacking-enabled-false)
+  (let
+    ((enabled (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut is-stacking-enabled u0)))
+    (match enabled
+      v (begin
+          (asserts! (is-eq v false) (err "✗ Expected stacking-enabled to be false"))
+          (ok "✓ is-stacking-enabled false test passed")
+        )
+      none (err "✗ Vault not found for is-stacking-enabled check")
+    )
+  )
+)
+
+;; Test: get-stacking-info returns pool and amount for stacking vault
+(define-private (test-get-stacking-info)
+  (let
+    ((info (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-stacking-info u1)))
+    (match info
+      stacking-data (ok "✓ get-stacking-info returned data for stacking vault")
+      none (err "✗ get-stacking-info returned none — expected stacking data")
+    )
+  )
+)
+
+;; Test: get-stacking-info returns none for unknown vault
+(define-private (test-get-stacking-info-unknown-vault)
+  (let
+    ((info (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-stacking-info u999)))
+    (match info
+      _data (err "✗ Expected none for unknown vault ID")
+      none (ok "✓ get-stacking-info returns none for unknown vault test passed")
+    )
+  )
+)

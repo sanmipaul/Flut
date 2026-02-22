@@ -10,7 +10,9 @@
     unlock-height: uint,
     created-at: uint,
     is-withdrawn: bool,
-    beneficiary: (optional principal)
+    beneficiary: (optional principal),
+    stacking-enabled: bool,
+    stacking-pool: (optional principal)
   }
 )
 
@@ -32,25 +34,76 @@
 (define-constant ERR-INVALID-HEIGHT (err u6))
 (define-constant ERR-INVALID-PENALTY-RATE (err u7))
 (define-constant ERR-NOT-PENALTY-OWNER (err u8))
+(define-constant ERR-STACKING-NO-POOL (err u9))
+(define-constant ERR-STACKING-NOT-ENABLED (err u10))
+
+;; pox-4 contract reference (testnet — swap to SP000000000000000000002Q6VF78.pox-4 on mainnet)
+(define-constant POX4-PRINCIPAL 'ST000000000000000000002AMW42H.pox-4)
 
 ;; Penalty configuration
 (define-constant PENALTY_RATE u10)
 (define-data-var penalty-destination principal tx-sender)
 
-;; Create a new vault
-(define-public (create-vault (lock-duration uint) (initial-amount uint))
+;; Private: attempt to delegate vault STX to a stacking pool via pox-4.
+;; Returns true on success, false on any delegation error (graceful fallback —
+;; a delegation failure must never block vault creation or deposit).
+(define-private (try-delegate-stacking (amount uint) (pool principal))
+  (match (as-contract (contract-call? 'ST000000000000000000002AMW42H.pox-4 delegate-stx amount pool none none))
+    _success (begin
+      (print { event: "stacking-delegated", amount: amount, pool: pool })
+      true
+    )
+    _err (begin
+      (print { event: "stacking-delegation-failed", pool: pool })
+      false
+    )
+  )
+)
+
+;; Private: revoke an existing stacking delegation via pox-4.
+;; Returns true on success, false if there was no active delegation or any error.
+;; Graceful — a failed revocation must never block withdrawal.
+(define-private (try-revoke-stacking)
+  (match (as-contract (contract-call? 'ST000000000000000000002AMW42H.pox-4 revoke-delegate-stx))
+    _success (begin
+      (print { event: "stacking-revoked" })
+      true
+    )
+    _err (begin
+      (print { event: "stacking-revoke-failed" })
+      false
+    )
+  )
+)
+
+;; Create a new vault.
+;; enable-stacking: opt-in to PoX delegation while funds are locked.
+;; stacking-pool: pool principal to delegate to (required when enable-stacking is true).
+(define-public (create-vault (lock-duration uint) (initial-amount uint) (enable-stacking bool) (stacking-pool (optional principal)))
   (let
     ((vault-id (var-get vault-counter))
      (unlock-height (+ lock-duration block-height)))
-    
+
     ;; Validate inputs
     (asserts! (> initial-amount u0) ERR-INVALID-AMOUNT)
     (asserts! (> lock-duration u0) ERR-INVALID-HEIGHT)
-    
+
+    ;; A pool address is mandatory when stacking opt-in is requested
+    (if enable-stacking
+      (asserts! (is-some stacking-pool) ERR-STACKING-NO-POOL)
+      true
+    )
+
     ;; Transfer STX to contract
     (try! (stx-transfer? initial-amount tx-sender (as-contract tx-sender)))
-    
-    ;; Create vault
+
+    ;; Attempt stacking delegation — graceful fallback on failure
+    (if (and enable-stacking (is-some stacking-pool))
+      (try-delegate-stacking initial-amount (unwrap-panic stacking-pool))
+      false
+    )
+
+    ;; Create vault record
     (map-set vaults
       { vault-id: vault-id }
       {
@@ -59,13 +112,15 @@
         unlock-height: unlock-height,
         created-at: block-height,
         is-withdrawn: false,
-        beneficiary: none
+        beneficiary: none,
+        stacking-enabled: enable-stacking,
+        stacking-pool: stacking-pool
       }
     )
-    
+
     ;; Increment counter
     (var-set vault-counter (+ vault-id u1))
-    
+
     (ok vault-id)
   )
 )
@@ -87,7 +142,13 @@
     
     ;; Verify hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
-    
+
+    ;; Revoke stacking delegation before transferring funds out
+    (if (get stacking-enabled vault)
+      (try-revoke-stacking)
+      false
+    )
+
     ;; Transfer funds to recipient (beneficiary or creator)
     (try! (as-contract (stx-transfer? (get amount vault) tx-sender recipient)))
     
@@ -154,30 +215,69 @@
   )
 )
 
-;; Deposit additional funds into an existing vault
+;; Deposit additional funds into an existing vault.
+;; When stacking is enabled the delegation is revoked and reissued with the
+;; updated total so the pool always delegates the correct amount.
 (define-public (deposit (vault-id uint) (amount uint))
   (let
-    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND)))
-    
+    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
+     (new-total (+ (get amount vault) amount)))
+
     ;; Verify caller is vault creator
     (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
-    
+
     ;; Verify amount is positive
     (asserts! (> amount u0) ERR-INVALID-AMOUNT)
-    
+
     ;; Verify vault hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
-    
+
     ;; Transfer STX to contract
     (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
-    
+
     ;; Update vault amount
     (map-set vaults
       { vault-id: vault-id }
-      (merge vault { amount: (+ (get amount vault) amount) })
+      (merge vault { amount: new-total })
     )
-    
+
+    ;; Re-delegate with the updated total when stacking is active
+    (if (and (get stacking-enabled vault) (is-some (get stacking-pool vault)))
+      (let ((pool (unwrap-panic (get stacking-pool vault))))
+        (try-revoke-stacking)
+        (try-delegate-stacking new-total pool)
+      )
+      false
+    )
+
     (ok true)
+  )
+)
+
+;; Check whether stacking is enabled for a vault
+(define-read-only (is-stacking-enabled (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (get stacking-enabled v)
+      false
+    )
+  )
+)
+
+;; Get stacking configuration for a vault
+(define-read-only (get-stacking-info (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (some {
+          enabled: (get stacking-enabled v),
+          pool: (get stacking-pool v),
+          amount: (get amount v),
+          unlock-height: (get unlock-height v)
+        })
+      none
+    )
   )
 )
 
@@ -202,11 +302,13 @@
     
     ;; Verify vault hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
-    
-    ;; Verify vault is still locked (allows early withdrawal)
-    ;; Note: This should fail if already unlocked to preserve incentive for normal withdrawal
-    ;; Optional: allow emergency-withdraw at any time for flexibility
-    
+
+    ;; Revoke stacking delegation before transferring funds out
+    (if (get stacking-enabled vault)
+      (try-revoke-stacking)
+      false
+    )
+
     ;; Transfer user amount to recipient
     (try! (as-contract (stx-transfer? user-amount tx-sender recipient)))
     
@@ -234,6 +336,40 @@
     (asserts! (is-eq tx-sender (var-get penalty-destination)) (err u8))
     
     (var-set penalty-destination new-destination)
+    (ok true)
+  )
+)
+
+;; Allow vault owner to change the stacking pool (revokes old delegation and re-delegates).
+;; Can also be used to enable stacking on an existing non-stacking vault.
+(define-public (update-stacking-pool (vault-id uint) (new-pool principal))
+  (let
+    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND)))
+
+    ;; Only vault creator may update the pool
+    (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
+
+    ;; Vault must still be active
+    (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+
+    ;; Revoke any existing delegation before switching pools
+    (if (get stacking-enabled vault)
+      (try-revoke-stacking)
+      false
+    )
+
+    ;; Update stacking fields on the vault
+    (map-set vaults
+      { vault-id: vault-id }
+      (merge vault {
+        stacking-enabled: true,
+        stacking-pool: (some new-pool)
+      })
+    )
+
+    ;; Delegate to the new pool
+    (try-delegate-stacking (get amount vault) new-pool)
+
     (ok true)
   )
 )

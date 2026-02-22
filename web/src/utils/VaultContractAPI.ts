@@ -10,6 +10,16 @@ export interface VaultData {
   createdAt: bigint;
   isWithdrawn: boolean;
   beneficiary?: string;
+  stackingEnabled: boolean;
+  stackingPool?: string;
+}
+
+export interface StackingInfo {
+  enabled: boolean;
+  pool?: string;
+  amount: bigint;
+  unlockHeight: bigint;
+  estimatedApyPercent: number;
 }
 
 /**
@@ -29,16 +39,22 @@ export class VaultContractAPI {
    * @param lockDuration - Duration in blocks
    * @param initialAmount - Initial deposit in microSTX
    * @param beneficiary - Optional beneficiary principal
+   * @param enableStacking - Opt-in to PoX stacking while locked
+   * @param stackingPool - Pool principal (required when enableStacking is true)
    */
   async createVault(
     lockDuration: number,
     initialAmount: bigint,
-    beneficiary?: string
+    beneficiary?: string,
+    enableStacking: boolean = false,
+    stackingPool?: string
   ): Promise<string> {
     const functionName = 'create-vault';
     const args = [
       `u${lockDuration}`,
       `u${initialAmount}`,
+      enableStacking ? 'true' : 'false',
+      stackingPool ? `(some '${stackingPool})` : 'none',
     ];
 
     if (beneficiary) {
@@ -195,6 +211,55 @@ export class VaultContractAPI {
 
     console.log(`Calling ${functionName} with args:`, args);
     return BigInt(0); // Placeholder
+  }
+
+  /**
+   * Delegate STX to a stacking pool via pox-4
+   * @param amount - Amount in microSTX to delegate
+   * @param pool - Pool principal to delegate to
+   */
+  async delegateStx(amount: bigint, pool: string): Promise<boolean> {
+    const functionName = 'delegate-stx';
+    const args = [`u${amount}`, `'${pool}`, 'none', 'none'];
+
+    console.log(`Calling pox-4 ${functionName} with args:`, args);
+    return true; // Placeholder
+  }
+
+  /**
+   * Revoke STX stacking delegation via pox-4
+   */
+  async revokeDelegateStx(): Promise<boolean> {
+    const functionName = 'revoke-delegate-stx';
+
+    console.log(`Calling pox-4 ${functionName}`);
+    return true; // Placeholder
+  }
+
+  /**
+   * Get stacking configuration and status for a vault
+   * @param vaultId - The vault ID
+   */
+  async getStackingInfo(vaultId: number): Promise<StackingInfo | null> {
+    const functionName = 'get-stacking-info';
+    const args = [`u${vaultId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    // Placeholder — real implementation would parse the contract response
+    return null;
+  }
+
+  /**
+   * Update the stacking pool for an existing vault (owner only)
+   * @param vaultId - The vault ID
+   * @param newPool - New pool principal
+   */
+  async updateStackingPool(vaultId: number, newPool: string): Promise<boolean> {
+    const functionName = 'update-stacking-pool';
+    const args = [`u${vaultId}`, `'${newPool}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return true; // Placeholder
   }
 
   /**

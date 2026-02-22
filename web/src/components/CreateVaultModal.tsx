@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 interface CreateVaultModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateVault: (amount: number, lockDuration: number, beneficiary?: string) => Promise<void>;
+  onCreateVault: (amount: number, lockDuration: number, beneficiary?: string, enableStacking?: boolean, stackingPool?: string) => Promise<void>;
 }
 
 export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
@@ -15,6 +15,8 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
   const [lockDuration, setLockDuration] = useState<string>('');
   const [beneficiaryAddress, setBeneficiaryAddress] = useState<string>('');
   const [hasBeneficiary, setHasBeneficiary] = useState<boolean>(false);
+  const [enableStacking, setEnableStacking] = useState<boolean>(false);
+  const [stackingPool, setStackingPool] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
@@ -44,15 +46,24 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
         return;
       }
 
-      const beneficiary = hasBeneficiary ? beneficiaryAddress.trim() : undefined;
+      if (enableStacking && !stackingPool.trim()) {
+        setError('Please enter a stacking pool address');
+        setLoading(false);
+        return;
+      }
 
-      await onCreateVault(amountNum, durationNum, beneficiary);
+      const beneficiary = hasBeneficiary ? beneficiaryAddress.trim() : undefined;
+      const pool = enableStacking ? stackingPool.trim() : undefined;
+
+      await onCreateVault(amountNum, durationNum, beneficiary, enableStacking, pool);
 
       // Reset form
       setAmount('');
       setLockDuration('');
       setBeneficiaryAddress('');
       setHasBeneficiary(false);
+      setEnableStacking(false);
+      setStackingPool('');
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create vault');
@@ -119,6 +130,46 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
             />
             <small>The address that will receive funds when the vault unlocks</small>
           </div>
+        )}
+
+        <div className="form-group checkbox">
+          <input
+            id="enableStacking"
+            type="checkbox"
+            checked={enableStacking}
+            onChange={(e) => setEnableStacking(e.target.checked)}
+            disabled={loading}
+          />
+          <label htmlFor="enableStacking">Enable STX Stacking (earn BTC yield while locked)</label>
+        </div>
+
+        {enableStacking && (
+          <>
+            <div className="form-group">
+              <label htmlFor="stackingPool">Stacking Pool Address</label>
+              <input
+                id="stackingPool"
+                type="text"
+                value={stackingPool}
+                onChange={(e) => setStackingPool(e.target.value)}
+                placeholder="SP... stacking pool principal"
+                disabled={loading}
+              />
+              <small>Your STX will be delegated to this pool via pox-4 while the vault is locked</small>
+            </div>
+
+            <div className="stacking-apy-banner">
+              <div className="apy-info">
+                <span className="apy-label">Estimated BTC Yield APY</span>
+                <span className="apy-value">~8–12%</span>
+              </div>
+              <p className="apy-note">
+                BTC rewards are distributed each Stacking cycle (~2 weeks). Actual APY varies
+                with network participation. Rewards accrue to the pool and are claimable
+                separately from your STX principal.
+              </p>
+            </div>
+          </>
         )}
 
         {error && <div className="error-message">{error}</div>}
