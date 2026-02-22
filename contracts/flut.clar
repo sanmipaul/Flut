@@ -11,6 +11,7 @@
     created-at: uint,
     is-withdrawn: bool,
     beneficiary: (optional principal),
+    nft-token-id: (optional uint)
     stacking-enabled: bool,
     stacking-pool: (optional principal)
   }
@@ -44,6 +45,21 @@
 (define-constant PENALTY_RATE u10)
 (define-data-var penalty-destination principal tx-sender)
 
+;; Create a new vault
+(define-public (create-vault (lock-duration uint) (initial-amount uint))
+  (let
+    ((vault-id (var-get vault-counter))
+     (unlock-height (+ lock-duration block-height))
+     (nft-token-id (try! (contract-call? 'ST1VAULT_NFT_ADDRESS.flut-nft mint-vault-receipt vault-id tx-sender initial-amount unlock-height))))
+    
+    ;; Validate inputs
+    (asserts! (> initial-amount u0) ERR-INVALID-AMOUNT)
+    (asserts! (> lock-duration u0) ERR-INVALID-HEIGHT)
+    
+    ;; Transfer STX to contract
+    (try! (stx-transfer? initial-amount tx-sender (as-contract tx-sender)))
+    
+    ;; Create vault with NFT reference
 ;; Private: attempt to delegate vault STX to a stacking pool via pox-4.
 ;; Returns true on success, false on any delegation error (graceful fallback —
 ;; a delegation failure must never block vault creation or deposit).
@@ -113,6 +129,13 @@
         created-at: block-height,
         is-withdrawn: false,
         beneficiary: none,
+        nft-token-id: (some nft-token-id)
+      }
+    )
+    
+    ;; Increment counter
+    (var-set vault-counter (+ vault-id u1))
+    
         stacking-enabled: enable-stacking,
         stacking-pool: stacking-pool
       }
@@ -142,6 +165,7 @@
     
     ;; Verify hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+    
 
     ;; Revoke stacking delegation before transferring funds out
     (if (get stacking-enabled vault)
@@ -157,6 +181,9 @@
       { vault-id: vault-id }
       (merge vault { is-withdrawn: true })
     )
+    
+    ;; Burn NFT receipt on successful withdrawal
+    (try! (contract-call? 'ST1VAULT_NFT_ADDRESS.flut-nft burn-vault-receipt vault-id (get creator vault)))
     
     (ok true)
   )
@@ -215,6 +242,40 @@
   )
 )
 
+;; Get NFT token ID for a vault
+(define-read-only (get-vault-nft-token-id (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (get nft-token-id v)
+      none
+    )
+  )
+)
+
+;; Deposit additional funds into an existing vault
+(define-public (deposit (vault-id uint) (amount uint))
+  (let
+    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND)))
+    
+    ;; Verify caller is vault creator
+    (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
+    
+    ;; Verify amount is positive
+    (asserts! (> amount u0) ERR-INVALID-AMOUNT)
+    
+    ;; Verify vault hasn't been withdrawn
+    (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+    
+    ;; Transfer STX to contract
+    (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
+    
+    ;; Update vault amount
+    (map-set vaults
+      { vault-id: vault-id }
+      (merge vault { amount: (+ (get amount vault) amount) })
+    )
+    
 ;; Deposit additional funds into an existing vault.
 ;; When stacking is enabled the delegation is revoked and reissued with the
 ;; updated total so the pool always delegates the correct amount.
@@ -302,6 +363,11 @@
     
     ;; Verify vault hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+    
+    ;; Verify vault is still locked (allows early withdrawal)
+    ;; Note: This should fail if already unlocked to preserve incentive for normal withdrawal
+    ;; Optional: allow emergency-withdraw at any time for flexibility
+    
 
     ;; Revoke stacking delegation before transferring funds out
     (if (get stacking-enabled vault)
@@ -323,6 +389,9 @@
       { vault-id: vault-id }
       (merge vault { is-withdrawn: true })
     )
+    
+    ;; Burn NFT receipt on emergency withdrawal
+    (try! (contract-call? 'ST1VAULT_NFT_ADDRESS.flut-nft burn-vault-receipt vault-id (get creator vault)))
     
     (ok { user-amount: user-amount, penalty: penalty-amount })
   )
