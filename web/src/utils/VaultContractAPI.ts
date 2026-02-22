@@ -10,7 +10,16 @@ export interface VaultData {
   createdAt: bigint;
   isWithdrawn: boolean;
   beneficiary?: string;
-  nftTokenId?: number;
+  stackingEnabled: boolean;
+  stackingPool?: string;
+}
+
+export interface StackingInfo {
+  enabled: boolean;
+  pool?: string;
+  amount: bigint;
+  unlockHeight: bigint;
+  estimatedApyPercent: number;
 }
 
 /**
@@ -30,16 +39,22 @@ export class VaultContractAPI {
    * @param lockDuration - Duration in blocks
    * @param initialAmount - Initial deposit in microSTX
    * @param beneficiary - Optional beneficiary principal
+   * @param enableStacking - Opt-in to PoX stacking while locked
+   * @param stackingPool - Pool principal (required when enableStacking is true)
    */
   async createVault(
     lockDuration: number,
     initialAmount: bigint,
-    beneficiary?: string
+    beneficiary?: string,
+    enableStacking: boolean = false,
+    stackingPool?: string
   ): Promise<string> {
     const functionName = 'create-vault';
     const args = [
       `u${lockDuration}`,
       `u${initialAmount}`,
+      enableStacking ? 'true' : 'false',
+      stackingPool ? `(some '${stackingPool})` : 'none',
     ];
 
     if (beneficiary) {
@@ -199,6 +214,55 @@ export class VaultContractAPI {
   }
 
   /**
+   * Delegate STX to a stacking pool via pox-4
+   * @param amount - Amount in microSTX to delegate
+   * @param pool - Pool principal to delegate to
+   */
+  async delegateStx(amount: bigint, pool: string): Promise<boolean> {
+    const functionName = 'delegate-stx';
+    const args = [`u${amount}`, `'${pool}`, 'none', 'none'];
+
+    console.log(`Calling pox-4 ${functionName} with args:`, args);
+    return true; // Placeholder
+  }
+
+  /**
+   * Revoke STX stacking delegation via pox-4
+   */
+  async revokeDelegateStx(): Promise<boolean> {
+    const functionName = 'revoke-delegate-stx';
+
+    console.log(`Calling pox-4 ${functionName}`);
+    return true; // Placeholder
+  }
+
+  /**
+   * Get stacking configuration and status for a vault
+   * @param vaultId - The vault ID
+   */
+  async getStackingInfo(vaultId: number): Promise<StackingInfo | null> {
+    const functionName = 'get-stacking-info';
+    const args = [`u${vaultId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    // Placeholder — real implementation would parse the contract response
+    return null;
+  }
+
+  /**
+   * Update the stacking pool for an existing vault (owner only)
+   * @param vaultId - The vault ID
+   * @param newPool - New pool principal
+   */
+  async updateStackingPool(vaultId: number, newPool: string): Promise<boolean> {
+    const functionName = 'update-stacking-pool';
+    const args = [`u${vaultId}`, `'${newPool}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return true; // Placeholder
+  }
+
+  /**
    * Set penalty destination (owner only)
    * @param newDestination - New penalty destination principal
    */
@@ -208,130 +272,6 @@ export class VaultContractAPI {
 
     console.log(`Calling ${functionName} with args:`, args);
     return true; // Placeholder
-  }
-
-  // ============================================================================
-  // NFT Methods (SIP-009 NFT Receipt)
-  // ============================================================================
-
-  /**
-   * Get NFT token ID associated with a vault
-   * @param vaultId - The vault ID
-   */
-  async getVaultNFTTokenId(vaultId: number): Promise<number | null> {
-    const functionName = 'get-vault-nft-token-id';
-    const args = [`u${vaultId}`];
-
-    console.log(`Calling ${functionName} with args:`, args);
-    return null; // Placeholder
-  }
-
-  /**
-   * Get NFT metadata for a specific token
-   * @param tokenId - The NFT token ID
-   */
-  async getNFTMetadata(tokenId: number): Promise<any | null> {
-    const functionName = 'get-nft-metadata';
-    const args = [`u${tokenId}`];
-
-    console.log(`Calling ${functionName} with args:`, args);
-    return null; // Placeholder
-  }
-
-  /**
-   * Get owner of an NFT token
-   * @param tokenId - The NFT token ID
-   */
-  async getNFTOwner(tokenId: number): Promise<string | null> {
-    const functionName = 'get-owner';
-    const args = [`u${tokenId}`];
-
-    console.log(`Calling ${functionName} with args:`, args);
-    return null; // Placeholder
-  }
-
-  /**
-   * Get NFT balance for an address
-   * @param owner - The owner principal address
-   */
-  async getNFTBalance(owner: string): Promise<number> {
-    const functionName = 'get-balance';
-    const args = [`'${owner}`];
-
-    console.log(`Calling ${functionName} with args:`, args);
-    return 0; // Placeholder
-  }
-
-  /**
-   * Transfer an NFT to another address
-   * @param tokenId - The NFT token ID
-   * @param recipient - The recipient principal address
-   */
-  async transferNFT(tokenId: number, recipient: string): Promise<boolean> {
-    const functionName = 'transfer';
-    const args = [
-      `u${tokenId}`,
-      `'${recipient}`,
-    ];
-
-    console.log(`Calling ${functionName} with args:`, args);
-    return true; // Placeholder
-  }
-
-  /**
-   * Get token URI for an NFT
-   * @param tokenId - The NFT token ID
-   */
-  async getTokenURI(tokenId: number): Promise<string | null> {
-    const functionName = 'get-token-uri';
-    const args = [`u${tokenId}`];
-
-    console.log(`Calling ${functionName} with args:`, args);
-    return null; // Placeholder
-  }
-
-  /**
-   * Get metadata URI for an NFT (returns data URI with JSON)
-   * @param tokenId - The NFT token ID
-   */
-  async getMetadataURI(tokenId: number): Promise<string | null> {
-    const functionName = 'get-metadata-uri';
-    const args = [`u${tokenId}`];
-
-    console.log(`Calling ${functionName} with args:`, args);
-    return null; // Placeholder
-  }
-
-  /**
-   * Check if an NFT token exists
-   * @param tokenId - The NFT token ID
-   */
-  async tokenExists(tokenId: number): Promise<boolean> {
-    const functionName = 'token-exists';
-    const args = [`u${tokenId}`];
-
-    console.log(`Calling ${functionName} with args:`, args);
-    return false; // Placeholder
-  }
-
-  /**
-   * Get last minted NFT token ID
-   */
-  async getLastTokenId(): Promise<number | null> {
-    const functionName = 'get-last-token-id';
-
-    console.log(`Calling ${functionName}`);
-    return null; // Placeholder
-  }
-
-  /**
-   * Get total NFT token count
-   */
-  async getTokenCount(): Promise<number> {
-    const functionName = 'get-token-count';
-
-    console.log(`Calling ${functionName}`);
-    return 0; // Placeholder
   }
 }
 

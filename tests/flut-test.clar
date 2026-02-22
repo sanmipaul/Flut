@@ -220,142 +220,73 @@
   )
 )
 
-;; Test: NFT minting on vault creation
-(define-private (test-nft-mint-on-vault-create)
+;; ===== Stacking Integration Tests =====
+
+;; Test: Create vault without stacking
+(define-private (test-create-vault-no-stacking)
   (let
-    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut create-vault u100 u1000000)))
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut create-vault u100 u1000000 false none)))
     (match result
-      vault-id (begin
-        (asserts! (is-eq vault-id u0) (err "First vault creation should succeed"))
-        (ok "✓ NFT minting on vault creation test passed")
-      )
-      error (err (concat "✗ Vault creation failed: " (to-string error)))
+      vault-id (ok "✓ Create vault without stacking test passed")
+      error (err (concat "✗ Create vault without stacking failed: " (to-string error)))
     )
   )
 )
 
-;; Test: Get NFT token ID from vault
-(define-private (test-get-vault-nft-token-id)
+;; Test: Create vault with stacking enabled and a pool address
+(define-private (test-create-vault-with-stacking)
   (let
-    ((nft-id (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-vault-nft-token-id u0)))
-    (match nft-id
-      token-id (ok "✓ Get vault NFT token ID test passed")
-      none (err "✗ Failed to get vault NFT token ID")
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut create-vault u200 u2000000 true (some 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG))))
+    (match result
+      vault-id (ok "✓ Create vault with stacking test passed")
+      error (err (concat "✗ Create vault with stacking failed: " (to-string error)))
     )
   )
 )
 
-;; Test: NFT metadata stored correctly
-(define-private (test-nft-metadata-storage)
+;; Test: Stacking enabled flag requires a pool address
+(define-private (test-stacking-requires-pool)
   (let
-    ((metadata (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-nft-metadata u0)))
-    (match metadata
-      data (ok "✓ NFT metadata storage test passed")
-      none (err "✗ Failed to retrieve NFT metadata")
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut create-vault u100 u1000000 true none)))
+    (match result
+      vault-id (err "✗ Should have failed — stacking without pool must return ERR-STACKING-NO-POOL")
+      error (ok "✓ Stacking-requires-pool validation test passed")
     )
   )
 )
 
-;; Test: NFT balance tracking
-(define-private (test-nft-balance)
+;; Test: is-stacking-enabled returns false for non-stacking vault
+(define-private (test-is-stacking-enabled-false)
   (let
-    ((balance (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-balance tx-sender)))
-    (match balance
-      b (begin
-        (asserts! (>= b u1) (err "User should have at least 1 NFT"))
-        (ok "✓ NFT balance tracking test passed")
-      )
-      none (err "✗ Failed to get NFT balance")
+    ((enabled (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut is-stacking-enabled u0)))
+    (match enabled
+      v (begin
+          (asserts! (is-eq v false) (err "✗ Expected stacking-enabled to be false"))
+          (ok "✓ is-stacking-enabled false test passed")
+        )
+      none (err "✗ Vault not found for is-stacking-enabled check")
     )
   )
 )
 
-;; Test: NFT token existence check
-(define-private (test-nft-token-exists)
+;; Test: get-stacking-info returns pool and amount for stacking vault
+(define-private (test-get-stacking-info)
   (let
-    ((exists (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft token-exists u0)))
-    (match exists
-      result (ok "✓ NFT token existence check test passed")
-      none (err "✗ Failed to check token existence")
+    ((info (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-stacking-info u1)))
+    (match info
+      stacking-data (ok "✓ get-stacking-info returned data for stacking vault")
+      none (err "✗ get-stacking-info returned none — expected stacking data")
     )
   )
 )
 
-;; Test: NFT owner verification
-(define-private (test-nft-owner-verification)
+;; Test: get-stacking-info returns none for unknown vault
+(define-private (test-get-stacking-info-unknown-vault)
   (let
-    ((owner (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-owner u0)))
-    (match owner
-      owner-result (ok "✓ NFT owner verification test passed")
-      none (err "✗ Failed to get NFT owner")
-    )
-  )
-)
-
-;; Test: Token URI retrieval
-(define-private (test-token-uri-retrieval)
-  (let
-    ((uri (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-token-uri u0)))
-    (match uri
-      token-uri (ok "✓ Token URI retrieval test passed")
-      error (err (concat "✗ Failed to get token URI: " (to-string error)))
-    )
-  )
-)
-
-;; Test: Metadata URI retrieval
-(define-private (test-metadata-uri-retrieval)
-  (let
-    ((uri (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-metadata-uri u0)))
-    (match uri
-      metadata-uri (ok "✓ Metadata URI retrieval test passed")
-      error (err (concat "✗ Failed to get metadata URI: " (to-string error)))
-    )
-  )
-)
-
-;; Test: Get last token ID
-(define-private (test-get-last-token-id)
-  (let
-    ((token-id (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-last-token-id)))
-    (match token-id
-      id (ok "✓ Get last token ID test passed")
-      error (err (concat "✗ Failed to get last token ID: " (to-string error)))
-    )
-  )
-)
-
-;; Test: Get token count
-(define-private (test-get-token-count)
-  (let
-    ((count (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft get-token-count)))
-    (match count
-      total (ok "✓ Get token count test passed")
-      error (err (concat "✗ Failed to get token count: " (to-string error)))
-    )
-  )
-)
-
-;; Test: NFT transfer between addresses
-(define-private (test-nft-transfer)
-  (let
-    ((transfer-result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft 
-      transfer u0 tx-sender 'ST1SJ3DTE5DN7X54YDH5D64R3BJB2ZZAB3A24GTNNP)))
-    (match transfer-result
-      success (ok "✓ NFT transfer test passed")
-      error (err (concat "✗ NFT transfer failed: " (to-string error)))
-    )
-  )
-)
-
-;; Test: NFT burning on vault withdrawal
-(define-private (test-nft-burn-on-withdrawal)
-  (let
-    ((burn-result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut-nft 
-      burn-vault-receipt u0 tx-sender)))
-    (match burn-result
-      success (ok "✓ NFT burning on withdrawal test passed")
-      error (err (concat "✗ NFT burning failed: " (to-string error)))
+    ((info (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-stacking-info u999)))
+    (match info
+      _data (err "✗ Expected none for unknown vault ID")
+      none (ok "✓ get-stacking-info returns none for unknown vault test passed")
     )
   )
 )

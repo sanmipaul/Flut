@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
-import NFTBadge from './NFTBadge';
 
 interface Vault {
   vaultId: number;
@@ -11,7 +10,8 @@ interface Vault {
   isWithdrawn: boolean;
   beneficiary?: string;
   currentBlockHeight: number;
-  nftTokenId?: number;
+  stackingEnabled?: boolean;
+  stackingPool?: string;
 }
 
 interface VaultDetailProps {
@@ -148,12 +148,6 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
         </div>
       </section>
 
-      {vault.nftTokenId !== undefined && (
-        <section className="nft-receipt-section">
-          <NFTBadge tokenId={vault.nftTokenId} vaultId={vault.vaultId} />
-        </section>
-      )}
-
       {vault.beneficiary && (
         <section className="beneficiary-info">
           <h3>Beneficiary Details</h3>
@@ -163,6 +157,40 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
           </div>
           <p className="info-text">
             When unlocked, funds will be transferred to this beneficiary address instead of the creator.
+          </p>
+        </section>
+      )}
+
+      {vault.stackingEnabled && (
+        <section className="stacking-info">
+          <h3>Stacking &amp; Yield</h3>
+          <div className="info-item">
+            <label>Stacking Status</label>
+            <span className="status-badge stacking-active">Active — delegated via pox-4</span>
+          </div>
+          {vault.stackingPool && (
+            <div className="info-item">
+              <label>Pool Address</label>
+              <code>{vault.stackingPool}</code>
+            </div>
+          )}
+          <div className="info-item">
+            <label>Estimated BTC APY</label>
+            <span className="apy-value">~8–12%</span>
+          </div>
+          <p className="info-text">
+            Your STX is being stacked. BTC rewards accrue each cycle (~2 weeks) and are
+            claimable through your pool. Delegation is automatically revoked on withdrawal.
+          </p>
+        </section>
+      )}
+
+      {!vault.stackingEnabled && !vault.isWithdrawn && (
+        <section className="stacking-info stacking-inactive">
+          <h3>Stacking &amp; Yield</h3>
+          <p className="info-text">
+            Stacking is not enabled for this vault. Use the pool update function to start
+            earning BTC yield on your locked STX.
           </p>
         </section>
       )}
