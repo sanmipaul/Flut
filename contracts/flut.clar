@@ -417,3 +417,10 @@
     )
   )
 )
+
+;; Private helper: sum total shares for a vault
+(define-private (sum-vault-shares (vault-id uint) (beneficiaries (list 10 principal)))
+  (fold + (map (lambda (beneficiary) 
+                 (default-to u0 (get share (map-get? vault-beneficiaries { vault-id: vault-id, address: beneficiary }))))
+               beneficiaries) u0)
+)
