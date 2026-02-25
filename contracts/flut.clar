@@ -10,7 +10,7 @@
     unlock-height: uint,
     created-at: uint,
     is-withdrawn: bool,
-    beneficiary: (optional principal),
+    beneficiaries: (list 10 principal),
     stacking-enabled: bool,
     stacking-pool: (optional principal)
   }
