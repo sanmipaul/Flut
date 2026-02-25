@@ -124,7 +124,7 @@
         unlock-height: unlock-height,
         created-at: block-height,
         is-withdrawn: false,
-        beneficiary: none,
+        beneficiaries: (list),
         stacking-enabled: enable-stacking,
         stacking-pool: stacking-pool
       }
