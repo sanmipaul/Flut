@@ -16,6 +16,12 @@
   }
 )
 
+;; Beneficiary record for multi-beneficiary support
+(define-map vault-beneficiaries
+  { vault-id: uint, address: principal }
+  { share: uint } ;; share in basis points (100 = 1%)
+)
+
 ;; Track the total number of vaults
 (define-data-var vault-counter uint u0)
 
