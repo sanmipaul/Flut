@@ -36,6 +36,12 @@
 (define-constant ERR-NOT-PENALTY-OWNER (err u8))
 (define-constant ERR-STACKING-NO-POOL (err u9))
 (define-constant ERR-STACKING-NOT-ENABLED (err u10))
+(define-constant ERR-INVALID-SHARES (err u11))
+(define-constant ERR-TOO-MANY-BENEFICIARIES (err u12))
+(define-constant ERR-BENEFICIARY-EXISTS (err u13))
+
+;; Basis points for share calculations (10000 = 100%)
+(define-constant BASIS_POINTS u10000)
 
 ;; pox-4 contract reference (testnet — swap to SP000000000000000000002Q6VF78.pox-4 on mainnet)
 (define-constant POX4-PRINCIPAL 'ST000000000000000000002AMW42H.pox-4)
