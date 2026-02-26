@@ -196,11 +196,20 @@
     ;; Verify vault hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
     
+    ;; Validate beneficiary address
+    (asserts! (is-valid-beneficiary beneficiary) ERR-INVALID-BENEFICIARY)
+    
+    ;; Prevent setting creator as beneficiary
+    (asserts! (not (is-eq beneficiary (get creator vault))) ERR-BENEFICIARY-SAME-AS-CREATOR)
+    
     ;; Set beneficiary
     (map-set vaults
       { vault-id: vault-id }
       (merge vault { beneficiary: (some beneficiary) })
     )
+    
+    ;; Emit event for beneficiary change
+    (print { event: "beneficiary-set", vault-id: vault-id, beneficiary: beneficiary, changed-by: tx-sender })
     
     (ok true)
   )
