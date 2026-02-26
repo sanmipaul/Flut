@@ -1,7 +1,9 @@
 ;; Flut — STX Savings Vault
 ;; A non-custodial, time-locked savings protocol built on Stacks
 
-;; Vault data structure
+;; ============================================
+;; Data Structures
+;; ============================================
 (define-map vaults
   { vault-id: uint }
   {
