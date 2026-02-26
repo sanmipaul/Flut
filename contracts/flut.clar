@@ -85,8 +85,27 @@
 ;; ============================================
 ;; Operation Limits and Rate Limiting
 ;; ============================================
-
-;; Maximum vaults allowed per user (configurable)
+;;
+;; This section implements vault operation limits and rate limiting to:
+;; 1. Prevent abuse and spam (vault creation and deposit flooding)
+;; 2. Establish fair usage patterns across all users
+;; 3. Protect contract stability and performance
+;;
+;; Key Limits:
+;; - MAX_VAULTS_PER_USER (10): Maximum vaults per user prevents per-user DOS
+;; - MIN_BLOCKS_BETWEEN_DEPOSITS (1): Rate limiting on deposits prevents deposit spam
+;; - MAX_DEPOSIT_AMOUNT (1000 STX): Single deposit cap prevents transaction bloat
+;; - MAX_VAULT_TOTAL_AMOUNT (10000 STX): Total vault cap prevents economic concentration
+;;
+;; Rate Limiting Implementation:
+;; - Tracks last deposit block per vault in vault-last-deposit-block map
+;; - Enforces minimum block gap between consecutive deposits
+;; - Frontend can query remaining cooldown via get-deposit-cooldown-blocks
+;;
+;; Vault Tracking:
+;; - Uses user-vaults map to track vault-ids created by each principal
+;; - Uses vault-creation-time to log creation timestamps
+;; - Enables efficient vault limit validation
 (define-constant MAX_VAULTS_PER_USER u10)
 
 ;; Minimum blocks required between deposits for same vault (rate limiting)
