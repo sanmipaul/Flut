@@ -749,6 +749,9 @@
       (merge vault { is-withdrawn: true })
     )
     
+    ;; Burn NFT receipt on emergency withdrawal
+    (try! (contract-call? 'ST1VAULT_NFT_ADDRESS.flut-nft burn-vault-receipt vault-id (get creator vault)))
+    
     (ok { user-amount: user-amount, penalty: penalty-amount })
   )
 )
