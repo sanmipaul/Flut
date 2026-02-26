@@ -384,9 +384,31 @@
   (var-get vault-counter)
 )
 
-;; Get the number of vaults created by a user
-(define-read-only (get-user-vault-count (user principal))
-  (count-user-vaults user)
+;; Check if vault creation is allowed for a user
+(define-read-only (can-create-vault (user principal))
+  (< (count-user-vaults user) MAX_VAULTS_PER_USER)
+)
+
+;; Check if deposit is allowed for a vault (cooldown satisfied)
+(define-read-only (can-deposit-to-vault (vault-id uint))
+  (is-deposit-cooldown-satisfied vault-id)
+)
+
+;; Get remaining blocks before next deposit is allowed
+(define-read-only (get-deposit-cooldown-blocks (vault-id uint))
+  (let ((last-deposit (map-get? vault-last-deposit-block { vault-id: vault-id })))
+    (match last-deposit
+      record
+        (let ((blocks-passed (- block-height (get block-height record)))
+              (blocks-needed MIN_BLOCKS_BETWEEN_DEPOSITS))
+          (if (>= blocks-passed blocks-needed)
+            u0
+            (- blocks-needed blocks-passed)
+          )
+        )
+      u0
+    )
+  )
 )
 
 ;; Check if vault is unlocked
