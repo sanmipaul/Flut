@@ -664,6 +664,36 @@
   MAX_VAULT_TOTAL_AMOUNT
 )
 
+;; Check if additional deposit would exceed limits
+(define-read-only (can-deposit-amount (vault-id uint) (deposit-amount uint))
+  (let ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (is-deposit-within-limits (get amount v) deposit-amount)
+      false
+    )
+  )
+)
+
+;; Get vault creation timestamp
+(define-read-only (get-vault-creation-time (vault-id uint))
+  (let ((creation-record (map-get? vault-creation-time { vault-id: vault-id })))
+    (match creation-record
+      record (some (get created-at record))
+      none
+    )
+  )
+)
+
+;; Get last deposit timestamp for rate limiting
+(define-read-only (get-vault-last-deposit-block (vault-id uint))
+  (let ((deposit-record (map-get? vault-last-deposit-block { vault-id: vault-id })))
+    (match deposit-record
+      record (some (get block-height record))
+      none
+    )
+  )
+)
+
 ;; Calculate penalty for a given amount
 (define-read-only (get-penalty-amount (vault-id uint))
   (let
