@@ -175,6 +175,20 @@
   )
 )
 
+)
+
+;; Private: check if deposit cooldown period has passed
+;; Returns true if enough blocks have passed since last deposit
+(define-private (is-deposit-cooldown-satisfied (vault-id uint))
+  (let ((last-deposit (map-get? vault-last-deposit-block { vault-id: vault-id })))
+    (match last-deposit
+      record 
+        (>= (- block-height (get block-height record)) MIN_BLOCKS_BETWEEN_DEPOSITS)
+      true ;; No previous deposit, so cooldown is satisfied
+    )
+  )
+)
+
 ;; Private: validate withdrawal recipient before processing
 ;; Returns true on success, false if there was no active delegation or any error.
 ;; Graceful — a failed revocation must never block withdrawal.
