@@ -300,6 +300,16 @@
   )
 )
 
+;; Validate a beneficiary address without setting it
+;; Checks if address is valid and can be set as beneficiary for creator
+;; Useful for frontend validation before calling set-beneficiary
+(define-read-only (validate-beneficiary-address (beneficiary principal) (creator principal))
+  (and
+    (is-valid-beneficiary beneficiary)
+    (not (is-eq beneficiary creator))
+  )
+)
+
 ;; Deposit additional funds into an existing vault.
 ;; When stacking is enabled the delegation is revoked and reissued with the
 ;; updated total so the pool always delegates the correct amount.
