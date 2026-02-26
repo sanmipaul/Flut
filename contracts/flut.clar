@@ -271,6 +271,21 @@
   )
 )
 
+;; Check if beneficiary can be modified for a vault
+;; Returns true if vault exists, is active (not withdrawn), and can be modified
+(define-read-only (can-modify-beneficiary (vault-id uint) (caller principal))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (and
+          (is-eq caller (get creator v))
+          (not (get is-withdrawn v))
+        )
+      false
+    )
+  )
+)
+
 ;; Deposit additional funds into an existing vault.
 ;; When stacking is enabled the delegation is revoked and reissued with the
 ;; updated total so the pool always delegates the correct amount.
