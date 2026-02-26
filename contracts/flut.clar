@@ -173,9 +173,7 @@
 (define-public (withdraw (vault-id uint))
   (let
     ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
-     (recipient (match (get beneficiary vault) 
-                   beneficiary beneficiary
-                   (get creator vault)))
+     (recipient (get-withdrawal-recipient vault))
     )
     
     ;; Verify caller is vault creator
@@ -201,6 +199,9 @@
       { vault-id: vault-id }
       (merge vault { is-withdrawn: true })
     )
+    
+    ;; Emit withdrawal event
+    (print { event: "vault-withdrawn", vault-id: vault-id, recipient: recipient, amount: (get amount vault) })
     
     (ok true)
   )
