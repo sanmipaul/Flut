@@ -215,11 +215,18 @@
 (define-public (create-vault (lock-duration uint) (initial-amount uint) (enable-stacking bool) (stacking-pool (optional principal)))
   (let
     ((vault-id (var-get vault-counter))
-     (unlock-height (+ lock-duration block-height)))
+     (unlock-height (+ lock-duration block-height))
+     (user-vault-count (count-user-vaults tx-sender)))
 
     ;; Validate inputs
     (asserts! (> initial-amount u0) ERR-INVALID-AMOUNT)
     (asserts! (> lock-duration u0) ERR-INVALID-HEIGHT)
+    
+    ;; Enforce vault creation limit
+    (asserts! (< user-vault-count MAX_VAULTS_PER_USER) ERR-TOO-MANY-VAULTS)
+    
+    ;; Validate deposit amount is within limits
+    (asserts! (is-deposit-within-limits u0 initial-amount) ERR-DEPOSIT-AMOUNT-EXCEEDED)
 
     ;; A pool address is mandatory when stacking opt-in is requested
     (if enable-stacking
@@ -250,9 +257,30 @@
         stacking-pool: stacking-pool
       }
     )
+    
+    ;; Track vault creation time
+    (map-set vault-creation-time
+      { vault-id: vault-id }
+      { created-at: block-height }
+    )
+    
+    ;; Track deposit time for rate limiting
+    (map-set vault-last-deposit-block
+      { vault-id: vault-id }
+      { block-height: block-height }
+    )
+    
+    ;; Update user's vault list
+    (let ((user-vaults-record (default-to { vault-ids: (list) } (map-get? user-vaults { user: tx-sender })))
+         (updated-vault-ids (unwrap! (as-max-len? (append (get vault-ids user-vaults-record) vault-id) u100) ERR-INVALID-AMOUNT)))
+      (map-set user-vaults { user: tx-sender } { vault-ids: updated-vault-ids })
+    )
 
     ;; Increment counter
     (var-set vault-counter (+ vault-id u1))
+    
+    ;; Emit vault creation event
+    (print { event: "vault-created", vault-id: vault-id, creator: tx-sender, amount: initial-amount, unlock-height: unlock-height })
 
     (ok vault-id)
   )
