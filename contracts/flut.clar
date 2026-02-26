@@ -65,6 +65,22 @@
 (define-constant PENALTY_RATE u10)
 
 ;; ============================================
+;; Operation Limits and Rate Limiting
+;; ============================================
+
+;; Maximum vaults allowed per user (configurable)
+(define-constant MAX_VAULTS_PER_USER u10)
+
+;; Minimum blocks required between deposits for same vault (rate limiting)
+(define-constant MIN_BLOCKS_BETWEEN_DEPOSITS u1)
+
+;; Maximum deposit amount in a single transaction (in microSTX)
+(define-constant MAX_DEPOSIT_AMOUNT u1000000000) ;; 1000 STX
+
+;; Maximum vault amount (sum of all deposits)
+(define-constant MAX_VAULT_TOTAL_AMOUNT u10000000000) ;; 10000 STX
+
+;; ============================================
 ;; Variables
 ;; ============================================
 
