@@ -69,6 +69,13 @@
 (define-constant ERR-DEPOSIT-AMOUNT-EXCEEDED (err u18))     ;; Single deposit amount too large
 (define-constant ERR-VAULT-AMOUNT-EXCEEDED (err u19))       ;; Total vault amount exceeds limit
 
+;; Withdrawal safety errors
+(define-constant ERR-INSUFFICIENT-BALANCE (err u20))        ;; Vault balance less than withdrawal
+(define-constant ERR-INVALID-WITHDRAWAL-AMOUNT (err u21))   ;; Withdrawal amount is zero or invalid
+(define-constant ERR-RECIPIENT-CANNOT-WITHDRAW (err u22))   ;; Recipient cannot withdraw before unlock
+(define-constant ERR-WITHDRAWAL-NOT-ALLOWED (err u23))      ;; Withdrawal not allowed for this vault
+(define-constant ERR-EMERGENCY-WITHDRAWAL-DISABLED (err u24)) ;; Emergency withdrawal disabled
+
 ;; ============================================
 ;; Constants
 ;; ============================================
