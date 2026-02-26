@@ -153,6 +153,17 @@
   )
 )
 
+;; Private: count user's existing vaults
+;; Returns the number of vault IDs associated with the user
+(define-private (count-user-vaults (user principal))
+  (let ((user-vault-record (map-get? user-vaults { user: user })))
+    (match user-vault-record
+      record (len (get vault-ids record))
+      u0
+    )
+  )
+)
+
 ;; Private: validate withdrawal recipient before processing
 ;; Returns true on success, false if there was no active delegation or any error.
 ;; Graceful — a failed revocation must never block withdrawal.
