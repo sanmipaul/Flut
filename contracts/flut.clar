@@ -45,6 +45,24 @@
   { created-at: uint }
 )
 
+;; Track withdrawal history and metadata
+(define-map withdrawal-history
+  { vault-id: uint }
+  {
+    withdrawal-time: uint,
+    withdrawal-block: uint,
+    amount-withdrawn: uint,
+    recipient: principal,
+    was-emergency: bool
+  }
+)
+
+;; Track last withdrawal attempt for security auditing
+(define-map withdrawal-attempts
+  { vault-id: uint }
+  { last-attempt-block: uint }
+)
+
 ;; Error codes
 (define-constant ERR-VAULT-NOT-FOUND (err u1))
 (define-constant ERR-UNAUTHORIZED (err u2))
