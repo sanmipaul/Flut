@@ -640,6 +640,30 @@
   (var-get penalty-destination)
 )
 
+;; ============================================
+;; Read-Only Functions - Operation Limits
+;; ============================================
+
+;; Get maximum vaults allowed per user
+(define-read-only (get-max-vaults-per-user)
+  MAX_VAULTS_PER_USER
+)
+
+;; Get minimum blocks between deposits (rate limit)
+(define-read-only (get-min-blocks-between-deposits)
+  MIN_BLOCKS_BETWEEN_DEPOSITS
+)
+
+;; Get maximum deposit amount per transaction
+(define-read-only (get-max-deposit-amount)
+  MAX_DEPOSIT_AMOUNT
+)
+
+;; Get maximum total vault amount
+(define-read-only (get-max-vault-total-amount)
+  MAX_VAULT_TOTAL_AMOUNT
+)
+
 ;; Calculate penalty for a given amount
 (define-read-only (get-penalty-amount (vault-id uint))
   (let
