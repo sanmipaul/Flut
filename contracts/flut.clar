@@ -60,6 +60,13 @@
 
 ;; Private: validate beneficiary address
 ;; Ensures beneficiary is a valid address and not the contract itself
+;; 
+;; This helper function performs core validation checks:
+;; 1. Ensures beneficiary is not the contract address
+;; 2. Ensures beneficiary is not the null address
+;;
+;; @param beneficiary - Principal address to validate
+;; @return true if valid, false otherwise
 (define-private (is-valid-beneficiary (beneficiary principal))
   (and
     (not (is-eq beneficiary (as-contract tx-sender)))
