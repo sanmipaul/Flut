@@ -272,6 +272,10 @@
   )
 )
 
+;; ============================================
+;; Read-Only Functions - Vault Queries
+;; ============================================
+
 ;; Get vault details
 (define-read-only (get-vault (vault-id uint))
   (map-get? vaults { vault-id: vault-id })
