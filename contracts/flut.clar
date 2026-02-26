@@ -174,6 +174,10 @@
 
 ;; Private: count user's existing vaults
 ;; Returns the number of vault IDs associated with the user
+;; 
+;; This function counts vaults for a user to enforce deposit/creation limits
+;; @param user - Principal address of user to count vaults for
+;; @return uint - Number of vaults owned by user
 (define-private (count-user-vaults (user principal))
   (let ((user-vault-record (map-get? user-vaults { user: user })))
     (match user-vault-record
@@ -183,10 +187,13 @@
   )
 )
 
-)
-
 ;; Private: validate deposit amount against limits
 ;; Checks both single deposit and total vault limits
+;; Ensures deposits don't exceed maximum transaction size or vault total
+;; 
+;; @param current-vault-amount - Current amount in vault before deposit
+;; @param deposit-amount - Amount being deposited in this transaction
+;; @return bool - true if within limits, false otherwise
 (define-private (is-deposit-within-limits (current-vault-amount uint) (deposit-amount uint))
   (and
     (<= deposit-amount MAX_DEPOSIT_AMOUNT)
@@ -194,10 +201,12 @@
   )
 )
 
-)
-
 ;; Private: check if deposit cooldown period has passed
 ;; Returns true if enough blocks have passed since last deposit
+;; Implements rate limiting to prevent deposit spam
+;;
+;; @param vault-id - ID of vault to check cooldown for  
+;; @return bool - true if cooldown satisfied, false if rate limited
 (define-private (is-deposit-cooldown-satisfied (vault-id uint))
   (let ((last-deposit (map-get? vault-last-deposit-block { vault-id: vault-id })))
     (match last-deposit
