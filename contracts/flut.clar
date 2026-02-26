@@ -384,6 +384,11 @@
   (var-get vault-counter)
 )
 
+;; Get the number of vaults created by a user
+(define-read-only (get-user-vault-count (user principal))
+  (count-user-vaults user)
+)
+
 ;; Check if vault is unlocked
 (define-read-only (is-vault-unlocked (vault-id uint))
   (let
