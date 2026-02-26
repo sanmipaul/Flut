@@ -682,13 +682,23 @@
      (penalty-amount (calculate-penalty (get amount vault)))
      (user-amount (- (get amount vault) penalty-amount))
      (recipient (get-withdrawal-recipient vault))
+     (vault-amount (get amount vault))
     )
     
-    ;; Verify caller is vault creator
-    (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
+    ;; Verify caller is authorized to withdraw (vault creator)
+    (asserts! (is-authorized-withdrawer (get creator vault) tx-sender) ERR-UNAUTHORIZED)
     
     ;; Verify vault hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+    
+    ;; Validate withdrawal amount is valid
+    (asserts! (is-valid-withdrawal-amount vault-amount u0) ERR-INVALID-WITHDRAWAL-AMOUNT)
+    
+    ;; Verify sufficient balance
+    (asserts! (> vault-amount u0) ERR-INSUFFICIENT-BALANCE)
+    
+    ;; Verify recipient is valid
+    (asserts! (is-valid-beneficiary recipient) ERR-RECIPIENT-CANNOT-WITHDRAW)
 
     ;; Revoke stacking delegation before transferring funds out
     (if (get stacking-enabled vault)
@@ -702,8 +712,36 @@
     ;; Transfer penalty to destination
     (try! (as-contract (stx-transfer? penalty-amount tx-sender (var-get penalty-destination))))
     
-    ;; Emit event for indexing
-    (print { event: "emergency-withdrawal", vault-id: vault-id, amount: user-amount, penalty: penalty-amount, recipient: recipient })
+    ;; Record withdrawal attempt for auditing
+    (map-set withdrawal-attempts
+      { vault-id: vault-id }
+      { last-attempt-block: block-height }
+    )
+    
+    ;; Record withdrawal history
+    (map-set withdrawal-history
+      { vault-id: vault-id }
+      {
+        withdrawal-time: block-height,
+        withdrawal-block: block-height,
+        amount-withdrawn: user-amount,
+        recipient: recipient,
+        was-emergency: true
+      }
+    )
+    
+    ;; Emit detailed event for indexing and auditing
+    (print { 
+      event: "emergency-withdrawal", 
+      vault-id: vault-id,
+      creator: (get creator vault),
+      amount: user-amount, 
+      penalty: penalty-amount, 
+      recipient: recipient,
+      penalty-destination: (var-get penalty-destination),
+      block-height: block-height,
+      timestamp: block-timestamp
+    })
     
     ;; Mark as withdrawn
     (map-set vaults
