@@ -164,6 +164,17 @@
   )
 )
 
+)
+
+;; Private: validate deposit amount against limits
+;; Checks both single deposit and total vault limits
+(define-private (is-deposit-within-limits (current-vault-amount uint) (deposit-amount uint))
+  (and
+    (<= deposit-amount MAX_DEPOSIT_AMOUNT)
+    (<= (+ current-vault-amount deposit-amount) MAX_VAULT_TOTAL_AMOUNT)
+  )
+)
+
 ;; Private: validate withdrawal recipient before processing
 ;; Returns true on success, false if there was no active delegation or any error.
 ;; Graceful — a failed revocation must never block withdrawal.
