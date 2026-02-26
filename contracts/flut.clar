@@ -447,6 +447,12 @@
 
     ;; Verify vault hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+    
+    ;; Enforce deposit cooldown period for rate limiting
+    (asserts! (is-deposit-cooldown-satisfied vault-id) ERR-DEPOSIT-COOLDOWN-ACTIVE)
+    
+    ;; Validate deposit amount is within limits
+    (asserts! (is-deposit-within-limits (get amount vault) amount) ERR-DEPOSIT-AMOUNT-EXCEEDED)
 
     ;; Transfer STX to contract
     (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
@@ -455,6 +461,12 @@
     (map-set vaults
       { vault-id: vault-id }
       (merge vault { amount: new-total })
+    )
+    
+    ;; Update last deposit block for rate limiting
+    (map-set vault-last-deposit-block
+      { vault-id: vault-id }
+      { block-height: block-height }
     )
 
     ;; Re-delegate with the updated total when stacking is active
@@ -465,6 +477,9 @@
       )
       false
     )
+    
+    ;; Emit deposit event
+    (print { event: "vault-deposit", vault-id: vault-id, depositor: tx-sender, amount: amount, new-total: new-total })
 
     (ok true)
   )
