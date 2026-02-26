@@ -91,7 +91,20 @@
   )
 )
 
-;; Private: revoke an existing stacking delegation via pox-4.
+;; Private: get the withdrawal recipient for a vault
+;; Returns beneficiary if set and valid, otherwise returns vault creator
+(define-private (get-withdrawal-recipient (vault principal))
+  (match (get beneficiary vault)
+    beneficiary-opt 
+      (if (is-valid-beneficiary beneficiary-opt)
+        beneficiary-opt
+        (get creator vault)
+      )
+    (get creator vault)
+  )
+)
+
+;; Private: validate withdrawal recipient before processing
 ;; Returns true on success, false if there was no active delegation or any error.
 ;; Graceful — a failed revocation must never block withdrawal.
 (define-private (try-revoke-stacking)
