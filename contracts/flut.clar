@@ -63,6 +63,12 @@
 (define-constant ERR-INVALID-BENEFICIARY (err u14))        ;; Beneficiary address is invalid
 (define-constant ERR-BENEFICIARY-SAME-AS-CREATOR (err u15)) ;; Cannot set creator as beneficiary
 
+;; Operation limit errors
+(define-constant ERR-TOO-MANY-VAULTS (err u16))             ;; User has reached max vault limit
+(define-constant ERR-DEPOSIT-COOLDOWN-ACTIVE (err u17))     ;; Must wait before next deposit
+(define-constant ERR-DEPOSIT-AMOUNT-EXCEEDED (err u18))     ;; Single deposit amount too large
+(define-constant ERR-VAULT-AMOUNT-EXCEEDED (err u19))       ;; Total vault amount exceeds limit
+
 ;; ============================================
 ;; Constants
 ;; ============================================
