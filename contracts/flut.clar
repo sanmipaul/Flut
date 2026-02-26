@@ -135,6 +135,10 @@
   )
 )
 
+;; ============================================
+;; Public Functions - Vault Management
+;; ============================================
+
 ;; Create a new vault.
 ;; enable-stacking: opt-in to PoX delegation while funds are locked.
 ;; stacking-pool: pool principal to delegate to (required when enable-stacking is true).
