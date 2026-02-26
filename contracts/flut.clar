@@ -58,6 +58,15 @@
 (define-constant PENALTY_RATE u10)
 (define-data-var penalty-destination principal tx-sender)
 
+;; Private: validate beneficiary address
+;; Ensures beneficiary is a valid address and not the contract itself
+(define-private (is-valid-beneficiary (beneficiary principal))
+  (and
+    (not (is-eq beneficiary (as-contract tx-sender)))
+    (not (is-eq beneficiary 'ST000000000000000000000000000000000000000000000000000000000000))
+  )
+)
+
 ;; Private: attempt to delegate vault STX to a stacking pool via pox-4.
 ;; Returns true on success, false on any delegation error (graceful fallback —
 ;; a delegation failure must never block vault creation or deposit).
