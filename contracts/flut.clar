@@ -374,16 +374,26 @@
   (let
     ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
      (recipient (get-withdrawal-recipient vault))
+     (vault-amount (get amount vault))
     )
     
-    ;; Verify caller is vault creator
-    (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
+    ;; Verify caller is authorized to withdraw (vault creator)
+    (asserts! (is-authorized-withdrawer (get creator vault) tx-sender) ERR-UNAUTHORIZED)
     
     ;; Verify vault is unlocked
     (asserts! (>= block-height (get unlock-height vault)) ERR-NOT-UNLOCKED)
     
     ;; Verify hasn't been withdrawn
     (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+    
+    ;; Validate withdrawal amount is valid
+    (asserts! (is-valid-withdrawal-amount vault-amount u0) ERR-INVALID-WITHDRAWAL-AMOUNT)
+    
+    ;; Verify sufficient balance
+    (asserts! (> vault-amount u0) ERR-INSUFFICIENT-BALANCE)
+    
+    ;; Verify recipient is valid
+    (asserts! (is-valid-beneficiary recipient) ERR-RECIPIENT-CANNOT-WITHDRAW)
 
     ;; Revoke stacking delegation before transferring funds out
     (if (get stacking-enabled vault)
@@ -392,7 +402,25 @@
     )
 
     ;; Transfer funds to recipient (beneficiary or creator)
-    (try! (as-contract (stx-transfer? (get amount vault) tx-sender recipient)))
+    (try! (as-contract (stx-transfer? vault-amount tx-sender recipient)))
+    
+    ;; Record withdrawal attempt for auditing
+    (map-set withdrawal-attempts
+      { vault-id: vault-id }
+      { last-attempt-block: block-height }
+    )
+    
+    ;; Record withdrawal history
+    (map-set withdrawal-history
+      { vault-id: vault-id }
+      {
+        withdrawal-time: block-height,
+        withdrawal-block: block-height,
+        amount-withdrawn: vault-amount,
+        recipient: recipient,
+        was-emergency: false
+      }
+    )
     
     ;; Mark as withdrawn
     (map-set vaults
@@ -400,8 +428,16 @@
       (merge vault { is-withdrawn: true })
     )
     
-    ;; Emit withdrawal event
-    (print { event: "vault-withdrawn", vault-id: vault-id, recipient: recipient, amount: (get amount vault) })
+    ;; Emit detailed withdrawal event
+    (print { 
+      event: "vault-withdrawn", 
+      vault-id: vault-id, 
+      creator: (get creator vault),
+      recipient: recipient, 
+      amount: vault-amount,
+      block-height: block-height,
+      timestamp: block-timestamp
+    })
     
     (ok true)
   )
