@@ -186,6 +186,22 @@
 )
 
 ;; Set beneficiary for a vault (only owner can call)
+;; 
+;; This function allows the vault creator to designate a beneficiary address
+;; that will receive the vault funds upon withdrawal instead of the creator.
+;;
+;; @param vault-id - ID of the vault to update
+;; @param beneficiary - Principal address to receive vault funds on withdrawal
+;;
+;; @return (ok true) on successful beneficiary set, or error code:
+;;   - ERR-VAULT-NOT-FOUND: Vault with given ID does not exist
+;;   - ERR-UNAUTHORIZED: Caller is not the vault creator
+;;   - ERR-ALREADY-WITHDRAWN: Vault has already been withdrawn
+;;   - ERR-INVALID-BENEFICIARY: Beneficiary address is invalid (e.g., contract itself)
+;;   - ERR-BENEFICIARY-SAME-AS-CREATOR: Beneficiary cannot be the vault creator
+;;
+;; Events emitted:
+;;   - beneficiary-set: Logs vault-id, new beneficiary, and caller
 (define-public (set-beneficiary (vault-id uint) (beneficiary principal))
   (let
     ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND)))
