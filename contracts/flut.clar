@@ -413,16 +413,28 @@
 )
 
 ;; Check if vault creation is allowed for a user
+;; Returns true if user hasn't reached max vaults limit
+;;
+;; @param user - Principal address to check
+;; @return bool - true if user can create another vault
 (define-read-only (can-create-vault (user principal))
   (< (count-user-vaults user) MAX_VAULTS_PER_USER)
 )
 
 ;; Check if deposit is allowed for a vault (cooldown satisfied)
+;; Returns true if enough blocks have passed since last deposit
+;;
+;; @param vault-id - ID of vault to check
+;; @return bool - true if deposit allowed (no rate limit)
 (define-read-only (can-deposit-to-vault (vault-id uint))
   (is-deposit-cooldown-satisfied vault-id)
 )
 
 ;; Get remaining blocks before next deposit is allowed
+;; Useful for UI to show countdown timer to users
+;;
+;; @param vault-id - ID of vault to check
+;; @return uint - Number of blocks to wait (0 if ready)
 (define-read-only (get-deposit-cooldown-blocks (vault-id uint))
   (let ((last-deposit (map-get? vault-last-deposit-block { vault-id: vault-id })))
     (match last-deposit
