@@ -51,6 +51,10 @@
 (define-constant ERR-INVALID-BENEFICIARY (err u14))        ;; Beneficiary address is invalid
 (define-constant ERR-BENEFICIARY-SAME-AS-CREATOR (err u15)) ;; Cannot set creator as beneficiary
 
+;; ============================================
+;; Constants
+;; ============================================
+
 ;; Basis points for share calculations (10000 = 100%)
 (define-constant BASIS_POINTS u10000)
 
@@ -59,7 +63,16 @@
 
 ;; Penalty configuration
 (define-constant PENALTY_RATE u10)
+
+;; ============================================
+;; Variables
+;; ============================================
+
 (define-data-var penalty-destination principal tx-sender)
+
+;; ============================================
+;; Helper Functions
+;; ============================================
 
 ;; Private: validate beneficiary address
 ;; Ensures beneficiary is a valid address and not the contract itself
