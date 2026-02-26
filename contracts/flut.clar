@@ -45,6 +45,8 @@
 (define-constant ERR-INVALID-SHARES (err u11))
 (define-constant ERR-TOO-MANY-BENEFICIARIES (err u12))
 (define-constant ERR-BENEFICIARY-EXISTS (err u13))
+(define-constant ERR-INVALID-BENEFICIARY (err u14))
+(define-constant ERR-BENEFICIARY-SAME-AS-CREATOR (err u15))
 
 ;; Basis points for share calculations (10000 = 100%)
 (define-constant BASIS_POINTS u10000)
@@ -423,4 +425,9 @@
   (fold + (map (lambda (beneficiary) 
                  (default-to u0 (get share (map-get? vault-beneficiaries { vault-id: vault-id, address: beneficiary }))))
                beneficiaries) u0)
+)
+
+;; Private helper: calculate amount for a given share
+(define-private (calculate-share-amount (total-amount uint) (share uint))
+  (/ (* total-amount share) BASIS_POINTS)
 )
