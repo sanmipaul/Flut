@@ -262,6 +262,16 @@
   )
 )
 
+;; Private: check if caller is authorized to initiate withdrawal
+;; Only the vault creator can withdraw (they specify where funds go)
+;;
+;; @param creator - Original vault creator principal
+;; @param caller - Principal attempting to withdraw
+;; @return bool - true if caller is authorized
+(define-private (is-authorized-withdrawer (creator principal) (caller principal))
+  (is-eq caller creator)
+)
+
 ;; Private: validate withdrawal recipient
 ;; Returns true on success, false if there was no active delegation or any error.
 ;; Graceful — a failed revocation must never block withdrawal.
