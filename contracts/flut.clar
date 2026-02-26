@@ -33,6 +33,18 @@
   { vault-ids: (list 100 uint) }
 )
 
+;; Track last deposit block for each vault (rate limiting)
+(define-map vault-last-deposit-block
+  { vault-id: uint }
+  { block-height: uint }
+)
+
+;; Track vault creation time for rate limiting
+(define-map vault-creation-time
+  { vault-id: uint }
+  { created-at: uint }
+)
+
 ;; Error codes
 (define-constant ERR-VAULT-NOT-FOUND (err u1))
 (define-constant ERR-UNAUTHORIZED (err u2))
