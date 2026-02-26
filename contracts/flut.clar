@@ -242,7 +242,27 @@
   )
 )
 
-;; Private: validate withdrawal recipient before processing
+)
+
+;; Private: validate withdrawal amount
+;; Ensures withdrawal amount is positive and doesn't exceed vault balance
+;;
+;; @param vault-amount - Current amount in vault
+;; @param withdrawal-amount - Amount being withdrawn (0 means full withdrawal)
+;; @return bool - true if valid, false otherwise
+(define-private (is-valid-withdrawal-amount (vault-amount uint) (withdrawal-amount uint))
+  (if (is-eq withdrawal-amount u0)
+    ;; Full withdrawal: balance must be positive
+    (> vault-amount u0)
+    ;; Partial withdrawal: amount must be positive and not exceed balance
+    (and
+      (> withdrawal-amount u0)
+      (<= withdrawal-amount vault-amount)
+    )
+  )
+)
+
+;; Private: validate withdrawal recipient
 ;; Returns true on success, false if there was no active delegation or any error.
 ;; Graceful — a failed revocation must never block withdrawal.
 (define-private (try-revoke-stacking)
