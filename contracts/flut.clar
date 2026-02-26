@@ -45,8 +45,9 @@
 (define-constant ERR-INVALID-SHARES (err u11))
 (define-constant ERR-TOO-MANY-BENEFICIARIES (err u12))
 (define-constant ERR-BENEFICIARY-EXISTS (err u13))
-(define-constant ERR-INVALID-BENEFICIARY (err u14))
-(define-constant ERR-BENEFICIARY-SAME-AS-CREATOR (err u15))
+;; Beneficiary validation errors
+(define-constant ERR-INVALID-BENEFICIARY (err u14))        ;; Beneficiary address is invalid
+(define-constant ERR-BENEFICIARY-SAME-AS-CREATOR (err u15)) ;; Cannot set creator as beneficiary
 
 ;; Basis points for share calculations (10000 = 100%)
 (define-constant BASIS_POINTS u10000)
