@@ -179,6 +179,20 @@ export function isSingleSigAddress(address: string): boolean {
   return prefix === 'SP' || prefix === 'ST';
 }
 
+/**
+ * Returns true when both addresses belong to the same Stacks network.
+ * Useful for preventing cross-network vault operations (e.g. a mainnet
+ * creator setting a testnet beneficiary).
+ *
+ * Returns false when either address is invalid or unrecognised.
+ */
+export function areAddressesOnSameNetwork(a: string, b: string): boolean {
+  const netA = getAddressNetwork(a);
+  const netB = getAddressNetwork(b);
+  if (!netA || !netB) return false;
+  return netA === netB;
+}
+
 /** Result returned by the composite `validateAddress` function */
 export interface AddressValidationResult {
   /** Whether the address passes all validation rules */
