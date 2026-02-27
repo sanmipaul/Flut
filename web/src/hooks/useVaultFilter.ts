@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   VaultFilterState,
   VaultStatusFilter,
@@ -8,6 +8,18 @@ import {
   DEFAULT_FILTER_STATE,
 } from '../types/VaultFilterTypes';
 import { useDebounce } from './useDebounce';
+
+const STORAGE_KEY = 'flut-vault-filter';
+
+function loadPersistedFilters(): VaultFilterState {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (raw) return { ...DEFAULT_FILTER_STATE, ...JSON.parse(raw) };
+  } catch {
+    // ignore parse / access errors
+  }
+  return DEFAULT_FILTER_STATE;
+}
 
 /** Minimal vault shape required by the filter hook */
 export interface FilterableVault {
@@ -46,8 +58,18 @@ export interface UseVaultFilterReturn<T extends FilterableVault> {
 export function useVaultFilter<T extends FilterableVault>(
   vaults: T[]
 ): UseVaultFilterReturn<T> {
-  const [filterState, setFilterState] = useState<VaultFilterState>(DEFAULT_FILTER_STATE);
+  const [filterState, setFilterState] = useState<VaultFilterState>(loadPersistedFilters);
   const debouncedQuery = useDebounce(filterState.searchQuery, 200);
+
+  // Persist filter state (excluding search query) to sessionStorage
+  useEffect(() => {
+    try {
+      const { searchQuery, ...persistable } = filterState;
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(persistable));
+    } catch {
+      // ignore
+    }
+  }, [filterState]);
 
   const filteredVaults = useMemo(() => {
     let result = [...vaults];
