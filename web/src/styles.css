@@ -846,6 +846,40 @@ button:disabled {
   z-index: 999;
 }
 
+/* ============================================================
+   Dark mode overrides for specific components
+   ============================================================ */
+
+[data-theme='dark'] .vault-actions {
+  background-color: rgba(45, 214, 92, 0.06);
+  border-color: rgba(45, 214, 92, 0.25);
+}
+
+[data-theme='dark'] .vault-actions.emergency-section {
+  background-color: rgba(240, 100, 116, 0.06);
+  border-color: rgba(240, 100, 116, 0.25);
+}
+
+[data-theme='dark'] .beneficiary-info,
+[data-theme='dark'] .beneficiary-setup {
+  background-color: rgba(123, 111, 255, 0.1);
+  border-left-color: var(--primary-color);
+}
+
+[data-theme='dark'] .error-message,
+[data-theme='dark'] .error-banner {
+  background-color: rgba(240, 100, 116, 0.1);
+  border-color: var(--error-color);
+}
+
+[data-theme='dark'] .penalty-calculation {
+  background-color: rgba(30, 30, 46, 0.8);
+}
+
+[data-theme='dark'] .confirmation-checkbox {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .app-main {
