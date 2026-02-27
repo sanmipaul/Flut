@@ -553,6 +553,56 @@ body {
   font-size: 0.85rem;
 }
 
+/* Address input validation states */
+.address-input-wrapper {
+  position: relative;
+}
+
+.address-input-wrapper input {
+  padding-right: 2.5rem;
+}
+
+.address-input-valid {
+  border-color: var(--success-color) !important;
+  background-color: rgba(28, 184, 69, 0.03);
+}
+
+.address-input-invalid {
+  border-color: var(--error-color) !important;
+  background-color: rgba(220, 53, 69, 0.03);
+}
+
+.address-input-valid:focus {
+  box-shadow: 0 0 0 3px rgba(28, 184, 69, 0.15) !important;
+}
+
+.address-input-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
+}
+
+.address-validation-icon {
+  position: absolute;
+  right: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.address-error-text {
+  display: block;
+  margin-top: var(--spacing-xs);
+  color: var(--error-color);
+  font-size: 0.82rem;
+}
+
+.address-help-text {
+  display: block;
+  margin-top: var(--spacing-xs);
+  color: var(--text-light);
+  font-size: 0.82rem;
+}
+
 /* Buttons */
 .btn-primary,
 .btn-secondary,
