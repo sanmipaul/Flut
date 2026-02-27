@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import StxAmountInput from './StxAmountInput';
 
 interface CreateVaultModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
   onCreateVault,
 }) => {
   const [amount, setAmount] = useState<string>('');
+  const [parsedAmount, setParsedAmount] = useState<number>(NaN);
   const [lockDuration, setLockDuration] = useState<string>('');
   const [beneficiaryAddress, setBeneficiaryAddress] = useState<string>('');
   const [hasBeneficiary, setHasBeneficiary] = useState<boolean>(false);
@@ -23,10 +25,10 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
       setError('');
       setLoading(true);
 
-      const amountNum = parseFloat(amount);
+      const amountNum = isNaN(parsedAmount) ? parseFloat(amount) : parsedAmount;
       const durationNum = parseInt(lockDuration, 10);
 
-      if (!amount || amountNum <= 0) {
+      if (!amount || isNaN(amountNum) || amountNum <= 0) {
         setError('Please enter a valid amount');
         setLoading(false);
         return;
@@ -69,16 +71,14 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
         <h2>Create New Vault</h2>
 
         <div className="form-group">
-          <label htmlFor="amount">Amount (STX)</label>
-          <input
-            id="amount"
-            type="number"
+          <label htmlFor="vault-amount">Amount (STX)</label>
+          <StxAmountInput
+            id="vault-amount"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Enter amount in STX"
+            onChange={setAmount}
+            onParsed={setParsedAmount}
+            min={0.000001}
             disabled={loading}
-            step="0.01"
-            min="0"
           />
         </div>
 
