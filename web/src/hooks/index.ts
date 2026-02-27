@@ -5,6 +5,7 @@ export {
   createBeneficiaryRemovedEvent,
   createWithdrawalEvent,
   createEmergencyWithdrawalEvent,
+  MAX_HISTORY_EVENTS,
 } from './useVaultHistory';
 export type { UseVaultHistoryReturn } from './useVaultHistory';
 

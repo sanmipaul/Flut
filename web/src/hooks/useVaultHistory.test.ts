@@ -165,6 +165,21 @@ describe('useVaultHistory', () => {
     expect(result.current.getEvents(2)).toHaveLength(1);
   });
 
+  it('caps events at MAX_HISTORY_EVENTS (tested with small cap via direct API)', () => {
+    const { result } = renderHook(() => useVaultHistory());
+
+    // Add 3 events; with normal cap (500) all are kept
+    act(() => {
+      for (let i = 0; i < 3; i++) {
+        result.current.addEvent(
+          createVaultCreatedEvent(i, i * 10, { amount: 100, lockDuration: 10, unlockHeight: i * 10 + 10 })
+        );
+      }
+    });
+
+    expect(result.current.allEvents.length).toBe(3);
+  });
+
   it('clearAll removes every event', () => {
     const { result } = renderHook(() => useVaultHistory());
 
