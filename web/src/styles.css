@@ -700,6 +700,25 @@ button:disabled {
 }
 
 /* ============================================================
+   Address-with-copy layout
+   ============================================================ */
+
+.address-with-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.address-with-copy code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ============================================================
    CopyButton
    ============================================================ */
 
