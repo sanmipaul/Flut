@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
-import PenaltyWarningModal from './PenaltyWarningModal';
+import AddressInput from './AddressInput';
+import { AddressValidationResult } from '../utils/StacksAddressUtils';
 
 interface Vault {
   vaultId: number;
@@ -34,6 +35,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [newBeneficiary, setNewBeneficiary] = useState<string>('');
+  const [beneficiaryValidation, setBeneficiaryValidation] = useState<AddressValidationResult | null>(null);
   const [showBeneficiaryForm, setShowBeneficiaryForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [showPenaltyModal, setShowPenaltyModal] = useState<boolean>(false);
@@ -59,12 +61,16 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   const blocksUntilUnlock = vault ? Math.max(0, vault.unlockHeight - vault.currentBlockHeight) : 0;
   const lockedDays = vault ? Math.ceil((blocksUntilUnlock * 10) / (24 * 60 * 6)) : 0;
 
+  const handleBeneficiaryChange = (value: string, validation: AddressValidationResult) => {
+    setNewBeneficiary(value);
+    setBeneficiaryValidation(validation);
+  };
+
   const handleWithdraw = async () => {
     if (!vault) return;
     try {
       setSubmitting(true);
       await onWithdraw(vault.vaultId);
-      // Refresh vault data
       const updated = await onFetchVault(vaultId);
       setVault(updated);
     } catch (err) {
@@ -76,12 +82,17 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
 
   const handleSetBeneficiary = async () => {
     if (!vault || !newBeneficiary.trim()) return;
+    if (beneficiaryValidation && !beneficiaryValidation.isValid) {
+      setError('Please enter a valid Stacks address for the beneficiary');
+      return;
+    }
     try {
       setSubmitting(true);
-      await onSetBeneficiary(vault.vaultId, newBeneficiary);
+      const addressToSet = beneficiaryValidation?.normalised || newBeneficiary.trim();
+      await onSetBeneficiary(vault.vaultId, addressToSet);
       setNewBeneficiary('');
+      setBeneficiaryValidation(null);
       setShowBeneficiaryForm(false);
-      // Refresh vault data
       const updated = await onFetchVault(vaultId);
       setVault(updated);
     } catch (err) {
@@ -91,11 +102,16 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
     }
   };
 
+  const canSetBeneficiary =
+    newBeneficiary.trim() !== '' &&
+    beneficiaryValidation !== null &&
+    beneficiaryValidation.isValid;
+
   if (loading) {
     return <div className="vault-detail loading">Loading vault details...</div>;
   }
 
-  if (error) {
+  if (error && !vault) {
     return <div className="vault-detail error">Error: {error}</div>;
   }
 
@@ -171,31 +187,37 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
               Set Beneficiary
             </button>
           ) : (
-            <div className="beneficiary-form">
-              <input
-                type="text"
+            <div className="beneficiary-form-stack">
+              <AddressInput
+                id="new-beneficiary"
                 value={newBeneficiary}
-                onChange={(e) => setNewBeneficiary(e.target.value)}
-                placeholder="SP... or ST..."
+                onChange={handleBeneficiaryChange}
+                label="Beneficiary Address"
+                helpText="Enter a Stacks mainnet (SP) or testnet (ST) address"
                 disabled={submitting}
+                required
               />
-              <button
-                className="btn-primary"
-                onClick={handleSetBeneficiary}
-                disabled={submitting || !newBeneficiary.trim()}
-              >
-                {submitting ? 'Setting...' : 'Set'}
-              </button>
-              <button
-                className="btn-secondary"
-                onClick={() => {
-                  setShowBeneficiaryForm(false);
-                  setNewBeneficiary('');
-                }}
-                disabled={submitting}
-              >
-                Cancel
-              </button>
+              <div className="beneficiary-form-actions">
+                <button
+                  className="btn-primary"
+                  onClick={handleSetBeneficiary}
+                  disabled={submitting || !canSetBeneficiary}
+                  title={!canSetBeneficiary ? 'Enter a valid Stacks address' : undefined}
+                >
+                  {submitting ? 'Setting...' : 'Set'}
+                </button>
+                <button
+                  className="btn-secondary"
+                  onClick={() => {
+                    setShowBeneficiaryForm(false);
+                    setNewBeneficiary('');
+                    setBeneficiaryValidation(null);
+                  }}
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
         </section>
@@ -250,7 +272,6 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
                 await onEmergencyWithdraw(id);
               }
               setShowPenaltyModal(false);
-              // Refresh vault data
               const updated = await onFetchVault(vaultId);
               setVault(updated);
             } catch (err) {
