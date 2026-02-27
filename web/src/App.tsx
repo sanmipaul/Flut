@@ -172,6 +172,20 @@ export const App: React.FC = () => {
                     />
                   </span>
                   <span className="vault-amount">{vault.amount} STX</span>
+                  {vault.creator && (
+                    <span className="vault-creator address-with-copy">
+                      <code title={vault.creator}>
+                        {vault.creator.length > 12
+                          ? `${vault.creator.slice(0, 6)}…${vault.creator.slice(-4)}`
+                          : vault.creator}
+                      </code>
+                      <CopyButton
+                        text={vault.creator}
+                        label="Copy creator address"
+                        size="sm"
+                      />
+                    </span>
+                  )}
                   {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
                   {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
                 </li>
