@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
+import VaultSearchBar from './components/VaultSearchBar';
+import { useVaultFilter } from './hooks/useVaultFilter';
 
 interface Vault {
   vaultId: number;
@@ -12,9 +14,11 @@ interface Vault {
   isWithdrawn: boolean;
   beneficiary?: string;
   currentBlockHeight: number;
+  stackingEnabled?: boolean;
+  stackingPool?: string;
 }
 
-export const App: React.FC = () => {
+const AppInner: React.FC = () => {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -22,37 +26,47 @@ export const App: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [userAddress, setUserAddress] = useState<string | null>(null);
 
+  const {
+    filteredVaults,
+    filterState,
+    resultCount,
+    hasActiveFilters,
+    setSearchQuery,
+    setStatusFilter,
+    setLockFilter,
+    setSortField,
+    toggleSortDirection,
+    clearFilters,
+  } = useVaultFilter(vaults);
+
   useEffect(() => {
-    // Initialize user connection
     initializeUser();
   }, []);
 
   const initializeUser = async () => {
     try {
-      // This would connect to Stacks wallet
-      // For now, this is a placeholder
       console.log('Initializing user connection...');
     } catch (err) {
       console.error('Failed to initialize user:', err);
     }
   };
 
-  const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string) => {
+  const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string, enableStacking?: boolean, stackingPool?: string) => {
     try {
       setLoading(true);
       setError('');
 
-      // Call smart contract create-vault function
-      // This is a placeholder that would call the actual blockchain function
       const newVault: Vault = {
         vaultId: vaults.length,
         creator: userAddress || 'unknown',
         amount,
-        unlockHeight: 0, // Would be set by contract
+        unlockHeight: 0,
         createdAt: 0,
         isWithdrawn: false,
         beneficiary,
         currentBlockHeight: 0,
+        stackingEnabled: enableStacking ?? false,
+        stackingPool,
       };
 
       setVaults([...vaults, newVault]);
@@ -68,14 +82,8 @@ export const App: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-
-      // Call smart contract withdraw function
       console.log('Withdrawing from vault:', vaultId);
-
-      const updatedVaults = vaults.map((v) =>
-        v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
-      );
-      setVaults(updatedVaults);
+      setVaults((prev) => prev.map((v) => v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to withdraw');
     } finally {
@@ -87,14 +95,8 @@ export const App: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-
-      // Call smart contract set-beneficiary function
       console.log(`Setting beneficiary for vault ${vaultId}:`, beneficiary);
-
-      const updatedVaults = vaults.map((v) =>
-        v.vaultId === vaultId ? { ...v, beneficiary } : v
-      );
-      setVaults(updatedVaults);
+      setVaults((prev) => prev.map((v) => v.vaultId === vaultId ? { ...v, beneficiary } : v));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to set beneficiary');
     } finally {
@@ -106,14 +108,8 @@ export const App: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-
-      // Call smart contract emergency-withdraw function
       console.log(`Emergency withdrawing from vault ${vaultId}`);
-
-      const updatedVaults = vaults.map((v) =>
-        v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
-      );
-      setVaults(updatedVaults);
+      setVaults((prev) => prev.map((v) => v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process emergency withdrawal');
     } finally {
@@ -123,19 +119,24 @@ export const App: React.FC = () => {
 
   const handleFetchVault = async (vaultId: number): Promise<Vault> => {
     const vault = vaults.find((v) => v.vaultId === vaultId);
-    if (!vault) {
-      throw new Error('Vault not found');
-    }
+    if (!vault) throw new Error('Vault not found');
     return vault;
   };
 
-  const selectedVault = selectedVaultId !== null ? vaults.find((v) => v.vaultId === selectedVaultId) : null;
+  const selectedVault = selectedVaultId !== null
+    ? vaults.find((v) => v.vaultId === selectedVaultId)
+    : null;
 
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Flut — STX Savings Vault</h1>
-        <p>Lock your STX, designate beneficiaries, withdraw when unlocked</p>
+        <div className="app-header-toggle">
+          <ThemeToggle />
+        </div>
+        <div className="app-header-inner">
+          <h1>Flut — STX Savings Vault</h1>
+          <p>Lock your STX, designate beneficiaries, withdraw when unlocked</p>
+        </div>
       </header>
 
       <main className="app-main">
@@ -151,17 +152,58 @@ export const App: React.FC = () => {
             </button>
           </div>
 
+          {/* Live region announces filter result count to screen readers */}
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+          >
+            {hasActiveFilters
+              ? `${resultCount} of ${vaults.length} vaults shown`
+              : ''}
+          </div>
+
+          {vaults.length > 0 && (
+            <VaultSearchBar
+              filterState={filterState}
+              resultCount={resultCount}
+              totalCount={vaults.length}
+              hasActiveFilters={hasActiveFilters}
+              onSearchChange={setSearchQuery}
+              onStatusFilterChange={setStatusFilter}
+              onLockFilterChange={setLockFilter}
+              onSortFieldChange={setSortField}
+              onToggleSortDirection={toggleSortDirection}
+              onClearFilters={clearFilters}
+            />
+          )}
+
           {vaults.length === 0 ? (
             <div className="empty-state">
               <p>No vaults yet. Create one to get started!</p>
             </div>
+          ) : filteredVaults.length === 0 ? (
+            <div className="vault-list-empty">
+              <span className="empty-icon" aria-hidden="true">🔍</span>
+              <p>No vaults match your filters.</p>
+              {hasActiveFilters && (
+                <button className="clear-filters-btn" onClick={clearFilters} type="button">
+                  Clear filters
+                </button>
+              )}
+            </div>
           ) : (
             <ul className="vault-list">
-              {vaults.map((vault) => (
+              {filteredVaults.map((vault) => (
                 <li
                   key={vault.vaultId}
                   className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''}`}
                   onClick={() => setSelectedVaultId(vault.vaultId)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Vault ${vault.vaultId}, ${vault.amount} STX${vault.isWithdrawn ? ', withdrawn' : ''}`}
+                  onKeyDown={(e) => e.key === 'Enter' && setSelectedVaultId(vault.vaultId)}
                 >
                   <span className="vault-id">
                     Vault #{vault.vaultId}
@@ -188,6 +230,9 @@ export const App: React.FC = () => {
                   )}
                   {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
                   {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
+                  {!vault.isWithdrawn && vault.currentBlockHeight >= vault.unlockHeight && (
+                    <span className="badge-unlocked">Unlocked</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -223,5 +268,11 @@ export const App: React.FC = () => {
     </div>
   );
 };
+
+export const App: React.FC = () => (
+  <ThemeProvider>
+    <AppInner />
+  </ThemeProvider>
+);
 
 export default App;
