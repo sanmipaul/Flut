@@ -15,6 +15,7 @@ import {
   formatMicroStx,
   formatStxWhole,
   formatStxPenalty,
+  formatStxDiff,
   parseStxInput,
   type FormatStxOptions,
 } from '../utils/formatStx';
@@ -51,6 +52,12 @@ export interface UseStxFormatReturn {
    */
   fmtPenalty: (penaltyStx: number) => string;
 
+  /**
+   * Signed difference display (+/-) for history and comparison views.
+   * @example fmtDiff(500) → "+500 STX"  fmtDiff(-100) → "−100 STX"
+   */
+  fmtDiff: (diffStx: number, decimals?: number) => string;
+
   /** Parse a user-typed string into STX number */
   parse: (raw: string) => number;
 
@@ -81,6 +88,7 @@ export function useStxFormat(): UseStxFormatReturn {
       fmtMicro: (uStx, showSymbol = true) => formatMicroStx(uStx, showSymbol),
       fmtWhole: (amount, showSymbol = true) => formatStxWhole(amount, showSymbol),
       fmtPenalty: (penaltyStx) => formatStxPenalty(penaltyStx),
+      fmtDiff: (diffStx, decimals) => formatStxDiff(diffStx, decimals),
       parse: parseStxInput,
       toMicro: stxToMicroStx,
       fromMicro: microStxToStx,

@@ -4,6 +4,7 @@ import {
   formatMicroStx,
   formatStxWhole,
   formatStxPenalty,
+  formatStxDiff,
   parseStxInput,
 } from './formatStx';
 
@@ -103,6 +104,30 @@ describe('formatStxPenalty', () => {
     expect(result).toContain('50');
     expect(result).toContain('fee');
     expect(result).toContain('STX');
+  });
+});
+
+describe('formatStxDiff', () => {
+  it('prefixes positive value with +', () => {
+    const result = formatStxDiff(500);
+    expect(result).toContain('+');
+    expect(result).toContain('500');
+    expect(result).toContain('STX');
+  });
+
+  it('prefixes negative value with −', () => {
+    const result = formatStxDiff(-100);
+    expect(result).toContain('−');
+    expect(result).toContain('100');
+  });
+
+  it('formats zero without sign', () => {
+    const result = formatStxDiff(0);
+    expect(result).toBe('0 STX');
+  });
+
+  it('returns placeholder for NaN', () => {
+    expect(formatStxDiff(NaN)).toContain('—');
   });
 });
 
