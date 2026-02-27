@@ -214,6 +214,10 @@ This table mirrors the constants defined in `contracts/flut.clar` so that fronte
 can display meaningful messages when a transaction fails. When the contract returns `(err uXXX)`
 these codes correspond to the rows below.
 
+> **Tip:** the contract exposes a read-only function `get-error-description` which returns a human
+> readable string for a given numeric code. You can call this helper directly from your frontend or
+> mirror the mapping in your UI (see `web/src/utils/VaultContractAPI.ts` for an example).
+
 | Code | Constant | Meaning |
 |------|----------|---------|
 | `u1`   | `ERR-VAULT-NOT-FOUND`        | Vault does not exist |
