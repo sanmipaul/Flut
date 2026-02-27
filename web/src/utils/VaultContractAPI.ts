@@ -91,9 +91,12 @@ export class VaultContractAPI {
       args.push(`'${beneficiary}`);
     }
 
-    // This would be replaced with actual contract call
+    // TODO: replace with actual contract call (eg. stacks.js transaction)
     console.log(`Calling ${functionName} with args:`, args);
-    return 'vault-id-0'; // Placeholder
+    // Simulate failure to illustrate formatting helper
+    const simulatedErrorCode = 5;
+    console.error("Contract call failed:", formatError(simulatedErrorCode));
+    throw new Error(formatError(simulatedErrorCode));
   }
 
   /**
@@ -105,7 +108,14 @@ export class VaultContractAPI {
     const args = [`u${vaultId}`];
 
     console.log(`Calling ${functionName} with args:`, args);
-    return true; // Placeholder
+    // simulate response error code and convert to message
+    const simulatedCode = 3; // vault still locked
+    const message = formatError(simulatedCode);
+    if (simulatedCode !== 0) {
+      console.error(`Withdraw failed: ${message}`);
+      throw new Error(message);
+    }
+    return true; // Placeholder for success
   }
 
   /**
