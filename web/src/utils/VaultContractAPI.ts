@@ -109,10 +109,12 @@ export class VaultContractAPI {
 
     // TODO: replace with actual contract call (eg. stacks.js transaction)
     console.log(`Calling ${functionName} with args:`, args);
-    // Simulate failure to illustrate formatting helper
-    const simulatedErrorCode = 5;
-    console.error("Contract call failed:", formatError(simulatedErrorCode));
-    throw new Error(formatError(simulatedErrorCode));
+    // Simulated response object from Clarinet / contract
+    const simulatedResponse = { err: 'u5' };
+    // use helper to throw formatted error if needed
+    VaultContractAPI.checkResult(simulatedResponse);
+    // if we reach here, return success value (vault id) for placeholder
+    return 'vault-id-0';
   }
 
   /**
