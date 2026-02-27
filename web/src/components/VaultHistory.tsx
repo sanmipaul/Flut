@@ -10,7 +10,7 @@
  *   events   – pre-filtered list of VaultEvent records (newest first)
  *   loading  – shows a loading skeleton when true
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { VaultEvent } from '../types/VaultEvent';
 import VaultHistoryItem from './VaultHistoryItem';
 
@@ -26,9 +26,27 @@ const VaultHistory: React.FC<VaultHistoryProps> = ({
   loading = false,
 }) => {
   const [expanded, setExpanded] = useState(true);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && expanded) {
+        // Only collapse if focus is inside this section
+        if (sectionRef.current?.contains(document.activeElement)) {
+          setExpanded(false);
+        }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [expanded]);
 
   return (
-    <section className="vault-history" aria-labelledby={`history-heading-${vaultId}`}>
+    <section
+      className="vault-history"
+      aria-labelledby={`history-heading-${vaultId}`}
+      ref={sectionRef}
+    >
       <header className="vault-history__header">
         <h3 id={`history-heading-${vaultId}`} className="vault-history__title">
           Transaction History
