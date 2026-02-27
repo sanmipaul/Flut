@@ -700,6 +700,9 @@
     ;; Verify caller is vault creator
     (asserts! (is-eq tx-sender (get creator vault)) ERR-UNAUTHORIZED)
 
+    ;; Record incoming deposit attempt for off-chain analytics
+    (print { event: "deposit-attempt", vault-id: vault-id, depositor: tx-sender, amount: amount })
+
     ;; Verify amount is positive
     (asserts! (> amount u0) ERR-INVALID-AMOUNT)
 
