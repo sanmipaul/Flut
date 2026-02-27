@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import VaultDetail from './components/VaultDetail';
+import ThemeToggle from './components/ThemeToggle';
+import { ThemeProvider } from './context/ThemeContext';
 
 interface Vault {
   vaultId: number;
@@ -13,7 +15,7 @@ interface Vault {
   currentBlockHeight: number;
 }
 
-export const App: React.FC = () => {
+const AppInner: React.FC = () => {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -133,8 +135,13 @@ export const App: React.FC = () => {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Flut — STX Savings Vault</h1>
-        <p>Lock your STX, designate beneficiaries, withdraw when unlocked</p>
+        <div className="app-header-toggle">
+          <ThemeToggle />
+        </div>
+        <div className="app-header-inner">
+          <h1>Flut — STX Savings Vault</h1>
+          <p>Lock your STX, designate beneficiaries, withdraw when unlocked</p>
+        </div>
       </header>
 
       <main className="app-main">
@@ -201,5 +208,11 @@ export const App: React.FC = () => {
     </div>
   );
 };
+
+export const App: React.FC = () => (
+  <ThemeProvider>
+    <AppInner />
+  </ThemeProvider>
+);
 
 export default App;
