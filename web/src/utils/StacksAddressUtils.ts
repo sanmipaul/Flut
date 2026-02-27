@@ -160,6 +160,31 @@ export function isTestnetAddress(address: string): boolean {
   return getAddressNetwork(address) === 'testnet';
 }
 
+/** Result returned by the composite `validateAddress` function */
+export interface AddressValidationResult {
+  /** Whether the address passes all validation rules */
+  isValid: boolean;
+  /** Human-readable error message, empty when valid */
+  errorMessage: string;
+  /** Network the address belongs to, null when prefix is unrecognised */
+  network: StacksNetwork | null;
+  /** Normalised (trimmed, uppercase) form of the input */
+  normalised: string;
+}
+
+/**
+ * Runs the full validation pipeline and returns a structured result object.
+ * This is the recommended entry-point for components that need both
+ * validity information and user-facing feedback in a single call.
+ */
+export function validateAddress(address: string): AddressValidationResult {
+  const normalised = normalizeAddress(address);
+  const isValid = isValidStacksAddress(normalised);
+  const errorMessage = isValid ? '' : getAddressErrorMessage(normalised);
+  const network = isValid ? getAddressNetwork(normalised) : null;
+  return { isValid, errorMessage, network, normalised };
+}
+
 /**
  * Normalises a Stacks address to its canonical form:
  * trims whitespace and converts to uppercase.
