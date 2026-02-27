@@ -1,3 +1,20 @@
+/**
+ * VaultSearchBar
+ *
+ * A compact control panel that lives at the top of the vault sidebar and
+ * lets users:
+ *
+ * - Free-text search by vault ID or creator address
+ * - Filter by vault status (All / Active / Withdrawn)
+ * - Filter by lock state (All / Locked / Unlocked)
+ * - Sort by Vault ID, Amount, Unlock block, or Created block
+ * - Toggle sort direction (ascending / descending)
+ * - Clear all active filters with a single click
+ *
+ * A keyboard shortcut (Ctrl/Cmd + F) focuses the search input.
+ * The result count in the footer provides a tooltip with the active
+ * sort field label when any filter is active.
+ */
 import React, { useRef, useEffect, useCallback } from 'react';
 import {
   VaultFilterState,
