@@ -414,7 +414,8 @@ body {
 }
 
 .modal-content {
-  background: white;
+  background: var(--bg-surface);
+  color: var(--text-dark);
   border-radius: 8px;
   padding: var(--spacing-lg);
   max-width: 500px;
@@ -422,6 +423,7 @@ body {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.25s ease;
 }
 
 .modal-content h2 {
