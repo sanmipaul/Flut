@@ -1,13 +1,8 @@
-export {
-  useVaultHistory,
-  createVaultCreatedEvent,
-  createBeneficiarySetEvent,
-  createBeneficiaryRemovedEvent,
-  createWithdrawalEvent,
-  createEmergencyWithdrawalEvent,
-  MAX_HISTORY_EVENTS,
-} from './useVaultHistory';
-export type { UseVaultHistoryReturn } from './useVaultHistory';
+export { useToast, DISMISS_DELAY_MS, MAX_TOASTS } from './useToast';
+export type { UseToastReturn, ToastShortcuts, UseToastOptions } from './useToast';
 
-export { useEstimatedTime, estimateTimeLabel } from './useEstimatedTime';
-export type { UseEstimatedTimeOptions, EstimatedTimeResult } from './useEstimatedTime';
+/**
+ * Re-export useToastContext so consumers can import from the hooks barrel
+ * without knowing about the context directory.
+ */
+export { useToastContext } from '../context/ToastContext';

@@ -2,14 +2,8 @@ import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
-import VaultHistory from './components/VaultHistory';
-import { useVaultHistory } from './hooks/useVaultHistory';
-import {
-  createVaultCreatedEvent,
-  createBeneficiarySetEvent,
-  createWithdrawalEvent,
-  createEmergencyWithdrawalEvent,
-} from './hooks/useVaultHistory';
+import ToastContainer from './components/ToastContainer';
+import { useToast } from './hooks/useToast';
 
 interface Vault {
   vaultId: number;
@@ -29,10 +23,9 @@ const AppInner: React.FC = () => {
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
   const [userAddress, setUserAddress] = useState<string | null>(null);
 
-  const { getEvents, addEvent } = useVaultHistory();
+  const { toasts, dismissToast, clearAll, toast } = useToast();
 
   useEffect(() => {
     initializeUser();
@@ -49,16 +42,12 @@ const AppInner: React.FC = () => {
   const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string, enableStacking?: boolean, stackingPool?: string) => {
     try {
       setLoading(true);
-      setError('');
-
-      const vaultId = vaults.length;
-      const unlockHeight = lockDuration;
 
       const newVault: Vault = {
         vaultId,
         creator: userAddress || 'unknown',
         amount,
-        unlockHeight,
+        unlockHeight: lockDuration,
         createdAt: 0,
         isWithdrawn: false,
         beneficiary,
@@ -68,17 +57,13 @@ const AppInner: React.FC = () => {
       };
 
       setVaults([...vaults, newVault]);
-
-      addEvent(
-        createVaultCreatedEvent(vaultId, 0, {
-          amount,
-          lockDuration,
-          unlockHeight,
-          beneficiary,
-        })
-      );
+      toast.success('Vault created!', {
+        description: `${amount} STX locked for ${lockDuration} blocks${beneficiary ? ' with beneficiary' : ''}.`,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create vault');
+      toast.error('Failed to create vault', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -87,24 +72,22 @@ const AppInner: React.FC = () => {
   const handleWithdraw = async (vaultId: number) => {
     try {
       setLoading(true);
-      setError('');
 
       const vault = vaults.find((v) => v.vaultId === vaultId);
-      if (!vault) throw new Error('Vault not found');
-
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
       );
       setVaults(updatedVaults);
 
-      addEvent(
-        createWithdrawalEvent(vaultId, vault.currentBlockHeight, {
-          amount: vault.amount,
-          recipient: vault.beneficiary ?? vault.creator,
-        })
-      );
+      toast.success('Withdrawal successful!', {
+        description: vault
+          ? `${vault.amount} STX sent to ${vault.beneficiary ?? vault.creator}.`
+          : undefined,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to withdraw');
+      toast.error('Withdrawal failed', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -113,22 +96,19 @@ const AppInner: React.FC = () => {
   const handleSetBeneficiary = async (vaultId: number, beneficiary: string) => {
     try {
       setLoading(true);
-      setError('');
 
-      const vault = vaults.find((v) => v.vaultId === vaultId);
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, beneficiary } : v
       );
       setVaults(updatedVaults);
 
-      addEvent(
-        createBeneficiarySetEvent(vaultId, vault?.currentBlockHeight ?? 0, {
-          newBeneficiary: beneficiary,
-          previousBeneficiary: vault?.beneficiary,
-        })
-      );
+      toast.success('Beneficiary updated', {
+        description: `Vault #${vaultId} will pay out to ${beneficiary}.`,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to set beneficiary');
+      toast.error('Failed to set beneficiary', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -137,31 +117,28 @@ const AppInner: React.FC = () => {
   const handleEmergencyWithdraw = async (vaultId: number) => {
     try {
       setLoading(true);
-      setError('');
 
       const vault = vaults.find((v) => v.vaultId === vaultId);
-      if (!vault) throw new Error('Vault not found');
-
       const penaltyRate = 10;
-      const penaltyAmount = Math.floor((vault.amount * penaltyRate) / 100);
-      const netAmount = vault.amount - penaltyAmount;
+      const netAmount = vault
+        ? vault.amount - Math.floor((vault.amount * penaltyRate) / 100)
+        : 0;
 
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
       );
       setVaults(updatedVaults);
 
-      addEvent(
-        createEmergencyWithdrawalEvent(vaultId, vault.currentBlockHeight, {
-          amount: vault.amount,
-          penaltyAmount,
-          netAmount,
-          recipient: vault.beneficiary ?? vault.creator,
-          penaltyRate,
-        })
-      );
+      toast.warning('Emergency withdrawal complete', {
+        description: vault
+          ? `${netAmount} STX received after ${penaltyRate}% penalty.`
+          : undefined,
+        duration: 8000,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to process emergency withdrawal');
+      toast.error('Emergency withdrawal failed', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -320,7 +297,7 @@ const AppInner: React.FC = () => {
         onCreateVault={handleCreateVault}
       />
 
-      {error && <div className="error-banner">{error}</div>}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} onClearAll={clearAll} />
     </div>
   );
 };

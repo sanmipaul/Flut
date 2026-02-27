@@ -1,4 +1,8 @@
-// Context barrel — re-export from all context modules
-export { ThemeProvider, useTheme, ThemeContext } from './ThemeContext';
-export type { Theme, ThemeContextValue } from './ThemeContext';
-export { default as ResponsiveContext } from './ResponsiveContext';
+/**
+ * Context barrel.
+ * Import any React context provider or consumer hook from this entry-point.
+ *
+ * @example
+ *   import { ToastProvider, useToastContext } from './context';
+ */
+export { ToastProvider, useToastContext } from './ToastContext';
