@@ -113,3 +113,39 @@ export function truncateAddress(
   if (trimmed.length <= leadChars + tailChars + 1) return trimmed;
   return `${trimmed.slice(0, leadChars)}…${trimmed.slice(-tailChars)}`;
 }
+
+/**
+ * Returns a human-readable error description explaining *why* an address
+ * failed validation, or an empty string when the address is valid.
+ */
+export function getAddressErrorMessage(address: string): string {
+  if (!address || !address.trim()) return 'Address is required';
+
+  const trimmed = address.trim().toUpperCase();
+
+  if (!trimmed.startsWith('S')) {
+    return 'Stacks addresses must start with "S"';
+  }
+
+  const prefix = trimmed.slice(0, 2);
+  if (!ALL_VALID_PREFIXES.includes(prefix)) {
+    return `Unknown prefix "${prefix}". Expected SP, SM, ST, or SN`;
+  }
+
+  if (trimmed.length < MIN_ADDRESS_LENGTH) {
+    return `Address is too short (${trimmed.length} chars, minimum ${MIN_ADDRESS_LENGTH})`;
+  }
+
+  if (trimmed.length > MAX_ADDRESS_LENGTH) {
+    return `Address is too long (${trimmed.length} chars, maximum ${MAX_ADDRESS_LENGTH})`;
+  }
+
+  const body = trimmed.slice(2);
+  for (const ch of body) {
+    if (!C32_ALPHABET.includes(ch)) {
+      return `Invalid character "${ch}" — Stacks addresses use only 0–9 and A–Z (excluding I, L, O, U)`;
+    }
+  }
+
+  return '';
+}
