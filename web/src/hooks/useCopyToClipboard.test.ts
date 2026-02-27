@@ -138,6 +138,32 @@ describe('useCopyToClipboard', () => {
     expect(result.current.copyState).toBe('idle');
   });
 
+  it('respects a custom resetDelay option', async () => {
+    vi.stubGlobal('navigator', { clipboard: makeClipboard() });
+
+    const { result } = renderHook(() =>
+      useCopyToClipboard({ resetDelay: 500 })
+    );
+
+    await act(async () => {
+      await result.current.copy('hello');
+    });
+
+    expect(result.current.copyState).toBe('copied');
+
+    // Should still be copied at 499ms
+    act(() => {
+      vi.advanceTimersByTime(499);
+    });
+    expect(result.current.copyState).toBe('copied');
+
+    // Should reset at 500ms
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(result.current.copyState).toBe('idle');
+  });
+
   it('falls back to execCommand when async clipboard API is unavailable', async () => {
     // No clipboard on navigator
     vi.stubGlobal('navigator', {});
