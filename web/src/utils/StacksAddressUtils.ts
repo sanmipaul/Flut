@@ -149,3 +149,13 @@ export function getAddressErrorMessage(address: string): string {
 
   return '';
 }
+
+/** Returns true when the address belongs to Stacks mainnet (SP or SM prefix). */
+export function isMainnetAddress(address: string): boolean {
+  return getAddressNetwork(address) === 'mainnet';
+}
+
+/** Returns true when the address belongs to Stacks testnet (ST or SN prefix). */
+export function isTestnetAddress(address: string): boolean {
+  return getAddressNetwork(address) === 'testnet';
+}
