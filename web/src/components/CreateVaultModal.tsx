@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CopyButton from './CopyButton';
 
 interface CreateVaultModalProps {
   isOpen: boolean;
@@ -109,14 +110,23 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
         {hasBeneficiary && (
           <div className="form-group">
             <label htmlFor="beneficiary">Beneficiary Address</label>
-            <input
-              id="beneficiary"
-              type="text"
-              value={beneficiaryAddress}
-              onChange={(e) => setBeneficiaryAddress(e.target.value)}
-              placeholder="SP... or ST..."
-              disabled={loading}
-            />
+            <div className="input-with-copy">
+              <input
+                id="beneficiary"
+                type="text"
+                value={beneficiaryAddress}
+                onChange={(e) => setBeneficiaryAddress(e.target.value)}
+                placeholder="SP... or ST..."
+                disabled={loading}
+              />
+              {beneficiaryAddress.trim() && (
+                <CopyButton
+                  text={beneficiaryAddress.trim()}
+                  label="Copy beneficiary address"
+                  size="sm"
+                />
+              )}
+            </div>
             <small>The address that will receive funds when the vault unlocks</small>
           </div>
         )}
