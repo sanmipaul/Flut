@@ -899,3 +899,25 @@ button:disabled {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* Dark mode overrides for VaultHistory */
+[data-theme='dark'] .vault-history {
+  border-top-color: var(--border-color, #3a3a5c);
+}
+
+[data-theme='dark'] .vault-history__toggle:hover {
+  background: #2a2a4e;
+}
+
+[data-theme='dark'] .vault-history__list::before {
+  background: var(--border-color, #3a3a5c);
+}
+
+[data-theme='dark'] .history-item__label {
+  color: var(--text-dark, #e2e8f0);
+}
+
+[data-theme='dark'] .vault-history__skeleton {
+  background: linear-gradient(90deg, #2d2d4e 25%, #3a3a5c 50%, #2d2d4e 75%);
+  background-size: 200% 100%;
+}
