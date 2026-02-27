@@ -459,6 +459,67 @@
   )
 )
 
+;; Partial withdraw from a vault
+;; This function allows users to withdraw a specific amount from their vault.
+;; Passing zero for `amount` results in a full withdrawal. The vault balance is
+;; reduced by the withdrawn amount, and if the remaining balance is zero, the
+;; vault is marked as withdrawn.
+;;
+;; @param vault-id - ID of the vault to withdraw from
+;; @param amount - Amount to withdraw (u0 for full withdrawal)
+;;
+;; @return (ok true) on successful withdrawal or error code analogous to
+;;         standard withdraw errors plus ERR-INVALID-WITHDRAWAL-AMOUNT
+(define-public (partial-withdraw (vault-id uint) (amount uint))
+  (let
+    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
+     (recipient (get-withdrawal-recipient vault))
+     (vault-amount (get amount vault))
+     (withdrawal-amt (if (is-eq amount u0) vault-amount amount)))
+    
+    ;; Authorization
+    (asserts! (is-authorized-withdrawer (get creator vault) tx-sender) ERR-UNAUTHORIZED)
+    ;; Unlocked & not withdrawn
+    (asserts! (>= block-height (get unlock-height vault)) ERR-NOT-UNLOCKED)
+    (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+
+    ;; Validate amount
+    (asserts! (is-valid-withdrawal-amount vault-amount withdrawal-amt) ERR-INVALID-WITHDRAWAL-AMOUNT)
+    (asserts! (> vault-amount u0) ERR-INSUFFICIENT-BALANCE)
+    (asserts! (is-valid-beneficiary recipient) ERR-RECIPIENT-CANNOT-WITHDRAW)
+
+    ;; Revoke stacking if needed
+    (if (get stacking-enabled vault)
+      (try-revoke-stacking)
+      false
+    )
+
+    ;; Transfer
+    (try! (as-contract (stx-transfer? withdrawal-amt tx-sender recipient)))
+
+    ;; Update vault amount and status
+    (let ((new-total (- vault-amount withdrawal-amt)))
+      (map-set vaults
+        { vault-id: vault-id }
+        (merge vault { amount: new-total, is-withdrawn: (is-eq new-total u0) })
+      )
+    )
+
+    ;; Audit and history
+    (map-set withdrawal-attempts { vault-id: vault-id } { last-attempt-block: block-height })
+    (map-set withdrawal-history { vault-id: vault-id }
+      { withdrawal-time: block-height, withdrawal-block: block-height, amount-withdrawn: withdrawal-amt, recipient: recipient, was-emergency: false })
+    (let ((record (default-to { vault-ids: (list) } (map-get? user-withdrawn-vaults { user: (get creator vault) })))
+          (updated (unwrap! (as-max-len? (append (get vault-ids record) vault-id) u100) ERR-INVALID-AMOUNT)))
+      (map-set user-withdrawn-vaults { user: (get creator vault) } { vault-ids: updated }))
+
+    ;; Emit event
+    (print { event: "partial-withdraw", vault-id: vault-id, amount: withdrawal-amt, remaining: (- vault-amount withdrawal-amt), recipient: recipient, block-height: block-height })
+
+    (ok true)
+  )
+)
+
 ;; Set beneficiary for a vault (only owner can call)
 ;; 
 ;; This function allows the vault creator to designate a beneficiary address
