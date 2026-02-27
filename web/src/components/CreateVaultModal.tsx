@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import AddressInput from './AddressInput';
+import { AddressValidationResult } from '../utils/StacksAddressUtils';
 
 interface CreateVaultModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateVault: (amount: number, lockDuration: number, beneficiary?: string) => Promise<void>;
+  onCreateVault: (amount: number, lockDuration: number, beneficiary?: string, enableStacking?: boolean, stackingPool?: string) => Promise<void>;
 }
 
 export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
@@ -14,9 +16,19 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
   const [amount, setAmount] = useState<string>('');
   const [lockDuration, setLockDuration] = useState<string>('');
   const [beneficiaryAddress, setBeneficiaryAddress] = useState<string>('');
+  const [beneficiaryValidation, setBeneficiaryValidation] = useState<AddressValidationResult | null>(null);
   const [hasBeneficiary, setHasBeneficiary] = useState<boolean>(false);
+  const [enableStacking, setEnableStacking] = useState<boolean>(false);
+  const [stackingPool, setStackingPool] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+
+  const handleBeneficiaryChange = (value: string, validation: AddressValidationResult) => {
+    setBeneficiaryAddress(value);
+    setBeneficiaryValidation(validation);
+  };
+
+  const isBeneficiaryValid = !hasBeneficiary || (beneficiaryAddress.trim() !== '' && beneficiaryValidation?.isValid === true);
 
   const handleCreateVault = async () => {
     try {
@@ -44,15 +56,24 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
         return;
       }
 
-      const beneficiary = hasBeneficiary ? beneficiaryAddress.trim() : undefined;
+      if (hasBeneficiary && beneficiaryValidation && !beneficiaryValidation.isValid) {
+        setError('Beneficiary address is not a valid Stacks address');
+        setLoading(false);
+        return;
+      }
 
-      await onCreateVault(amountNum, durationNum, beneficiary);
+      const beneficiary = hasBeneficiary ? beneficiaryValidation?.normalised || beneficiaryAddress.trim() : undefined;
+
+      await onCreateVault(amountNum, durationNum, beneficiary, enableStacking, pool);
 
       // Reset form
       setAmount('');
       setLockDuration('');
       setBeneficiaryAddress('');
+      setBeneficiaryValidation(null);
       setHasBeneficiary(false);
+      setEnableStacking(false);
+      setStackingPool('');
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create vault');
@@ -100,25 +121,69 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
             id="hasBeneficiary"
             type="checkbox"
             checked={hasBeneficiary}
-            onChange={(e) => setHasBeneficiary(e.target.checked)}
+            onChange={(e) => {
+              setHasBeneficiary(e.target.checked);
+              if (!e.target.checked) {
+                setBeneficiaryAddress('');
+                setBeneficiaryValidation(null);
+              }
+            }}
             disabled={loading}
           />
           <label htmlFor="hasBeneficiary">Add a Beneficiary Address?</label>
         </div>
 
         {hasBeneficiary && (
-          <div className="form-group">
-            <label htmlFor="beneficiary">Beneficiary Address</label>
-            <input
-              id="beneficiary"
-              type="text"
-              value={beneficiaryAddress}
-              onChange={(e) => setBeneficiaryAddress(e.target.value)}
-              placeholder="SP... or ST..."
-              disabled={loading}
-            />
-            <small>The address that will receive funds when the vault unlocks</small>
-          </div>
+          <AddressInput
+            id="beneficiary"
+            value={beneficiaryAddress}
+            onChange={handleBeneficiaryChange}
+            label="Beneficiary Address"
+            helpText="The Stacks address that will receive funds when the vault unlocks"
+            disabled={loading}
+            required
+            validateOnBlur={false}
+          />
+        )}
+
+        <div className="form-group checkbox">
+          <input
+            id="enableStacking"
+            type="checkbox"
+            checked={enableStacking}
+            onChange={(e) => setEnableStacking(e.target.checked)}
+            disabled={loading}
+          />
+          <label htmlFor="enableStacking">Enable STX Stacking (earn BTC yield while locked)</label>
+        </div>
+
+        {enableStacking && (
+          <>
+            <div className="form-group">
+              <label htmlFor="stackingPool">Stacking Pool Address</label>
+              <input
+                id="stackingPool"
+                type="text"
+                value={stackingPool}
+                onChange={(e) => setStackingPool(e.target.value)}
+                placeholder="SP... stacking pool principal"
+                disabled={loading}
+              />
+              <small>Your STX will be delegated to this pool via pox-4 while the vault is locked</small>
+            </div>
+
+            <div className="stacking-apy-banner">
+              <div className="apy-info">
+                <span className="apy-label">Estimated BTC Yield APY</span>
+                <span className="apy-value">~8–12%</span>
+              </div>
+              <p className="apy-note">
+                BTC rewards are distributed each Stacking cycle (~2 weeks). Actual APY varies
+                with network participation. Rewards accrue to the pool and are claimable
+                separately from your STX principal.
+              </p>
+            </div>
+          </>
         )}
 
         {error && <div className="error-message">{error}</div>}
@@ -134,7 +199,8 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
           <button
             className="btn-primary"
             onClick={handleCreateVault}
-            disabled={loading}
+            disabled={loading || (hasBeneficiary && !isBeneficiaryValid)}
+          title={hasBeneficiary && !isBeneficiaryValid ? 'Enter a valid Stacks address before creating the vault' : undefined}
           >
             {loading ? 'Creating...' : 'Create Vault'}
           </button>

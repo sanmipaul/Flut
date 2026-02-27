@@ -13,9 +13,11 @@ interface Vault {
   isWithdrawn: boolean;
   beneficiary?: string;
   currentBlockHeight: number;
+  stackingEnabled?: boolean;
+  stackingPool?: string;
 }
 
-export const App: React.FC = () => {
+const AppInner: React.FC = () => {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -48,7 +50,7 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string) => {
+  const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string, enableStacking?: boolean, stackingPool?: string) => {
     try {
       setLoading(true);
       setError('');
@@ -62,6 +64,8 @@ export const App: React.FC = () => {
         isWithdrawn: false,
         beneficiary,
         currentBlockHeight: 0,
+        stackingEnabled: enableStacking ?? false,
+        stackingPool,
       };
 
       setVaults([...vaults, newVault]);
@@ -125,8 +129,13 @@ export const App: React.FC = () => {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Flut — STX Savings Vault</h1>
-        <p>Lock your STX, designate beneficiaries, withdraw when unlocked</p>
+        <div className="app-header-toggle">
+          <ThemeToggle />
+        </div>
+        <div className="app-header-inner">
+          <h1>Flut — STX Savings Vault</h1>
+          <p>Lock your STX, designate beneficiaries, withdraw when unlocked</p>
+        </div>
       </header>
 
       <main className="app-main">
@@ -237,5 +246,11 @@ export const App: React.FC = () => {
     </div>
   );
 };
+
+export const App: React.FC = () => (
+  <ThemeProvider>
+    <AppInner />
+  </ThemeProvider>
+);
 
 export default App;
