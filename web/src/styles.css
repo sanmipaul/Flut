@@ -31,6 +31,22 @@
   --bg-input: #1e1e2e;
 }
 
+/* Dark mode via system preference (no-JS fallback) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --primary-color: #7b6fff;
+    --secondary-color: #1e1e2e;
+    --success-color: #2dd65c;
+    --error-color: #f06474;
+    --text-dark: #e8e8f0;
+    --text-light: #9898b0;
+    --border-color: #2e2e42;
+    --bg-body: #12121c;
+    --bg-surface: #1a1a2e;
+    --bg-input: #1e1e2e;
+  }
+}
+
 /* Dark mode CSS custom properties */
 [data-theme='dark'] {
   --primary-color: #7b6fff;
