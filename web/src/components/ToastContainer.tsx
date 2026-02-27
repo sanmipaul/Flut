@@ -30,6 +30,8 @@ const ToastContainer: React.FC<ToastContainerProps> = ({
     <div
       className={`toast-container toast-container--${position}`}
       aria-label="Notifications"
+      aria-live="polite"
+      aria-relevant="additions removals"
     >
       {toasts.map((t) => (
         <ToastItem key={t.id} toast={t} onDismiss={onDismiss} />
