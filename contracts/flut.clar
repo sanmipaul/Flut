@@ -63,6 +63,12 @@
   { last-attempt-block: uint }
 )
 
+;; Track withdrawn vaults per user
+(define-map user-withdrawn-vaults
+  { user: principal }
+  { vault-ids: (list 100 uint) }
+)
+
 ;; Config flag to enable/disable emergency withdrawals globally
 (define-data-var emergency-withdrawal-enabled bool true)
 
@@ -426,6 +432,12 @@
       }
     )
     
+    ;; Track withdrawal under user for later queries
+    (let ((record (default-to { vault-ids: (list) } (map-get? user-withdrawn-vaults { user: (get creator vault) })))
+          (updated (unwrap! (as-max-len? (append (get vault-ids record) vault-id) u100) ERR-INVALID-AMOUNT)))
+      (map-set user-withdrawn-vaults { user: (get creator vault) } { vault-ids: updated })
+    )
+    
     ;; Mark as withdrawn
     (map-set vaults
       { vault-id: vault-id }
@@ -737,6 +749,12 @@
       }
     )
     
+    ;; Track withdrawal under user for later queries
+    (let ((record (default-to { vault-ids: (list) } (map-get? user-withdrawn-vaults { user: (get creator vault) })))
+          (updated (unwrap! (as-max-len? (append (get vault-ids record) vault-id) u100) ERR-INVALID-AMOUNT)))
+      (map-set user-withdrawn-vaults { user: (get creator vault) } { vault-ids: updated })
+    )
+    
     ;; Emit detailed event for indexing and auditing
     (print { 
       event: "emergency-withdrawal", 
@@ -954,6 +972,16 @@
 ;; Get withdrawal history for vault
 (define-read-only (get-withdrawal-history (vault-id uint))
   (map-get? withdrawal-history { vault-id: vault-id })
+)
+
+;; Get list of vault IDs withdrawn by a specific user
+(define-read-only (get-user-withdrawn-vaults (user principal))
+  (let ((record (map-get? user-withdrawn-vaults { user: user })))
+    (match record
+      r (some (get vault-ids r))
+      none
+    )
+  )
 )
 
 ;; Get last withdrawal attempt block
