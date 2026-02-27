@@ -286,6 +286,16 @@
   )
 )
 
+;; Test: error description helper returns expected string
+(define-private (test-error-description)
+  (let
+    ((desc (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-error-description u5)))
+    (match desc
+      s (begin
+            (asserts! (is-eq s "Invalid amount") (err "Description mismatched"))
+            (ok "✓ Error description helper test passed"))
+      _ (err "✗ Error description call returned unexpected type"))))
+
 ;; End of new withdrawal safety tests
 
 ;; Test: Edge case - zero remainder penalty
