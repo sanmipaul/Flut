@@ -713,6 +713,21 @@ button:disabled {
 }
 
 /* ============================================================
+   Input-with-copy layout (form inputs paired with CopyButton)
+   ============================================================ */
+
+.input-with-copy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input-with-copy input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ============================================================
    Address-with-copy layout
    ============================================================ */
 
