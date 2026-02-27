@@ -95,6 +95,7 @@ const AddressInput: React.FC<AddressInputProps> = ({
           spellCheck={false}
           className={inputClasses}
           aria-describedby={`${id}-hint`}
+          aria-required={required ? 'true' : undefined}
           aria-invalid={showError ? 'true' : undefined}
         />
         {showSuccess && (
