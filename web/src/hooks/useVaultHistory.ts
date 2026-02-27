@@ -139,6 +139,16 @@ export function createEmergencyWithdrawalEvent(
 }
 
 // ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+/**
+ * Maximum number of events retained across all vaults.
+ * Prevents unbounded memory growth in long-running sessions.
+ */
+export const MAX_HISTORY_EVENTS = 500;
+
+// ---------------------------------------------------------------------------
 // Hook
 // ---------------------------------------------------------------------------
 
@@ -154,7 +164,7 @@ export function useVaultHistory(): UseVaultHistoryReturn {
   );
 
   const addEvent = useCallback((event: VaultEvent) => {
-    setEvents((prev) => [event, ...prev]);
+    setEvents((prev) => [event, ...prev].slice(0, MAX_HISTORY_EVENTS));
   }, []);
 
   const clearEvents = useCallback((vaultId: number) => {
