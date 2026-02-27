@@ -210,14 +210,39 @@ Returns `true` if the vault has passed its lock period.
 
 ### Error Codes
 
+This table mirrors the constants defined in `contracts/flut.clar` so that frontends and integrators
+can display meaningful messages when a transaction fails. When the contract returns `(err uXXX)`
+these codes correspond to the rows below.
+
 | Code | Constant | Meaning |
 |------|----------|---------|
-| `u100` | `err-not-found` | Vault does not exist |
-| `u101` | `err-still-locked` | Lock period has not expired |
-| `u102` | `err-empty-vault` | Vault balance is zero |
-| `u103` | `err-unauthorized` | Caller is not the vault owner |
-| `u104` | `err-invalid-amount` | Deposit amount must be > 0 |
-| `u105` | `err-invalid-duration` | Lock duration must be > 0 |
+| `u1`   | `ERR-VAULT-NOT-FOUND`        | Vault does not exist |
+| `u2`   | `ERR-UNAUTHORIZED`           | Caller is not vault owner |
+| `u3`   | `ERR-NOT-UNLOCKED`           | Vault is still locked |
+| `u4`   | `ERR-ALREADY-WITHDRAWN`      | Vault balance already withdrawn |
+| `u5`   | `ERR-INVALID-AMOUNT`         | Amount must be > 0 and <= balance |
+| `u6`   | `ERR-INVALID-HEIGHT`         | Unlock height must be > current height |
+| `u7`   | `ERR-INVALID-PENALTY-RATE`   | Penalty rate out of bounds |
+| `u8`   | `ERR-NOT-PENALTY-OWNER`      | Only penalty owner may update destination |
+| `u9`   | `ERR-STACKING-NO-POOL`       | Stacking enabled but no pool provided |
+| `u10`  | `ERR-STACKING-NOT-ENABLED`   | Attempted stacking operation on non-stacking vault |
+| `u11`  | `ERR-INVALID-SHARES`         | Beneficiary shares must sum to 10000 |
+| `u12`  | `ERR-TOO-MANY-BENEFICIARIES` | Exceeded maximum allowed beneficiaries |
+| `u13`  | `ERR-BENEFICIARY-EXISTS`     | Beneficiary already set for vault |
+| `u14`  | `ERR-INVALID-BENEFICIARY`    | Provided beneficiary address is invalid |
+| `u15`  | `ERR-BENEFICIARY-SAME-AS-CREATOR` | Creator cannot be a beneficiary |
+| `u16`  | `ERR-TOO-MANY-VAULTS`        | User reached vault creation limit |
+| `u17`  | `ERR-DEPOSIT-COOLDOWN-ACTIVE`| Must wait between deposits |
+| `u18`  | `ERR-DEPOSIT-AMOUNT-EXCEEDED`| Single deposit exceeds maximum |
+| `u19`  | `ERR-VAULT-AMOUNT-EXCEEDED`  | Vault total balance exceeds cap |
+| `u20`  | `ERR-INSUFFICIENT-BALANCE`   | Withdrawal amount exceeds balance |
+| `u21`  | `ERR-INVALID-WITHDRAWAL-AMOUNT` | Withdrawal amount zero/invalid |
+| `u22`  | `ERR-RECIPIENT-CANNOT-WITHDRAW` | Recipient not allowed to withdraw yet |
+| `u23`  | `ERR-WITHDRAWAL-NOT-ALLOWED` | Withdrawals disabled for vault |
+| `u24`  | `ERR-EMERGENCY-WITHDRAWAL-DISABLED` | Emergency withdrawals globally disabled |
+
+> **Note:** new error codes may be added as the contract evolves; keep this table in sync with
+> `contracts/flut.clar`.
 
 ---
 
