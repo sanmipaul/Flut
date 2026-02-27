@@ -142,6 +142,18 @@ export const App: React.FC = () => {
             </button>
           </div>
 
+          {/* Live region announces filter result count to screen readers */}
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+          >
+            {hasActiveFilters
+              ? `${resultCount} of ${vaults.length} vaults shown`
+              : ''}
+          </div>
+
           {vaults.length > 0 && (
             <VaultSearchBar
               filterState={filterState}
