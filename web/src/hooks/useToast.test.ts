@@ -126,6 +126,18 @@ describe('useToast', () => {
     expect(result.current.toasts[0].description).toBe('Details here');
   });
 
+  it('calls onDismiss callback when a toast is fully removed', () => {
+    const onDismiss = vi.fn();
+    const { result } = renderHook(() => useToast({ onDismiss }));
+
+    let id: string;
+    act(() => { id = result.current.toast.info('Bye'); });
+    act(() => { result.current.dismissToast(id!); });
+    act(() => { vi.advanceTimersByTime(DISMISS_DELAY_MS); });
+
+    expect(onDismiss).toHaveBeenCalledWith(id!);
+  });
+
   it('persistent toast (duration=0) does not auto-dismiss', () => {
     const { result } = renderHook(() => useToast());
     act(() => {
