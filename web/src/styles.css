@@ -12,6 +12,59 @@
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
+  --bg-body: #fafafa;
+  --bg-surface: #ffffff;
+  --bg-input: #ffffff;
+}
+
+/* Dark mode custom properties (consumed by address validation states) */
+[data-theme='dark'] {
+  --primary-color: #7b6fff;
+  --secondary-color: #1e1e2e;
+  --success-color: #2dd65c;
+  --error-color: #f06474;
+  --text-dark: #e8e8f0;
+  --text-light: #9898b0;
+  --border-color: #2e2e42;
+  --bg-body: #12121c;
+  --bg-surface: #1a1a2e;
+  --bg-input: #1e1e2e;
+}
+
+/* Dark mode via system preference (no-JS fallback) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --primary-color: #7b6fff;
+    --secondary-color: #1e1e2e;
+    --success-color: #2dd65c;
+    --error-color: #f06474;
+    --text-dark: #e8e8f0;
+    --text-light: #9898b0;
+    --border-color: #2e2e42;
+    --bg-body: #12121c;
+    --bg-surface: #1a1a2e;
+    --bg-input: #1e1e2e;
+  }
+}
+
+/* Dark mode CSS custom properties */
+[data-theme='dark'] {
+  --primary-color: #7b6fff;
+  --secondary-color: #1e1e2e;
+  --success-color: #2dd65c;
+  --error-color: #f06474;
+  --text-dark: #e8e8f0;
+  --text-light: #9898b0;
+  --border-color: #2e2e42;
+  --bg-body: #12121c;
+  --bg-surface: #1a1a2e;
+  --bg-input: #1e1e2e;
+}
+
+:root {
+  --bg-body: #fafafa;
+  --bg-surface: #ffffff;
+  --bg-input: #ffffff;
 }
 
 * {
@@ -52,7 +105,37 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--text-dark);
-  background-color: #fafafa;
+  background-color: var(--bg-body);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+.theme-toggle-icon {
+  display: block;
+  line-height: 1;
 }
 
 /* App Layout */
@@ -68,6 +151,20 @@ body {
   padding: var(--spacing-xl);
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.app-header-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.app-header-toggle {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
 }
 
 .app-header h1 {
@@ -94,12 +191,13 @@ body {
 /* Sidebar */
 .sidebar {
   width: 350px;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.25s ease;
 }
 
 .sidebar-header {
@@ -127,15 +225,21 @@ body {
   padding: var(--spacing-md);
   border-bottom: 1px solid var(--border-color);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, border-color 0.25s ease, color 0.25s ease;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--spacing-sm);
+  color: var(--text-dark);
 }
 
 .vault-item:hover {
   background-color: var(--secondary-color);
+}
+
+.vault-item:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
 }
 
 .vault-item.active {
@@ -169,6 +273,14 @@ body {
   background-color: #999;
 }
 
+.badge-unlocked {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background-color: var(--success-color);
+  color: white;
+}
+
 .empty-state {
   padding: var(--spacing-lg);
   text-align: center;
@@ -178,10 +290,11 @@ body {
 /* Content Area */
 .content {
   flex: 1;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   padding: var(--spacing-lg);
+  transition: background-color 0.25s ease;
 }
 
 .empty-content {
@@ -256,6 +369,7 @@ body {
   padding: var(--spacing-md);
   background-color: var(--secondary-color);
   border-radius: 6px;
+  transition: background-color 0.25s ease;
 }
 
 .info-item {
@@ -273,13 +387,15 @@ body {
 }
 
 .info-item code {
-  background-color: white;
+  background-color: var(--bg-input);
   padding: var(--spacing-sm);
   border-radius: 4px;
   font-family: 'Courier New', monospace;
   font-size: 0.85rem;
   word-break: break-all;
   border: 1px solid var(--border-color);
+  color: var(--text-dark);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .info-item .amount {
@@ -335,6 +451,24 @@ body {
   margin-top: var(--spacing-md);
 }
 
+/* Stacked beneficiary form used inside VaultDetail */
+.beneficiary-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.beneficiary-form-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.beneficiary-form-actions .btn-primary,
+.beneficiary-form-actions .btn-secondary {
+  flex: 1;
+}
+
 .beneficiary-form input {
   flex: 1;
   padding: var(--spacing-sm) var(--spacing-md);
@@ -381,7 +515,8 @@ body {
 }
 
 .modal-content {
-  background: white;
+  background: var(--bg-surface);
+  color: var(--text-dark);
   border-radius: 8px;
   padding: var(--spacing-lg);
   max-width: 500px;
@@ -389,6 +524,7 @@ body {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.25s ease;
 }
 
 .modal-content h2 {
@@ -558,6 +694,9 @@ body {
   border-radius: 4px;
   font-size: 0.9rem;
   font-family: inherit;
+  background-color: var(--bg-input);
+  color: var(--text-dark);
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
 .form-group input:focus,
@@ -578,6 +717,89 @@ body {
   margin-top: var(--spacing-xs);
   color: var(--text-light);
   font-size: 0.85rem;
+}
+
+/* Address input validation states */
+.address-input-wrapper {
+  position: relative;
+}
+
+.address-input-wrapper input {
+  padding-right: 2.5rem;
+}
+
+.address-input-valid {
+  border-color: var(--success-color) !important;
+  background-color: rgba(28, 184, 69, 0.03);
+}
+
+.address-input-invalid {
+  border-color: var(--error-color) !important;
+  background-color: rgba(220, 53, 69, 0.03);
+}
+
+.address-input-valid:focus {
+  box-shadow: 0 0 0 3px rgba(28, 184, 69, 0.15) !important;
+}
+
+.address-input-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
+}
+
+.address-validation-icon {
+  position: absolute;
+  right: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.address-error-text {
+  display: block;
+  margin-top: var(--spacing-xs);
+  color: var(--error-color);
+  font-size: 0.82rem;
+}
+
+.address-help-text {
+  display: block;
+  margin-top: var(--spacing-xs);
+  color: var(--text-light);
+  font-size: 0.82rem;
+}
+
+/* Network badge shown beside a validated address */
+.network-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-top: var(--spacing-xs);
+}
+
+.network-badge.mainnet {
+  background-color: rgba(85, 70, 255, 0.1);
+  color: var(--primary-color);
+  border: 1px solid rgba(85, 70, 255, 0.25);
+}
+
+.network-badge.testnet {
+  background-color: rgba(255, 174, 66, 0.15);
+  color: #b06000;
+  border: 1px solid rgba(255, 174, 66, 0.35);
+}
+
+.network-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  display: inline-block;
 }
 
 /* Buttons */
@@ -678,6 +900,137 @@ button:disabled {
   right: var(--spacing-lg);
   max-width: 400px;
   z-index: 999;
+}
+
+/* ============================================================
+   Dark mode overrides for specific components
+   ============================================================ */
+
+[data-theme='dark'] .vault-actions {
+  background-color: rgba(45, 214, 92, 0.06);
+  border-color: rgba(45, 214, 92, 0.25);
+}
+
+[data-theme='dark'] .vault-actions.emergency-section {
+  background-color: rgba(240, 100, 116, 0.06);
+  border-color: rgba(240, 100, 116, 0.25);
+}
+
+[data-theme='dark'] .beneficiary-info,
+[data-theme='dark'] .beneficiary-setup {
+  background-color: rgba(123, 111, 255, 0.1);
+  border-left-color: var(--primary-color);
+}
+
+[data-theme='dark'] .error-message,
+[data-theme='dark'] .error-banner {
+  background-color: rgba(240, 100, 116, 0.1);
+  border-color: var(--error-color);
+}
+
+[data-theme='dark'] .penalty-calculation {
+  background-color: rgba(30, 30, 46, 0.8);
+}
+
+[data-theme='dark'] .confirmation-checkbox {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='dark'] .stacking-info {
+  background-color: rgba(255, 153, 0, 0.08);
+  border-color: rgba(255, 153, 0, 0.25);
+}
+
+[data-theme='dark'] .stacking-inactive {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .stacking-apy-banner {
+  background: linear-gradient(135deg, rgba(255, 153, 0, 0.08), rgba(255, 200, 50, 0.06));
+  border-color: rgba(255, 153, 0, 0.2);
+}
+
+[data-theme='dark'] .status-badge {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+[data-theme='dark'] .status-badge.unlocked {
+  background-color: rgba(45, 214, 92, 0.12);
+}
+
+[data-theme='dark'] .status-badge.locked {
+  background-color: rgba(255, 152, 0, 0.12);
+}
+
+[data-theme='dark'] .status.active {
+  background-color: rgba(45, 214, 92, 0.12);
+}
+
+[data-theme='dark'] .status.withdrawn {
+  background-color: rgba(200, 200, 200, 0.08);
+  color: #999;
+}
+
+[data-theme='dark'] .offline-indicator {
+  background-color: #2d2000;
+  border-color: #665500;
+  color: #fbbf24;
+}
+
+[data-theme='dark'] .btn-secondary {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-dark);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .btn-secondary:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+[data-theme='dark'] .modal-actions {
+  border-top-color: var(--border-color);
+}
+
+[data-theme='dark'] .sidebar-header {
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme='dark'] .vault-header {
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme='dark'] .form-group input:disabled,
+[data-theme='dark'] .form-group select:disabled {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-light);
+  cursor: not-allowed;
+}
+
+[data-theme='dark'] .calc-divider {
+  background-color: var(--border-color);
+}
+
+[data-theme='dark'] .total-row {
+  background-color: rgba(45, 214, 92, 0.1);
+}
+
+[data-theme='dark'] .penalty-info {
+  background-color: rgba(240, 100, 116, 0.07);
+}
+
+[data-theme='dark'] .empty-state,
+[data-theme='dark'] .empty-content {
+  color: var(--text-light);
+}
+
+[data-theme='dark'] .vault-detail.loading,
+[data-theme='dark'] .vault-detail.not-found {
+  color: var(--text-light);
+}
+
+[data-theme='dark'] .vault-detail.error {
+  color: var(--error-color);
 }
 
 /* Responsive */

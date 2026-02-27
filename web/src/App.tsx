@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
+import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
 import ToastContainer from './components/ToastContainer';
 import { useToast } from './hooks/useToast';
@@ -13,9 +14,11 @@ interface Vault {
   isWithdrawn: boolean;
   beneficiary?: string;
   currentBlockHeight: number;
+  stackingEnabled?: boolean;
+  stackingPool?: string;
 }
 
-export const App: React.FC = () => {
+const AppInner: React.FC = () => {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -36,12 +39,12 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string) => {
+  const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string, enableStacking?: boolean, stackingPool?: string) => {
     try {
       setLoading(true);
 
       const newVault: Vault = {
-        vaultId: vaults.length,
+        vaultId,
         creator: userAddress || 'unknown',
         amount,
         unlockHeight: lockDuration,
@@ -49,6 +52,8 @@ export const App: React.FC = () => {
         isWithdrawn: false,
         beneficiary,
         currentBlockHeight: 0,
+        stackingEnabled: enableStacking ?? false,
+        stackingPool,
       };
 
       setVaults([...vaults, newVault]);
@@ -141,19 +146,24 @@ export const App: React.FC = () => {
 
   const handleFetchVault = async (vaultId: number): Promise<Vault> => {
     const vault = vaults.find((v) => v.vaultId === vaultId);
-    if (!vault) {
-      throw new Error('Vault not found');
-    }
+    if (!vault) throw new Error('Vault not found');
     return vault;
   };
 
-  const selectedVault = selectedVaultId !== null ? vaults.find((v) => v.vaultId === selectedVaultId) : null;
+  const selectedVault = selectedVaultId !== null
+    ? vaults.find((v) => v.vaultId === selectedVaultId)
+    : null;
 
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Flut — STX Savings Vault</h1>
-        <p>Lock your STX, designate beneficiaries, withdraw when unlocked</p>
+        <div className="app-header-toggle">
+          <ThemeToggle />
+        </div>
+        <div className="app-header-inner">
+          <h1>Flut — STX Savings Vault</h1>
+          <p>Lock your STX, designate beneficiaries, withdraw when unlocked</p>
+        </div>
       </header>
 
       <main className="app-main">
@@ -169,22 +179,87 @@ export const App: React.FC = () => {
             </button>
           </div>
 
+          {/* Live region announces filter result count to screen readers */}
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+          >
+            {hasActiveFilters
+              ? `${resultCount} of ${vaults.length} vaults shown`
+              : ''}
+          </div>
+
+          {vaults.length > 0 && (
+            <VaultSearchBar
+              filterState={filterState}
+              resultCount={resultCount}
+              totalCount={vaults.length}
+              hasActiveFilters={hasActiveFilters}
+              onSearchChange={setSearchQuery}
+              onStatusFilterChange={setStatusFilter}
+              onLockFilterChange={setLockFilter}
+              onSortFieldChange={setSortField}
+              onToggleSortDirection={toggleSortDirection}
+              onClearFilters={clearFilters}
+            />
+          )}
+
           {vaults.length === 0 ? (
             <div className="empty-state">
               <p>No vaults yet. Create one to get started!</p>
             </div>
+          ) : filteredVaults.length === 0 ? (
+            <div className="vault-list-empty">
+              <span className="empty-icon" aria-hidden="true">🔍</span>
+              <p>No vaults match your filters.</p>
+              {hasActiveFilters && (
+                <button className="clear-filters-btn" onClick={clearFilters} type="button">
+                  Clear filters
+                </button>
+              )}
+            </div>
           ) : (
             <ul className="vault-list">
-              {vaults.map((vault) => (
+              {filteredVaults.map((vault) => (
                 <li
                   key={vault.vaultId}
                   className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''}`}
                   onClick={() => setSelectedVaultId(vault.vaultId)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Vault ${vault.vaultId}, ${vault.amount} STX${vault.isWithdrawn ? ', withdrawn' : ''}`}
+                  onKeyDown={(e) => e.key === 'Enter' && setSelectedVaultId(vault.vaultId)}
                 >
-                  <span className="vault-id">Vault #{vault.vaultId}</span>
+                  <span className="vault-id">
+                    Vault #{vault.vaultId}
+                    <CopyButton
+                      text={String(vault.vaultId)}
+                      label={`Copy vault ${vault.vaultId} ID`}
+                      size="sm"
+                    />
+                  </span>
                   <span className="vault-amount">{vault.amount} STX</span>
+                  {vault.creator && (
+                    <span className="vault-creator address-with-copy">
+                      <code title={vault.creator}>
+                        {vault.creator.length > 12
+                          ? `${vault.creator.slice(0, 6)}…${vault.creator.slice(-4)}`
+                          : vault.creator}
+                      </code>
+                      <CopyButton
+                        text={vault.creator}
+                        label="Copy creator address"
+                        size="sm"
+                      />
+                    </span>
+                  )}
                   {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
                   {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
+                  {!vault.isWithdrawn && vault.currentBlockHeight >= vault.unlockHeight && (
+                    <span className="badge-unlocked">Unlocked</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -193,14 +268,20 @@ export const App: React.FC = () => {
 
         <section className="content">
           {selectedVault ? (
-            <VaultDetail
-              vaultId={selectedVault.vaultId}
-              onWithdraw={handleWithdraw}
-              onSetBeneficiary={handleSetBeneficiary}
-              onFetchVault={handleFetchVault}
-              onEmergencyWithdraw={handleEmergencyWithdraw}
-              penaltyRate={10}
-            />
+            <>
+              <VaultDetail
+                vaultId={selectedVault.vaultId}
+                onWithdraw={handleWithdraw}
+                onSetBeneficiary={handleSetBeneficiary}
+                onFetchVault={handleFetchVault}
+                onEmergencyWithdraw={handleEmergencyWithdraw}
+                penaltyRate={10}
+              />
+              <VaultHistory
+                vaultId={selectedVault.vaultId}
+                events={getEvents(selectedVault.vaultId)}
+              />
+            </>
           ) : (
             <div className="empty-content">
               <h2>No vault selected</h2>
@@ -220,5 +301,11 @@ export const App: React.FC = () => {
     </div>
   );
 };
+
+export const App: React.FC = () => (
+  <ThemeProvider>
+    <AppInner />
+  </ThemeProvider>
+);
 
 export default App;
