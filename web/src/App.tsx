@@ -2,8 +2,14 @@ import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
-import VaultSearchBar from './components/VaultSearchBar';
-import { useVaultFilter } from './hooks/useVaultFilter';
+import VaultHistory from './components/VaultHistory';
+import { useVaultHistory } from './hooks/useVaultHistory';
+import {
+  createVaultCreatedEvent,
+  createBeneficiarySetEvent,
+  createWithdrawalEvent,
+  createEmergencyWithdrawalEvent,
+} from './hooks/useVaultHistory';
 
 interface Vault {
   vaultId: number;
@@ -26,18 +32,7 @@ const AppInner: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [userAddress, setUserAddress] = useState<string | null>(null);
 
-  const {
-    filteredVaults,
-    filterState,
-    resultCount,
-    hasActiveFilters,
-    setSearchQuery,
-    setStatusFilter,
-    setLockFilter,
-    setSortField,
-    toggleSortDirection,
-    clearFilters,
-  } = useVaultFilter(vaults);
+  const { getEvents, addEvent } = useVaultHistory();
 
   useEffect(() => {
     initializeUser();
@@ -56,11 +51,14 @@ const AppInner: React.FC = () => {
       setLoading(true);
       setError('');
 
+      const vaultId = vaults.length;
+      const unlockHeight = lockDuration;
+
       const newVault: Vault = {
-        vaultId: vaults.length,
+        vaultId,
         creator: userAddress || 'unknown',
         amount,
-        unlockHeight: 0,
+        unlockHeight,
         createdAt: 0,
         isWithdrawn: false,
         beneficiary,
@@ -70,7 +68,15 @@ const AppInner: React.FC = () => {
       };
 
       setVaults([...vaults, newVault]);
-      console.log('Vault created:', newVault);
+
+      addEvent(
+        createVaultCreatedEvent(vaultId, 0, {
+          amount,
+          lockDuration,
+          unlockHeight,
+          beneficiary,
+        })
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create vault');
     } finally {
@@ -82,8 +88,21 @@ const AppInner: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      console.log('Withdrawing from vault:', vaultId);
-      setVaults((prev) => prev.map((v) => v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v));
+
+      const vault = vaults.find((v) => v.vaultId === vaultId);
+      if (!vault) throw new Error('Vault not found');
+
+      const updatedVaults = vaults.map((v) =>
+        v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
+      );
+      setVaults(updatedVaults);
+
+      addEvent(
+        createWithdrawalEvent(vaultId, vault.currentBlockHeight, {
+          amount: vault.amount,
+          recipient: vault.beneficiary ?? vault.creator,
+        })
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to withdraw');
     } finally {
@@ -95,8 +114,19 @@ const AppInner: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      console.log(`Setting beneficiary for vault ${vaultId}:`, beneficiary);
-      setVaults((prev) => prev.map((v) => v.vaultId === vaultId ? { ...v, beneficiary } : v));
+
+      const vault = vaults.find((v) => v.vaultId === vaultId);
+      const updatedVaults = vaults.map((v) =>
+        v.vaultId === vaultId ? { ...v, beneficiary } : v
+      );
+      setVaults(updatedVaults);
+
+      addEvent(
+        createBeneficiarySetEvent(vaultId, vault?.currentBlockHeight ?? 0, {
+          newBeneficiary: beneficiary,
+          previousBeneficiary: vault?.beneficiary,
+        })
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to set beneficiary');
     } finally {
@@ -108,8 +138,28 @@ const AppInner: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      console.log(`Emergency withdrawing from vault ${vaultId}`);
-      setVaults((prev) => prev.map((v) => v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v));
+
+      const vault = vaults.find((v) => v.vaultId === vaultId);
+      if (!vault) throw new Error('Vault not found');
+
+      const penaltyRate = 10;
+      const penaltyAmount = Math.floor((vault.amount * penaltyRate) / 100);
+      const netAmount = vault.amount - penaltyAmount;
+
+      const updatedVaults = vaults.map((v) =>
+        v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
+      );
+      setVaults(updatedVaults);
+
+      addEvent(
+        createEmergencyWithdrawalEvent(vaultId, vault.currentBlockHeight, {
+          amount: vault.amount,
+          penaltyAmount,
+          netAmount,
+          recipient: vault.beneficiary ?? vault.creator,
+          penaltyRate,
+        })
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process emergency withdrawal');
     } finally {
@@ -241,14 +291,20 @@ const AppInner: React.FC = () => {
 
         <section className="content">
           {selectedVault ? (
-            <VaultDetail
-              vaultId={selectedVault.vaultId}
-              onWithdraw={handleWithdraw}
-              onSetBeneficiary={handleSetBeneficiary}
-              onFetchVault={handleFetchVault}
-              onEmergencyWithdraw={handleEmergencyWithdraw}
-              penaltyRate={10}
-            />
+            <>
+              <VaultDetail
+                vaultId={selectedVault.vaultId}
+                onWithdraw={handleWithdraw}
+                onSetBeneficiary={handleSetBeneficiary}
+                onFetchVault={handleFetchVault}
+                onEmergencyWithdraw={handleEmergencyWithdraw}
+                penaltyRate={10}
+              />
+              <VaultHistory
+                vaultId={selectedVault.vaultId}
+                events={getEvents(selectedVault.vaultId)}
+              />
+            </>
           ) : (
             <div className="empty-content">
               <h2>No vault selected</h2>

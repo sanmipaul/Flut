@@ -1066,142 +1066,252 @@ button:disabled {
 }
 
 /* ============================================================
-   Input-with-copy layout (form inputs paired with CopyButton)
+   VaultHistory responsive overrides (mobile)
    ============================================================ */
 
-.input-with-copy {
+@media (max-width: 600px) {
+  .vault-history__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .history-item__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .history-item__block {
+    margin-left: 0;
+  }
+
+  .history-item__footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
+
+/* ============================================================
+   VaultHistory — transaction timeline
+   ============================================================ */
+
+.vault-history {
+  margin-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color, #ddd);
+  padding-top: var(--spacing-md);
+}
+
+.vault-history__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.vault-history__title {
+  margin: 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vault-history__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--primary-color, #5546ff);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.vault-history__toggle {
+  border: none;
+  background: none;
+  color: var(--primary-color, #5546ff);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-decoration: underline;
+}
+
+.vault-history__toggle:hover {
+  background: #f0efff;
+}
+
+.vault-history__empty {
+  color: var(--text-light, #666);
+  font-size: 0.875rem;
+  font-style: italic;
+  padding: var(--spacing-sm) 0;
+}
+
+/* ============================================================
+   History timeline list
+   ============================================================ */
+
+.vault-history__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+/* Vertical timeline line */
+.vault-history__list::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-color, #e5e7eb);
+}
+
+/* ============================================================
+   Individual history item
+   ============================================================ */
+
+.history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: var(--spacing-sm) 0;
+  position: relative;
+}
+
+.history-item__dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-color, #9ca3af);
+  margin-top: 5px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Severity-coloured dots */
+.history-item--info    .history-item__dot { background: #6366f1; }
+.history-item--success .history-item__dot { background: #22c55e; }
+.history-item--warning .history-item__dot { background: #f59e0b; }
+.history-item--danger  .history-item__dot { background: #ef4444; }
+
+.history-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-item__header {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
-.input-with-copy input {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* ============================================================
-   Address-with-copy layout
-   ============================================================ */
-
-.address-with-copy {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  max-width: 100%;
-}
-
-.address-with-copy code {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* ============================================================
-   CopyButton
-   ============================================================ */
-
-.copy-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border: 1px solid var(--border-color, #d1d5db);
-  border-radius: 4px;
-  background: var(--bg-surface, #ffffff);
-  color: var(--text-dark, #1a1a2e);
-  cursor: pointer;
-  font-family: inherit;
-  line-height: 1;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  white-space: nowrap;
-}
-
-.copy-btn:focus-visible {
-  outline: 2px solid var(--accent-color, #6f3ff5);
-  outline-offset: 2px;
-}
-
-/* Size variants */
-.copy-btn--sm {
-  padding: 3px 6px;
-  font-size: 0.75rem;
-}
-
-.copy-btn--md {
-  padding: 5px 10px;
-  font-size: 0.875rem;
-}
-
-/* State: idle */
-.copy-btn--idle {
-  border-color: var(--border-color, #d1d5db);
-}
-
-.copy-btn--idle:hover {
-  background: var(--bg-input, #f3f4f6);
-  border-color: var(--accent-color, #6f3ff5);
-}
-
-/* State: copied */
-.copy-btn--copied {
-  color: #15803d;
-  border-color: #86efac;
-  background: #f0fdf4;
-  animation: copy-flash 0.3s ease;
-}
-
-/* State: error */
-.copy-btn--error {
-  color: #b91c1c;
-  border-color: #fca5a5;
-  background: #fef2f2;
-}
-
-/* State: disabled */
-.copy-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.copy-btn__icon {
+.history-item__icon {
   font-style: normal;
-  user-select: none;
+  font-size: 1rem;
 }
 
-.copy-btn__text {
+.history-item__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-dark, #111827);
+}
+
+.history-item__block {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-light, #6b7280);
+  white-space: nowrap;
+}
+
+.history-item__description {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-light, #374151);
+  line-height: 1.4;
+}
+
+.history-item__footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.history-item__time {
+  font-size: 0.7rem;
+  color: var(--text-light, #9ca3af);
+}
+
+.history-item__tx {
+  font-size: 0.7rem;
+  color: var(--text-light, #9ca3af);
+}
+
+.history-item__tx code {
   font-size: inherit;
-  user-select: none;
 }
 
-@keyframes copy-flash {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.12); }
-  100% { transform: scale(1); }
+/* ============================================================
+   Loading skeleton
+   ============================================================ */
+
+.vault-history__loading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--spacing-sm) 0;
 }
 
-/* Dark mode overrides for CopyButton */
-[data-theme='dark'] .copy-btn {
-  background: var(--bg-surface, #1e1e2e);
-  border-color: var(--border-color, #3a3a5c);
+.vault-history__skeleton {
+  display: block;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite;
+  width: 100%;
+}
+
+.vault-history__skeleton--short {
+  width: 55%;
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Dark mode overrides for VaultHistory */
+[data-theme='dark'] .vault-history {
+  border-top-color: var(--border-color, #3a3a5c);
+}
+
+[data-theme='dark'] .vault-history__toggle:hover {
+  background: #2a2a4e;
+}
+
+[data-theme='dark'] .vault-history__list::before {
+  background: var(--border-color, #3a3a5c);
+}
+
+[data-theme='dark'] .history-item__label {
   color: var(--text-dark, #e2e8f0);
 }
 
-[data-theme='dark'] .copy-btn--idle:hover {
-  background: var(--bg-input, #2a2a3e);
-  border-color: #a78bfa;
-}
-
-[data-theme='dark'] .copy-btn--copied {
-  color: #4ade80;
-  border-color: #166534;
-  background: #052e16;
-}
-
-[data-theme='dark'] .copy-btn--error {
-  color: #f87171;
-  border-color: #7f1d1d;
-  background: #450a0a;
+[data-theme='dark'] .vault-history__skeleton {
+  background: linear-gradient(90deg, #2d2d4e 25%, #3a3a5c 50%, #2d2d4e 75%);
+  background-size: 200% 100%;
 }
