@@ -183,6 +183,9 @@ export const App: React.FC = () => {
                   <span className="vault-amount">{vault.amount} STX</span>
                   {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
                   {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
+                  {!vault.isWithdrawn && vault.currentBlockHeight >= vault.unlockHeight && (
+                    <span className="badge-unlocked">Unlocked</span>
+                  )}
                 </li>
               ))}
             </ul>
