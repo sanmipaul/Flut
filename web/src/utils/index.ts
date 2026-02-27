@@ -9,6 +9,7 @@ export {
   formatMicroStx,
   formatStxWhole,
   formatStxPenalty,
+  formatStxDiff,
   parseStxInput,
 } from './formatStx';
 export type { FormatStxOptions } from './formatStx';

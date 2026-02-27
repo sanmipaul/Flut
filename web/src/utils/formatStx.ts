@@ -136,6 +136,26 @@ export function formatStxPenalty(penaltyStx: number): string {
 }
 
 /**
+ * Formats a signed STX difference (+/-) for display in history or comparison views.
+ * Positive values get a "+" prefix, negative values get "−".
+ * @example
+ *   formatStxDiff(500)   → "+500 STX"
+ *   formatStxDiff(-100)  → "−100 STX"
+ *   formatStxDiff(0)     → "0 STX"
+ */
+export function formatStxDiff(diffStx: number, decimals = 2): string {
+  if (!Number.isFinite(diffStx)) return `— ${STX_SYMBOL}`;
+  if (diffStx === 0) return `0 ${STX_SYMBOL}`;
+  const abs = Math.abs(diffStx);
+  const formatted = abs.toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: decimals,
+  });
+  const sign = diffStx > 0 ? '+' : '−';
+  return `${sign}${formatted} ${STX_SYMBOL}`;
+}
+
+/**
  * Parses a user-typed string into a STX number.
  * Returns NaN for non-numeric input.
  * Handles common input patterns: "1,234.56", "1.5M", "500k".
