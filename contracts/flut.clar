@@ -681,30 +681,33 @@
 
 ;; Emergency withdraw before unlock with penalty
 (define-public (emergency-withdraw (vault-id uint))
-  (let
-    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
-     (penalty-amount (calculate-penalty (get amount vault)))
-     (user-amount (- (get amount vault) penalty-amount))
-     (recipient (get-withdrawal-recipient vault))
-     (vault-amount (get amount vault))
-    )
-    
-    ;; Verify caller is authorized to withdraw (vault creator)
-    (asserts! (is-authorized-withdrawer (get creator vault) tx-sender) ERR-UNAUTHORIZED)
-    
-    ;; Verify vault hasn't been withdrawn
-    (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
-    
-    ;; Validate withdrawal amount is valid
-    (asserts! (is-valid-withdrawal-amount vault-amount u0) ERR-INVALID-WITHDRAWAL-AMOUNT)
-    
-    ;; Verify sufficient balance
-    (asserts! (> vault-amount u0) ERR-INSUFFICIENT-BALANCE)
-    
-    ;; Verify recipient is valid
-    (asserts! (is-valid-beneficiary recipient) ERR-RECIPIENT-CANNOT-WITHDRAW)
+  (begin
+    ;; Check if emergency withdrawals are enabled
+    (asserts! (var-get emergency-withdrawal-enabled) ERR-EMERGENCY-WITHDRAWAL-DISABLED)
+    (let
+      ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
+       (penalty-amount (calculate-penalty (get amount vault)))
+       (user-amount (- (get amount vault) penalty-amount))
+       (recipient (get-withdrawal-recipient vault))
+       (vault-amount (get amount vault))
+      )
+      
+      ;; Verify caller is authorized to withdraw (vault creator)
+      (asserts! (is-authorized-withdrawer (get creator vault) tx-sender) ERR-UNAUTHORIZED)
+      
+      ;; Verify vault hasn't been withdrawn
+      (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+      
+      ;; Validate withdrawal amount is valid
+      (asserts! (is-valid-withdrawal-amount vault-amount u0) ERR-INVALID-WITHDRAWAL-AMOUNT)
+      
+      ;; Verify sufficient balance
+      (asserts! (> vault-amount u0) ERR-INSUFFICIENT-BALANCE)
+      
+      ;; Verify recipient is valid
+      (asserts! (is-valid-beneficiary recipient) ERR-RECIPIENT-CANNOT-WITHDRAW)
 
-    ;; Revoke stacking delegation before transferring funds out
+      ;; Revoke stacking delegation before transferring funds out
     (if (get stacking-enabled vault)
       (try-revoke-stacking)
       false
@@ -768,6 +771,25 @@
     (asserts! (is-eq tx-sender (var-get penalty-destination)) (err u8))
     
     (var-set penalty-destination new-destination)
+    (ok true)
+  )
+)
+
+;; Enable or disable emergency withdrawals (contract owner only)
+;;
+;; This administrative function allows the designated owner (currently the
+;; penalty-destination address) to toggle the emergency withdrawal feature
+;; on or off. Disabling the feature prevents any emergency-withdraw calls,
+;; which can be useful during an investigation or after migration.
+;;
+;; @param enabled - boolean flag to enable (true) or disable (false)
+;; @return (ok true) on success or error code (ERR-NOT-PENALTY-OWNER if caller
+;; is not the owner)
+(define-public (set-emergency-withdrawal-enabled (enabled bool))
+  (begin
+    ;; Restrict to contract owner (reuse penalty-destination for ownership)
+    (asserts! (is-eq tx-sender (var-get penalty-destination)) (err u8))
+    (var-set emergency-withdrawal-enabled enabled)
     (ok true)
   )
 )
@@ -838,6 +860,13 @@
 ;; Get maximum total vault amount
 (define-read-only (get-max-vault-total-amount)
   MAX_VAULT_TOTAL_AMOUNT
+)
+
+;; Get emergency withdrawal enabled flag
+;;
+;; @return bool - true if emergency withdrawals are currently enabled
+(define-read-only (get-emergency-withdrawal-enabled)
+  (var-get emergency-withdrawal-enabled)
 )
 
 ;; Check if additional deposit would exceed limits
@@ -939,15 +968,18 @@
 
 ;; Check if vault is ready for emergency withdrawal
 (define-read-only (can-emergency-withdraw-vault (vault-id uint) (caller principal))
-  (let
-    ((vault (map-get? vaults { vault-id: vault-id })))
-    (match vault
-      v (and
-          (is-authorized-withdrawer (get creator v) caller)
-          (not (get is-withdrawn v))
-          (> (get amount v) u0)
-        )
-      false
+  (and
+    (var-get emergency-withdrawal-enabled)
+    (let
+      ((vault (map-get? vaults { vault-id: vault-id })))
+      (match vault
+        v (and
+            (is-authorized-withdrawer (get creator v) caller)
+            (not (get is-withdrawn v))
+            (> (get amount v) u0)
+          )
+        false
+      )
     )
   )
 )
