@@ -45,7 +45,7 @@ Sets or updates the beneficiary for a vault.
 - `vault-id` (uint): ID of the vault
 - `beneficiary` (principal): Address to receive funds on unlock
 
-**Returns:** (ok true) or error code
+**Returns:** (ok true) or error code (see README error code table)
 
 ```clarity
 (contract-call? 'ST1.flut set-beneficiary u0 'SP1BENEFICIARY)
@@ -57,7 +57,7 @@ Withdraws vault funds to the beneficiary (if set) or creator.
 **Parameters:**
 - `vault-id` (uint): ID of the vault to withdraw from
 
-**Returns:** (ok true) or error code
+**Returns:** (ok true) or error code (refer to README error table)
 
 ```clarity
 (contract-call? 'ST1.flut withdraw u0)
@@ -70,12 +70,11 @@ Adds additional funds to an existing vault.
 - `vault-id` (uint): ID of the vault
 - `amount` (uint): Additional amount in microSTX
 
-**Returns:** (ok true) or error code
+**Returns:** (ok true) or error code (see README error code table)
 
 ```clarity
 (contract-call? 'ST1.flut deposit u0 u500000)
 ```
-
 ### Read-Only Functions
 
 - `get-vault` (vault-id) → vault details
