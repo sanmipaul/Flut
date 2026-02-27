@@ -93,6 +93,14 @@
   )
 )
 
+;; Test: deposit with zero amount returns error code
+(define-private (test-deposit-zero-error)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut deposit u0 u0)))
+    (match result
+      success (err "✗ Zero deposit should not succeed")
+      error (ok "✓ Deposit zero amount error returned"))))
+
 ;; Test: Get penalty rate
 (define-private (test-get-penalty-rate)
   (let
