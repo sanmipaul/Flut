@@ -42,6 +42,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [theme]);
 
+  // Keyboard shortcut: Alt+D toggles dark mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key === 'd') {
+        setThemeState((prev) => (prev === 'light' ? 'dark' : 'light'));
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const setTheme = useCallback((t: Theme) => {
     setThemeState(t);
   }, []);
