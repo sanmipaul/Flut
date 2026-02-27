@@ -111,8 +111,19 @@ export function useVaultFilter<T extends FilterableVault>(
   const setLockFilter = (lockFilter: VaultLockFilter) =>
     setFilterState((s) => ({ ...s, lockFilter }));
 
+  /**
+   * Sets the sort field.  When the same field is selected again the sort
+   * direction is automatically reversed (toggle behaviour).
+   */
   const setSortField = (sortField: VaultSortField) =>
-    setFilterState((s) => ({ ...s, sortField }));
+    setFilterState((s) => ({
+      ...s,
+      sortField,
+      sortDirection:
+        s.sortField === sortField
+          ? s.sortDirection === 'asc' ? 'desc' : 'asc'
+          : 'asc',
+    }));
 
   const setSortDirection = (sortDirection: SortDirection) =>
     setFilterState((s) => ({ ...s, sortDirection }));
