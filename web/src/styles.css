@@ -727,6 +727,24 @@ button:disabled {
 }
 
 /* ============================================================
+   Toast responsive overrides (mobile)
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .toast-container {
+    /* Full-width strip at bottom of screen on mobile */
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    top: auto !important;
+    transform: none !important;
+    max-width: none;
+    width: auto;
+    flex-direction: column-reverse;
+  }
+}
+
+/* ============================================================
    ToastContainer — fixed overlay stack
    ============================================================ */
 
