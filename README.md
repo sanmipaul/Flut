@@ -48,6 +48,9 @@ This project was built as part of the [Stacks Builder Rewards](https://app.talen
 - ✅ **Deposit STX** into your vault at any time before unlock
 - ✅ **Time-lock enforcement** via Bitcoin block height
 - ✅ **Single-click withdrawal** once the lock period expires
+- 🛡️ **Partial withdrawals supported** (specify amount or withdraw full balance)
+- 🛑 **Withdrawal safety checks** with authorization, amount validation, and audit logs
+- ⚠️ **Emergency withdrawal toggle** controlled by owner with penalty and tracking
 - ✅ **Multiple vaults per wallet** — save for different goals
 - ✅ **Vault labeling** — name your vaults (e.g. "House Fund", "Emergency STX")
 - ✅ **Public leaderboard** — see top savers in the ecosystem
