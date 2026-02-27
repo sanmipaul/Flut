@@ -861,3 +861,22 @@ button:disabled {
 .clear-filters-btn:hover {
   opacity: 0.75;
 }
+
+/* Empty search / filter results state */
+.vault-list-empty {
+  padding: var(--spacing-lg) var(--spacing-md);
+  text-align: center;
+  color: var(--text-light);
+}
+
+.vault-list-empty p {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 0.9rem;
+}
+
+.vault-list-empty .empty-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  opacity: 0.5;
+}
