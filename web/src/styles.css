@@ -700,6 +700,77 @@ button:disabled {
 }
 
 /* ============================================================
+   StxAmountInput — validated STX amount input
+   ============================================================ */
+
+.stx-amount-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stx-amount-input__field {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-input, #fff);
+  transition: border-color 0.15s;
+}
+
+.stx-amount-input__field:focus-within {
+  border-color: var(--primary-color, #5546ff);
+  box-shadow: 0 0 0 3px rgba(85, 70, 255, 0.15);
+}
+
+.stx-amount-input__text {
+  flex: 1 1 auto;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  color: var(--text-dark, #111827);
+  outline: none;
+  min-width: 0;
+}
+
+.stx-amount-input__text--error {
+  color: var(--error-color, #dc2626);
+}
+
+.stx-amount-input__field:has(.stx-amount-input__text--error) {
+  border-color: var(--error-color, #dc2626);
+}
+
+.stx-amount-input__suffix {
+  padding: 8px 10px;
+  background: var(--bg-surface, #f9fafb);
+  border-left: 1px solid var(--border-color, #d1d5db);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-light, #6b7280);
+  user-select: none;
+}
+
+.stx-amount-input__error {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--error-color, #dc2626);
+}
+
+/* Dark mode */
+[data-theme='dark'] .stx-amount-input__field {
+  background: var(--bg-input, #1e1e2e);
+  border-color: var(--border-color, #3a3a5c);
+}
+
+[data-theme='dark'] .stx-amount-input__suffix {
+  background: var(--bg-surface, #16162a);
+  border-left-color: var(--border-color, #3a3a5c);
+}
+
+/* ============================================================
    StxAmount — semantic amount display
    ============================================================ */
 
