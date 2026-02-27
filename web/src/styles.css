@@ -182,11 +182,12 @@ body {
   padding: var(--spacing-md);
   border-bottom: 1px solid var(--border-color);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, border-color 0.25s ease, color 0.25s ease;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--spacing-sm);
+  color: var(--text-dark);
 }
 
 .vault-item:hover {
