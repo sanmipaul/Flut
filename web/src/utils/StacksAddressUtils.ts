@@ -94,3 +94,22 @@ export function getAddressVersion(address: string): number | null {
   const prefix = address.trim().toUpperCase().slice(0, 2);
   return ADDRESS_VERSIONS[prefix] ?? null;
 }
+
+/**
+ * Returns a shortened display form of a Stacks address, e.g.
+ * "SP2J6Z…EZ5V2V5RB9MP66SW86PYKKNRV9EJ" → "SP2J6Z…EJ"
+ *
+ * @param address - Full Stacks address
+ * @param leadChars - Number of leading characters to keep (default 8)
+ * @param tailChars - Number of trailing characters to keep (default 4)
+ */
+export function truncateAddress(
+  address: string,
+  leadChars: number = 8,
+  tailChars: number = 4
+): string {
+  if (!address) return '';
+  const trimmed = address.trim();
+  if (trimmed.length <= leadChars + tailChars + 1) return trimmed;
+  return `${trimmed.slice(0, leadChars)}…${trimmed.slice(-tailChars)}`;
+}
