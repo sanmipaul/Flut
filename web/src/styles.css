@@ -698,3 +698,204 @@ button:disabled {
     width: 100%;
   }
 }
+
+/* ============================================================
+   VaultHistory — transaction timeline
+   ============================================================ */
+
+.vault-history {
+  margin-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color, #ddd);
+  padding-top: var(--spacing-md);
+}
+
+.vault-history__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.vault-history__title {
+  margin: 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vault-history__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--primary-color, #5546ff);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.vault-history__toggle {
+  border: none;
+  background: none;
+  color: var(--primary-color, #5546ff);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-decoration: underline;
+}
+
+.vault-history__toggle:hover {
+  background: #f0efff;
+}
+
+.vault-history__empty {
+  color: var(--text-light, #666);
+  font-size: 0.875rem;
+  font-style: italic;
+  padding: var(--spacing-sm) 0;
+}
+
+/* ============================================================
+   History timeline list
+   ============================================================ */
+
+.vault-history__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+/* Vertical timeline line */
+.vault-history__list::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-color, #e5e7eb);
+}
+
+/* ============================================================
+   Individual history item
+   ============================================================ */
+
+.history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: var(--spacing-sm) 0;
+  position: relative;
+}
+
+.history-item__dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-color, #9ca3af);
+  margin-top: 5px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Severity-coloured dots */
+.history-item--info    .history-item__dot { background: #6366f1; }
+.history-item--success .history-item__dot { background: #22c55e; }
+.history-item--warning .history-item__dot { background: #f59e0b; }
+.history-item--danger  .history-item__dot { background: #ef4444; }
+
+.history-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-item__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.history-item__icon {
+  font-style: normal;
+  font-size: 1rem;
+}
+
+.history-item__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-dark, #111827);
+}
+
+.history-item__block {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-light, #6b7280);
+  white-space: nowrap;
+}
+
+.history-item__description {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-light, #374151);
+  line-height: 1.4;
+}
+
+.history-item__footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.history-item__time {
+  font-size: 0.7rem;
+  color: var(--text-light, #9ca3af);
+}
+
+.history-item__tx {
+  font-size: 0.7rem;
+  color: var(--text-light, #9ca3af);
+}
+
+.history-item__tx code {
+  font-size: inherit;
+}
+
+/* ============================================================
+   Loading skeleton
+   ============================================================ */
+
+.vault-history__loading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--spacing-sm) 0;
+}
+
+.vault-history__skeleton {
+  display: block;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite;
+  width: 100%;
+}
+
+.vault-history__skeleton--short {
+  width: 55%;
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
