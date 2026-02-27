@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
 import AddressInput from './AddressInput';
-import { AddressValidationResult } from '../utils/StacksAddressUtils';
+import { AddressValidationResult, areAddressesOnSameNetwork } from '../utils/StacksAddressUtils';
 
 interface Vault {
   vaultId: number;
@@ -102,10 +102,16 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
     }
   };
 
+  const networkMismatch =
+    vault !== null &&
+    beneficiaryValidation?.isValid === true &&
+    !areAddressesOnSameNetwork(vault.creator, beneficiaryValidation.normalised);
+
   const canSetBeneficiary =
     newBeneficiary.trim() !== '' &&
     beneficiaryValidation !== null &&
-    beneficiaryValidation.isValid;
+    beneficiaryValidation.isValid &&
+    !networkMismatch;
 
   if (loading) {
     return <div className="vault-detail loading">Loading vault details...</div>;
@@ -197,6 +203,11 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
                 disabled={submitting}
                 required
               />
+              {networkMismatch && (
+                <p className="warning-text" role="alert">
+                  The beneficiary address is on a different network than this vault's creator. Please use a matching network address.
+                </p>
+              )}
               <div className="beneficiary-form-actions">
                 <button
                   className="btn-primary"
