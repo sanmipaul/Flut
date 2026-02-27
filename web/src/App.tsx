@@ -22,7 +22,7 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [userAddress, setUserAddress] = useState<string | null>(null);
 
-  const { toasts, dismissToast, toast } = useToast();
+  const { toasts, dismissToast, clearAll, toast } = useToast();
 
   useEffect(() => {
     initializeUser();
@@ -216,7 +216,7 @@ export const App: React.FC = () => {
         onCreateVault={handleCreateVault}
       />
 
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} onClearAll={clearAll} />
     </div>
   );
 };

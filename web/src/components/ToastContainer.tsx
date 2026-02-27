@@ -13,18 +13,25 @@ import ReactDOM from 'react-dom';
 import type { Toast, ToastPosition } from '../types/Toast';
 import ToastItem from './ToastItem';
 
+/** Show "Dismiss all" button when this many or more toasts are visible */
+const DISMISS_ALL_THRESHOLD = 3;
+
 export interface ToastContainerProps {
   toasts: Toast[];
   onDismiss: (id: string) => void;
+  onClearAll?: () => void;
   position?: ToastPosition;
 }
 
 const ToastContainer: React.FC<ToastContainerProps> = ({
   toasts,
   onDismiss,
+  onClearAll,
   position = 'top-right',
 }) => {
   if (toasts.length === 0) return null;
+
+  const showClearAll = onClearAll && toasts.length >= DISMISS_ALL_THRESHOLD;
 
   const container = (
     <div
@@ -33,6 +40,16 @@ const ToastContainer: React.FC<ToastContainerProps> = ({
       aria-live="polite"
       aria-relevant="additions removals"
     >
+      {showClearAll && (
+        <button
+          type="button"
+          className="toast-dismiss-all"
+          onClick={onClearAll}
+          aria-label="Dismiss all notifications"
+        >
+          Dismiss all ({toasts.length})
+        </button>
+      )}
       {toasts.map((t) => (
         <ToastItem key={t.id} toast={t} onDismiss={onDismiss} />
       ))}

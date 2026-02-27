@@ -745,6 +745,27 @@ button:disabled {
 }
 
 /* ============================================================
+   Dismiss-all button (shown when >= 3 toasts are stacked)
+   ============================================================ */
+
+.toast-dismiss-all {
+  align-self: flex-end;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  pointer-events: all;
+  transition: background 0.15s;
+}
+
+.toast-dismiss-all:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+/* ============================================================
    ToastContainer — fixed overlay stack
    ============================================================ */
 
