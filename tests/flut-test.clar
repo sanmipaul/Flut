@@ -93,6 +93,14 @@
   )
 )
 
+;; Test: deposit with zero amount returns error code
+(define-private (test-deposit-zero-error)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut deposit u0 u0)))
+    (match result
+      success (err "✗ Zero deposit should not succeed")
+      error (ok "✓ Deposit zero amount error returned"))))
+
 ;; Test: Get penalty rate
 (define-private (test-get-penalty-rate)
   (let
@@ -285,6 +293,26 @@
     )
   )
 )
+
+;; Test: error description helper returns expected string
+(define-private (test-error-description)
+  (let
+    ((desc (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-error-description u5)))
+    (match desc
+      s (begin
+            (asserts! (is-eq s "Invalid amount") (err "Description mismatched"))
+            (ok "✓ Error description helper test passed"))
+      _ (err "✗ Error description call returned unexpected type"))))
+
+;; Additional test: description for deposit limit error
+(define-private (test-error-description-deposit-limit)
+  (let
+    ((desc (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-error-description u18)))
+    (match desc
+      s (begin
+            (asserts! (is-eq s "Deposit amount exceeded"))
+            (ok "✓ Deposit limit error description test passed"))
+      _ (err "✗ Failed to get description for deposit limit"))))
 
 ;; End of new withdrawal safety tests
 

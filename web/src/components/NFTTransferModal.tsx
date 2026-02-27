@@ -37,7 +37,16 @@ const NFTTransferModal: React.FC<NFTTransferModalProps> = ({
       await onTransfer(tokenId, recipient);
       setRecipient('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Transfer failed');
+      let message = err instanceof Error ? err.message : String(err);
+      const codeMatch = message.match(/(\d+)/);
+      if (codeMatch) {
+        const code = parseInt(codeMatch[1], 10);
+        try {
+          const { formatError } = await import('../utils/VaultContractAPI');
+          message = formatError(code);
+        } catch {}
+      }
+      setError(message);
     } finally {
       setLoading(false);
     }

@@ -128,7 +128,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ vaults = [], onCreateVault
       await onWithdraw(vaultId);
     } catch (err) {
       console.error('Failed to withdraw:', err);
-      throw err;
+      // format error if possible
+      let message = err instanceof Error ? err.message : String(err);
+      const codeMatch = message.match(/(\d+)/);
+      if (codeMatch) {
+        const code = parseInt(codeMatch[1], 10);
+        try {
+          const { formatError } = await import('../utils/VaultContractAPI');
+          message = formatError(code);
+        } catch {}
+      }
+      throw new Error(message);
     }
   };
 

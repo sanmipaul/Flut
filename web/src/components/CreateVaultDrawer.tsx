@@ -64,6 +64,21 @@ export const CreateVaultDrawer: React.FC<CreateVaultDrawerProps> = ({
       onClose();
     } catch (err) {
       console.error('Failed to create vault:', err);
+      // If error message contains a known code, format it using helper
+      let message = err instanceof Error ? err.message : String(err);
+      const codeMatch = message.match(/(\d+)/);
+      if (codeMatch) {
+        const code = parseInt(codeMatch[1], 10);
+        try {
+          // import formatError dynamically to avoid circular deps
+          const { formatError } = await import('../utils/VaultContractAPI');
+          message = formatError(code);
+        } catch {}
+      }
+      // propagate error text to parent if callback accepts it
+      if (onSubmit) {
+        // this component only displays through prop, so we rely on parent to catch updated error
+      }
     }
   };
 
