@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
+import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
 
 interface Vault {
@@ -162,7 +163,14 @@ export const App: React.FC = () => {
                   className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''}`}
                   onClick={() => setSelectedVaultId(vault.vaultId)}
                 >
-                  <span className="vault-id">Vault #{vault.vaultId}</span>
+                  <span className="vault-id">
+                    Vault #{vault.vaultId}
+                    <CopyButton
+                      text={String(vault.vaultId)}
+                      label={`Copy vault ${vault.vaultId} ID`}
+                      size="sm"
+                    />
+                  </span>
                   <span className="vault-amount">{vault.amount} STX</span>
                   {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
                   {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
