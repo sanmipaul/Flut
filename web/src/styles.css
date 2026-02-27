@@ -111,6 +111,11 @@ body {
   background-color: var(--secondary-color);
 }
 
+.vault-item:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
 .vault-item.active {
   background-color: var(--primary-color);
   color: white;
