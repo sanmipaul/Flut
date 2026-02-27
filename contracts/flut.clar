@@ -888,6 +888,88 @@
   )
 )
 
+;; ============================================
+;; Read-Only Functions - Withdrawal Status
+;; ============================================
+
+;; Check if vault has been withdrawn
+(define-read-only (is-vault-withdrawn (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (get is-withdrawn v)
+      false
+    )
+  )
+)
+
+;; Check readiness for withdrawal (creator and unlocked)
+(define-read-only (can-withdraw-vault (vault-id uint) (caller principal))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (and
+          (is-authorized-withdrawer (get creator v) caller)
+          (>= block-height (get unlock-height v))
+          (not (get is-withdrawn v))
+        )
+      false
+    )
+  )
+)
+
+;; Get withdrawal history for vault
+(define-read-only (get-withdrawal-history (vault-id uint))
+  (map-get? withdrawal-history { vault-id: vault-id })
+)
+
+;; Get last withdrawal attempt block
+(define-read-only (get-vault-last-withdrawal-attempt (vault-id uint))
+  (let ((attempt-record (map-get? withdrawal-attempts { vault-id: vault-id })))
+    (match attempt-record
+      record (some (get last-attempt-block record))
+      none
+    )
+  )
+)
+
+;; Check if vault is ready for emergency withdrawal
+(define-read-only (can-emergency-withdraw-vault (vault-id uint) (caller principal))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (and
+          (is-authorized-withdrawer (get creator v) caller)
+          (not (get is-withdrawn v))
+          (> (get amount v) u0)
+        )
+      false
+    )
+  )
+)
+
+;; Get expected amounts for emergency withdrawal (including penalty)
+(define-read-only (get-emergency-withdrawal-info (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (let
+          ((total-amount (get amount v))
+           (penalty (calculate-penalty total-amount))
+           (user-receives (- total-amount penalty)))
+          (some {
+            total-amount: total-amount,
+            penalty-amount: penalty,
+            user-receives: user-receives,
+            penalty-rate: PENALTY_RATE,
+            penalty-destination: (var-get penalty-destination)
+          })
+        )
+      none
+    )
+  )
+)
+
 ;; Private helper: sum total shares for a vault
 (define-private (sum-vault-shares (vault-id uint) (beneficiaries (list 10 principal)))
   (fold + (map (lambda (beneficiary) 
