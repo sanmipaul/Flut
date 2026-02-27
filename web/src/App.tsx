@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import VaultDetail from './components/VaultDetail';
+import ToastContainer from './components/ToastContainer';
+import { useToast } from './hooks/useToast';
 
 interface Vault {
   vaultId: number;
@@ -18,18 +20,16 @@ export const App: React.FC = () => {
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
   const [userAddress, setUserAddress] = useState<string | null>(null);
 
+  const { toasts, dismissToast, toast } = useToast();
+
   useEffect(() => {
-    // Initialize user connection
     initializeUser();
   }, []);
 
   const initializeUser = async () => {
     try {
-      // This would connect to Stacks wallet
-      // For now, this is a placeholder
       console.log('Initializing user connection...');
     } catch (err) {
       console.error('Failed to initialize user:', err);
@@ -39,15 +39,12 @@ export const App: React.FC = () => {
   const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string) => {
     try {
       setLoading(true);
-      setError('');
 
-      // Call smart contract create-vault function
-      // This is a placeholder that would call the actual blockchain function
       const newVault: Vault = {
         vaultId: vaults.length,
         creator: userAddress || 'unknown',
         amount,
-        unlockHeight: 0, // Would be set by contract
+        unlockHeight: lockDuration,
         createdAt: 0,
         isWithdrawn: false,
         beneficiary,
@@ -55,9 +52,13 @@ export const App: React.FC = () => {
       };
 
       setVaults([...vaults, newVault]);
-      console.log('Vault created:', newVault);
+      toast.success('Vault created!', {
+        description: `${amount} STX locked for ${lockDuration} blocks${beneficiary ? ' with beneficiary' : ''}.`,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create vault');
+      toast.error('Failed to create vault', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -66,17 +67,22 @@ export const App: React.FC = () => {
   const handleWithdraw = async (vaultId: number) => {
     try {
       setLoading(true);
-      setError('');
 
-      // Call smart contract withdraw function
-      console.log('Withdrawing from vault:', vaultId);
-
+      const vault = vaults.find((v) => v.vaultId === vaultId);
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
       );
       setVaults(updatedVaults);
+
+      toast.success('Withdrawal successful!', {
+        description: vault
+          ? `${vault.amount} STX sent to ${vault.beneficiary ?? vault.creator}.`
+          : undefined,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to withdraw');
+      toast.error('Withdrawal failed', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -85,17 +91,19 @@ export const App: React.FC = () => {
   const handleSetBeneficiary = async (vaultId: number, beneficiary: string) => {
     try {
       setLoading(true);
-      setError('');
-
-      // Call smart contract set-beneficiary function
-      console.log(`Setting beneficiary for vault ${vaultId}:`, beneficiary);
 
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, beneficiary } : v
       );
       setVaults(updatedVaults);
+
+      toast.success('Beneficiary updated', {
+        description: `Vault #${vaultId} will pay out to ${beneficiary}.`,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to set beneficiary');
+      toast.error('Failed to set beneficiary', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -104,17 +112,28 @@ export const App: React.FC = () => {
   const handleEmergencyWithdraw = async (vaultId: number) => {
     try {
       setLoading(true);
-      setError('');
 
-      // Call smart contract emergency-withdraw function
-      console.log(`Emergency withdrawing from vault ${vaultId}`);
+      const vault = vaults.find((v) => v.vaultId === vaultId);
+      const penaltyRate = 10;
+      const netAmount = vault
+        ? vault.amount - Math.floor((vault.amount * penaltyRate) / 100)
+        : 0;
 
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
       );
       setVaults(updatedVaults);
+
+      toast.warning('Emergency withdrawal complete', {
+        description: vault
+          ? `${netAmount} STX received after ${penaltyRate}% penalty.`
+          : undefined,
+        duration: 8000,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to process emergency withdrawal');
+      toast.error('Emergency withdrawal failed', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -197,7 +216,7 @@ export const App: React.FC = () => {
         onCreateVault={handleCreateVault}
       />
 
-      {error && <div className="error-banner">{error}</div>}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 };
