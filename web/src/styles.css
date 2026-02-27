@@ -816,3 +816,46 @@ button:disabled {
     width: 100%;
   }
 }
+
+/* ============================================================
+   Dark mode overrides for address validation components
+   ============================================================ */
+
+[data-theme='dark'] .address-input-valid {
+  background-color: rgba(45, 214, 92, 0.05);
+}
+
+[data-theme='dark'] .address-input-invalid {
+  background-color: rgba(240, 100, 116, 0.05);
+}
+
+[data-theme='dark'] .address-input-valid:focus {
+  box-shadow: 0 0 0 3px rgba(45, 214, 92, 0.2) !important;
+}
+
+[data-theme='dark'] .address-input-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(240, 100, 116, 0.2) !important;
+}
+
+[data-theme='dark'] .network-badge.mainnet {
+  background-color: rgba(123, 111, 255, 0.15);
+  border-color: rgba(123, 111, 255, 0.3);
+}
+
+[data-theme='dark'] .network-badge.testnet {
+  background-color: rgba(255, 174, 66, 0.12);
+  color: #d4860a;
+  border-color: rgba(255, 174, 66, 0.3);
+}
+
+[data-theme='dark'] .address-error-text {
+  color: var(--error-color);
+}
+
+[data-theme='dark'] .address-help-text {
+  color: var(--text-light);
+}
+
+[data-theme='dark'] .beneficiary-form-stack {
+  border-color: var(--border-color);
+}
