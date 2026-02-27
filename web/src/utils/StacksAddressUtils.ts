@@ -160,6 +160,25 @@ export function isTestnetAddress(address: string): boolean {
   return getAddressNetwork(address) === 'testnet';
 }
 
+/**
+ * Returns true when the address is a multi-signature Stacks address (SM or SN prefix).
+ * Multi-sig addresses require multiple signers to authorise transactions.
+ */
+export function isMultiSigAddress(address: string): boolean {
+  if (!address) return false;
+  const prefix = address.trim().toUpperCase().slice(0, 2);
+  return prefix === 'SM' || prefix === 'SN';
+}
+
+/**
+ * Returns true when the address is a single-signature Stacks address (SP or ST prefix).
+ */
+export function isSingleSigAddress(address: string): boolean {
+  if (!address) return false;
+  const prefix = address.trim().toUpperCase().slice(0, 2);
+  return prefix === 'SP' || prefix === 'ST';
+}
+
 /** Result returned by the composite `validateAddress` function */
 export interface AddressValidationResult {
   /** Whether the address passes all validation rules */
