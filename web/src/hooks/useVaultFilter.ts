@@ -51,6 +51,24 @@ export interface UseVaultFilterReturn<T extends FilterableVault> {
 }
 
 /**
+ * useVaultFilter
+ *
+ * Manages search, filter, and sort state for a list of vaults.
+ *
+ * Features:
+ * - Free-text search across vault ID and creator address (debounced 200 ms)
+ * - Status filter: all | active | withdrawn
+ * - Lock filter: all | locked | unlocked
+ * - Multi-field sort: id | amount | unlockHeight | createdAt
+ * - Auto-direction toggle when re-selecting the same sort field
+ * - Filter/sort state persisted to sessionStorage (search query excluded)
+ * - `hasActiveFilters` flag for conditionally showing "Clear filters" UI
+ *
+ * The `filteredVaults` array is memoised and only recomputed when the
+ * vault list or any filter/sort value changes.
+ *
+ * @param vaults - Full list of vaults to filter and sort.
+ *
  * Manages search, filter, and sort state for a list of vaults.
  * The returned `filteredVaults` array is derived via `useMemo` and is
  * only recomputed when the vault list or filter state changes.
