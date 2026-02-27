@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import VaultDetail from './components/VaultDetail';
+import VaultHistory from './components/VaultHistory';
+import { useVaultHistory } from './hooks/useVaultHistory';
+import {
+  createVaultCreatedEvent,
+  createBeneficiarySetEvent,
+  createWithdrawalEvent,
+  createEmergencyWithdrawalEvent,
+} from './hooks/useVaultHistory';
 
 interface Vault {
   vaultId: number;
@@ -21,15 +29,14 @@ export const App: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [userAddress, setUserAddress] = useState<string | null>(null);
 
+  const { getEvents, addEvent } = useVaultHistory();
+
   useEffect(() => {
-    // Initialize user connection
     initializeUser();
   }, []);
 
   const initializeUser = async () => {
     try {
-      // This would connect to Stacks wallet
-      // For now, this is a placeholder
       console.log('Initializing user connection...');
     } catch (err) {
       console.error('Failed to initialize user:', err);
@@ -41,13 +48,14 @@ export const App: React.FC = () => {
       setLoading(true);
       setError('');
 
-      // Call smart contract create-vault function
-      // This is a placeholder that would call the actual blockchain function
+      const vaultId = vaults.length;
+      const unlockHeight = lockDuration;
+
       const newVault: Vault = {
-        vaultId: vaults.length,
+        vaultId,
         creator: userAddress || 'unknown',
         amount,
-        unlockHeight: 0, // Would be set by contract
+        unlockHeight,
         createdAt: 0,
         isWithdrawn: false,
         beneficiary,
@@ -55,7 +63,15 @@ export const App: React.FC = () => {
       };
 
       setVaults([...vaults, newVault]);
-      console.log('Vault created:', newVault);
+
+      addEvent(
+        createVaultCreatedEvent(vaultId, 0, {
+          amount,
+          lockDuration,
+          unlockHeight,
+          beneficiary,
+        })
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create vault');
     } finally {
@@ -68,13 +84,20 @@ export const App: React.FC = () => {
       setLoading(true);
       setError('');
 
-      // Call smart contract withdraw function
-      console.log('Withdrawing from vault:', vaultId);
+      const vault = vaults.find((v) => v.vaultId === vaultId);
+      if (!vault) throw new Error('Vault not found');
 
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
       );
       setVaults(updatedVaults);
+
+      addEvent(
+        createWithdrawalEvent(vaultId, vault.currentBlockHeight, {
+          amount: vault.amount,
+          recipient: vault.beneficiary ?? vault.creator,
+        })
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to withdraw');
     } finally {
@@ -87,13 +110,18 @@ export const App: React.FC = () => {
       setLoading(true);
       setError('');
 
-      // Call smart contract set-beneficiary function
-      console.log(`Setting beneficiary for vault ${vaultId}:`, beneficiary);
-
+      const vault = vaults.find((v) => v.vaultId === vaultId);
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, beneficiary } : v
       );
       setVaults(updatedVaults);
+
+      addEvent(
+        createBeneficiarySetEvent(vaultId, vault?.currentBlockHeight ?? 0, {
+          newBeneficiary: beneficiary,
+          previousBeneficiary: vault?.beneficiary,
+        })
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to set beneficiary');
     } finally {
@@ -106,13 +134,27 @@ export const App: React.FC = () => {
       setLoading(true);
       setError('');
 
-      // Call smart contract emergency-withdraw function
-      console.log(`Emergency withdrawing from vault ${vaultId}`);
+      const vault = vaults.find((v) => v.vaultId === vaultId);
+      if (!vault) throw new Error('Vault not found');
+
+      const penaltyRate = 10;
+      const penaltyAmount = Math.floor((vault.amount * penaltyRate) / 100);
+      const netAmount = vault.amount - penaltyAmount;
 
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
       );
       setVaults(updatedVaults);
+
+      addEvent(
+        createEmergencyWithdrawalEvent(vaultId, vault.currentBlockHeight, {
+          amount: vault.amount,
+          penaltyAmount,
+          netAmount,
+          recipient: vault.beneficiary ?? vault.creator,
+          penaltyRate,
+        })
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process emergency withdrawal');
     } finally {
@@ -174,14 +216,20 @@ export const App: React.FC = () => {
 
         <section className="content">
           {selectedVault ? (
-            <VaultDetail
-              vaultId={selectedVault.vaultId}
-              onWithdraw={handleWithdraw}
-              onSetBeneficiary={handleSetBeneficiary}
-              onFetchVault={handleFetchVault}
-              onEmergencyWithdraw={handleEmergencyWithdraw}
-              penaltyRate={10}
-            />
+            <>
+              <VaultDetail
+                vaultId={selectedVault.vaultId}
+                onWithdraw={handleWithdraw}
+                onSetBeneficiary={handleSetBeneficiary}
+                onFetchVault={handleFetchVault}
+                onEmergencyWithdraw={handleEmergencyWithdraw}
+                penaltyRate={10}
+              />
+              <VaultHistory
+                vaultId={selectedVault.vaultId}
+                events={getEvents(selectedVault.vaultId)}
+              />
+            </>
           ) : (
             <div className="empty-content">
               <h2>No vault selected</h2>
