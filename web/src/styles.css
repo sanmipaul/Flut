@@ -12,6 +12,23 @@
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
+  --bg-body: #fafafa;
+  --bg-surface: #ffffff;
+  --bg-input: #ffffff;
+}
+
+/* Dark mode custom properties (consumed by address validation states) */
+[data-theme='dark'] {
+  --primary-color: #7b6fff;
+  --secondary-color: #1e1e2e;
+  --success-color: #2dd65c;
+  --error-color: #f06474;
+  --text-dark: #e8e8f0;
+  --text-light: #9898b0;
+  --border-color: #2e2e42;
+  --bg-body: #12121c;
+  --bg-surface: #1a1a2e;
+  --bg-input: #1e1e2e;
 }
 
 * {
@@ -308,6 +325,24 @@ body {
   margin-top: var(--spacing-md);
 }
 
+/* Stacked beneficiary form used inside VaultDetail */
+.beneficiary-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.beneficiary-form-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.beneficiary-form-actions .btn-primary,
+.beneficiary-form-actions .btn-secondary {
+  flex: 1;
+}
+
 .beneficiary-form input {
   flex: 1;
   padding: var(--spacing-sm) var(--spacing-md);
@@ -553,6 +588,89 @@ body {
   font-size: 0.85rem;
 }
 
+/* Address input validation states */
+.address-input-wrapper {
+  position: relative;
+}
+
+.address-input-wrapper input {
+  padding-right: 2.5rem;
+}
+
+.address-input-valid {
+  border-color: var(--success-color) !important;
+  background-color: rgba(28, 184, 69, 0.03);
+}
+
+.address-input-invalid {
+  border-color: var(--error-color) !important;
+  background-color: rgba(220, 53, 69, 0.03);
+}
+
+.address-input-valid:focus {
+  box-shadow: 0 0 0 3px rgba(28, 184, 69, 0.15) !important;
+}
+
+.address-input-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
+}
+
+.address-validation-icon {
+  position: absolute;
+  right: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.address-error-text {
+  display: block;
+  margin-top: var(--spacing-xs);
+  color: var(--error-color);
+  font-size: 0.82rem;
+}
+
+.address-help-text {
+  display: block;
+  margin-top: var(--spacing-xs);
+  color: var(--text-light);
+  font-size: 0.82rem;
+}
+
+/* Network badge shown beside a validated address */
+.network-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-top: var(--spacing-xs);
+}
+
+.network-badge.mainnet {
+  background-color: rgba(85, 70, 255, 0.1);
+  color: var(--primary-color);
+  border: 1px solid rgba(85, 70, 255, 0.25);
+}
+
+.network-badge.testnet {
+  background-color: rgba(255, 174, 66, 0.15);
+  color: #b06000;
+  border: 1px solid rgba(255, 174, 66, 0.35);
+}
+
+.network-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  display: inline-block;
+}
+
 /* Buttons */
 .btn-primary,
 .btn-secondary,
@@ -699,122 +817,45 @@ button:disabled {
   }
 }
 
-/* Stacking & Yield UI */
-.stacking-info {
-  padding: var(--spacing-md);
-  background-color: rgba(255, 153, 0, 0.06);
-  border: 1px solid rgba(255, 153, 0, 0.3);
-  border-radius: 6px;
-  margin-top: var(--spacing-md);
+/* ============================================================
+   Dark mode overrides for address validation components
+   ============================================================ */
+
+[data-theme='dark'] .address-input-valid {
+  background-color: rgba(45, 214, 92, 0.05);
 }
 
-.stacking-info h3 {
-  margin: 0 0 var(--spacing-sm);
-  font-size: 1rem;
-  color: #b36200;
+[data-theme='dark'] .address-input-invalid {
+  background-color: rgba(240, 100, 116, 0.05);
 }
 
-.stacking-inactive {
-  background-color: var(--secondary-color);
+[data-theme='dark'] .address-input-valid:focus {
+  box-shadow: 0 0 0 3px rgba(45, 214, 92, 0.2) !important;
+}
+
+[data-theme='dark'] .address-input-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(240, 100, 116, 0.2) !important;
+}
+
+[data-theme='dark'] .network-badge.mainnet {
+  background-color: rgba(123, 111, 255, 0.15);
+  border-color: rgba(123, 111, 255, 0.3);
+}
+
+[data-theme='dark'] .network-badge.testnet {
+  background-color: rgba(255, 174, 66, 0.12);
+  color: #d4860a;
+  border-color: rgba(255, 174, 66, 0.3);
+}
+
+[data-theme='dark'] .address-error-text {
+  color: var(--error-color);
+}
+
+[data-theme='dark'] .address-help-text {
+  color: var(--text-light);
+}
+
+[data-theme='dark'] .beneficiary-form-stack {
   border-color: var(--border-color);
-}
-
-.stacking-inactive h3 {
-  color: var(--text-light);
-}
-
-.status-badge.stacking-active {
-  background-color: rgba(255, 153, 0, 0.15);
-  color: #b36200;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.stacking-apy-banner {
-  background: linear-gradient(135deg, rgba(255, 153, 0, 0.1), rgba(255, 200, 50, 0.1));
-  border: 1px solid rgba(255, 153, 0, 0.25);
-  border-radius: 6px;
-  padding: var(--spacing-md);
-  margin-top: var(--spacing-sm);
-}
-
-.apy-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-xs);
-}
-
-.apy-label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--text-light);
-}
-
-.apy-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #b36200;
-}
-
-.apy-note {
-  font-size: 0.8rem;
-  color: var(--text-light);
-  margin: 0;
-}
-
-/* PWA Mobile-First Responsive Styles */
-@media (max-width: 480px) {
-  h1 { font-size: 1.5rem; }
-  h2 { font-size: 1.25rem; }
-  .app-header { padding: var(--spacing-md); }
-  .vault-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-  .vault-card { width: 100%; height: auto; }
-  .dashboard { padding-top: 4rem; }
-  button { font-size: 0.875rem; padding: 0.5rem 1rem; }
-  input, select, textarea { font-size: 1rem; padding: 0.75rem; }
-}
-
-@media (min-width: 481px) and (max-width: 768px) {
-  h1 { font-size: 2rem; }
-  .app-header { padding: var(--spacing-lg); }
-  .vault-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-  .vault-card { width: 100%; height: auto; }
-  .dashboard { padding: 2rem 1rem; }
-}
-
-@media (min-width: 769px) {
-  .vault-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
-  .vault-card { height: auto; }
-  .dashboard { padding: 2rem; }
-  button { font-size: 1rem; padding: 0.75rem 1.5rem; }
-}
-
-@keyframes slide-up {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
-}
-
-.offline-indicator {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: #fef3c7;
-  border-bottom: 2px solid #fbbf24;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  z-index: 100;
-}
-
-@media (hover: none) and (pointer: coarse) {
-  button, a { min-height: 44px; min-width: 44px; }
-  button:active { transform: scale(0.98); }
 }
