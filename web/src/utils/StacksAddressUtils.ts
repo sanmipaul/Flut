@@ -72,3 +72,15 @@ export function isValidStacksAddress(address: string): boolean {
 
   return true;
 }
+
+/**
+ * Returns the network an address belongs to, or `null` if the address is
+ * not a recognised Stacks address.
+ */
+export function getAddressNetwork(address: string): StacksNetwork | null {
+  if (!address) return null;
+  const prefix = address.trim().toUpperCase().slice(0, 2);
+  if (MAINNET_PREFIXES.includes(prefix)) return 'mainnet';
+  if (TESTNET_PREFIXES.includes(prefix)) return 'testnet';
+  return null;
+}
