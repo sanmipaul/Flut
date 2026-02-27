@@ -105,12 +105,13 @@ body {
 /* Sidebar */
 .sidebar {
   width: 350px;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.25s ease;
 }
 
 .sidebar-header {
@@ -189,10 +190,11 @@ body {
 /* Content Area */
 .content {
   flex: 1;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   padding: var(--spacing-lg);
+  transition: background-color 0.25s ease;
 }
 
 .empty-content {
