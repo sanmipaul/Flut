@@ -84,3 +84,13 @@ export function getAddressNetwork(address: string): StacksNetwork | null {
   if (TESTNET_PREFIXES.includes(prefix)) return 'testnet';
   return null;
 }
+
+/**
+ * Returns the numeric version byte associated with the address prefix,
+ * or `null` when the prefix is unrecognised.
+ */
+export function getAddressVersion(address: string): number | null {
+  if (!address) return null;
+  const prefix = address.trim().toUpperCase().slice(0, 2);
+  return ADDRESS_VERSIONS[prefix] ?? null;
+}
