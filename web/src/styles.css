@@ -312,6 +312,7 @@ body {
   padding: var(--spacing-md);
   background-color: var(--secondary-color);
   border-radius: 6px;
+  transition: background-color 0.25s ease;
 }
 
 .info-item {
