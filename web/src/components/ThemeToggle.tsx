@@ -17,6 +17,7 @@ const ThemeToggle: React.FC = () => {
       className="theme-toggle"
       onClick={toggleTheme}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-pressed={isDark}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       type="button"
     >
