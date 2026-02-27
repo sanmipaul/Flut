@@ -806,6 +806,13 @@ button:disabled {
   background: #fef2f2;
 }
 
+/* State: disabled */
+.copy-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .copy-btn__icon {
   font-style: normal;
   user-select: none;
