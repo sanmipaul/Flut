@@ -704,7 +704,8 @@ button:disabled {
    ============================================================ */
 
 .stx-amount {
-  font-variant-numeric: tabular-nums;
+  /* tabular-nums keeps digit widths equal for aligned columns */
+  font-variant-numeric: tabular-nums; /* stylelint-disable-line */
   white-space: nowrap;
 }
 
