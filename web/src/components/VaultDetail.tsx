@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
-import PenaltyWarningModal from './PenaltyWarningModal';
+import VaultSettingsPanel from './VaultSettingsPanel';
+import { useVaultSettings } from '../hooks/useVaultSettings';
 
 interface Vault {
   vaultId: number;
@@ -37,6 +38,8 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   const [showBeneficiaryForm, setShowBeneficiaryForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [showPenaltyModal, setShowPenaltyModal] = useState<boolean>(false);
+
+  const { settings } = useVaultSettings(vaultId);
 
   useEffect(() => {
     const fetchVault = async () => {
@@ -103,14 +106,32 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
     return <div className="vault-detail not-found">Vault not found</div>;
   }
 
+  const colorTagClass = settings.colorTag !== 'none'
+    ? `vault-detail--tag-${settings.colorTag}`
+    : '';
+
   return (
-    <div className="vault-detail">
+    <div className={`vault-detail ${colorTagClass}`}>
       <header className="vault-header">
-        <h2>Vault #{vault.vaultId}</h2>
+        <div className="vault-header__title-group">
+          <h2>
+            {settings.nickname ? settings.nickname : `Vault #${vault.vaultId}`}
+          </h2>
+          {settings.nickname && (
+            <span className="vault-header__id">#{vault.vaultId}</span>
+          )}
+        </div>
         <span className={vault.isWithdrawn ? 'status withdrawn' : 'status active'}>
           {vault.isWithdrawn ? 'Withdrawn' : 'Active'}
         </span>
       </header>
+
+      {settings.note && (
+        <div className="vault-note" role="note">
+          <span className="vault-note__icon" aria-hidden="true">📝</span>
+          <p className="vault-note__text">{settings.note}</p>
+        </div>
+      )}
 
       <section className="vault-info">
         <div className="info-item">
@@ -232,6 +253,8 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
           </p>
         </section>
       )}
+
+      <VaultSettingsPanel vaultId={vaultId} />
 
       {error && <div className="error-message">{error}</div>}
 
