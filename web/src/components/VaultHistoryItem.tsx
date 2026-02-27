@@ -12,14 +12,10 @@
 import React from 'react';
 import type { VaultEvent } from '../types/VaultEvent';
 import { EVENT_ICON, EVENT_LABEL, EVENT_SEVERITY } from '../types/VaultEvent';
+import { formatBlock } from '../utils/formatBlock';
 
 export interface VaultHistoryItemProps {
   event: VaultEvent;
-}
-
-/** Format a block height into a human-readable label */
-function formatBlock(blockHeight: number): string {
-  return `Block #${blockHeight.toLocaleString()}`;
 }
 
 /** Format a Unix ms timestamp into a locale date-time string */
