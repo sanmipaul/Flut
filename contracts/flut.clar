@@ -984,6 +984,29 @@
   )
 )
 
+;; Pre-check withdrawals for a given amount
+;; This helper can be used by frontends to verify whether a partial or full
+;; withdrawal of `amount` is valid, without sending a transaction.
+;;
+;; @param vault-id - ID of vault to check
+;; @param amount - Desired withdrawal amount (u0 for full)
+;; @param caller - Principal attempting withdrawal
+;; @return bool - true if withdrawal would succeed, false otherwise
+(define-read-only (can-withdraw-amount (vault-id uint) (amount uint) (caller principal))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (and
+          (is-authorized-withdrawer (get creator v) caller)
+          (not (get is-withdrawn v))
+          (>= block-height (get unlock-height v))
+          (is-valid-withdrawal-amount (get amount v) amount)
+        )
+      false
+    )
+  )
+)
+
 ;; Get expected amounts for emergency withdrawal (including penalty)
 (define-read-only (get-emergency-withdrawal-info (vault-id uint))
   (let
