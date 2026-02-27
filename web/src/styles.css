@@ -210,6 +210,11 @@ body {
   background-color: var(--secondary-color);
 }
 
+.vault-item:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
 .vault-item.active {
   background-color: var(--primary-color);
   color: white;
@@ -239,6 +244,14 @@ body {
 
 .badge-withdrawn {
   background-color: #999;
+}
+
+.badge-unlocked {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background-color: var(--success-color);
+  color: white;
 }
 
 .empty-state {
@@ -1039,45 +1052,246 @@ button:disabled {
   }
 }
 
+/* Screen-reader-only utility class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ============================================================
-   Dark mode overrides for address validation components
+   Vault Search Bar
    ============================================================ */
 
-[data-theme='dark'] .address-input-valid {
-  background-color: rgba(45, 214, 92, 0.05);
+.vault-search-bar {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  background: var(--bg-surface, white);
 }
 
-[data-theme='dark'] .address-input-invalid {
-  background-color: rgba(240, 100, 116, 0.05);
+/* Search input */
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
-[data-theme='dark'] .address-input-valid:focus {
-  box-shadow: 0 0 0 3px rgba(45, 214, 92, 0.2) !important;
+.search-icon {
+  position: absolute;
+  left: var(--spacing-sm);
+  font-size: 0.85rem;
+  pointer-events: none;
+  line-height: 1;
 }
 
-[data-theme='dark'] .address-input-invalid:focus {
-  box-shadow: 0 0 0 3px rgba(240, 100, 116, 0.2) !important;
+.search-input {
+  width: 100%;
+  padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-xs) calc(var(--spacing-sm) * 3);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: var(--bg-input, white);
+  color: var(--text-dark);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-[data-theme='dark'] .network-badge.mainnet {
-  background-color: rgba(123, 111, 255, 0.15);
-  border-color: rgba(123, 111, 255, 0.3);
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(85, 70, 255, 0.1);
 }
 
-[data-theme='dark'] .network-badge.testnet {
-  background-color: rgba(255, 174, 66, 0.12);
-  color: #d4860a;
-  border-color: rgba(255, 174, 66, 0.3);
+.search-input::-webkit-search-cancel-button {
+  display: none;
 }
 
-[data-theme='dark'] .address-error-text {
-  color: var(--error-color);
+.search-clear-btn {
+  position: absolute;
+  right: var(--spacing-xs);
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-light);
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: color 0.15s;
 }
 
-[data-theme='dark'] .address-help-text {
+.search-clear-btn:hover {
+  color: var(--text-dark);
+}
+
+.search-hint {
+  font-size: 0.74rem;
+  color: var(--text-light);
+  opacity: 0.7;
+}
+
+.search-hint kbd {
+  font-family: inherit;
+  font-size: 0.74rem;
+  background: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+
+/* Filter chip rows */
+.filter-row,
+.sort-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
+.filter-chip,
+.sort-chip {
+  padding: 3px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: none;
+  color: var(--text-light);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.filter-chip:hover,
+.sort-chip:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.filter-chip.active,
+.sort-chip.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+.sort-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-light);
+  margin-right: 2px;
+}
+
+.sort-direction {
+  font-size: 0.8rem;
+}
+
+.sort-dir-btn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--text-light);
+  transition: all 0.15s;
+}
+
+.sort-dir-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* Filter summary row */
+.filter-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 2px;
+}
+
+.result-count {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.clear-filters-btn {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 0;
+  font-weight: 600;
+  text-decoration: underline;
+  transition: opacity 0.15s;
+}
+
+.clear-filters-btn:hover {
+  opacity: 0.75;
+}
+
+/* Dark mode overrides for search bar */
+[data-theme='dark'] .vault-search-bar {
+  background: var(--bg-surface);
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme='dark'] .search-input {
+  background: var(--bg-input);
+  color: var(--text-dark);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .search-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(123, 111, 255, 0.15);
+}
+
+[data-theme='dark'] .filter-chip,
+[data-theme='dark'] .sort-chip,
+[data-theme='dark'] .sort-dir-btn {
+  border-color: var(--border-color);
   color: var(--text-light);
 }
 
-[data-theme='dark'] .beneficiary-form-stack {
-  border-color: var(--border-color);
+[data-theme='dark'] .filter-chip:hover,
+[data-theme='dark'] .sort-chip:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+[data-theme='dark'] .badge-unlocked {
+  background-color: var(--success-color);
+}
+
+/* Empty search / filter results state */
+.vault-list-empty {
+  padding: var(--spacing-lg) var(--spacing-md);
+  text-align: center;
+  color: var(--text-light);
+}
+
+.vault-list-empty p {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 0.9rem;
+}
+
+.vault-list-empty .empty-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  opacity: 0.5;
 }
