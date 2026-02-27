@@ -217,6 +217,19 @@ these codes correspond to the rows below.
 > **Tip:** the contract exposes a read-only function `get-error-description` which returns a human
 > readable string for a given numeric code. You can call this helper directly from your frontend or
 > mirror the mapping in your UI (see `web/src/utils/VaultContractAPI.ts` for an example).
+>
+> **Example (frontend)**:
+> ```ts
+> import { formatError, VaultContractAPI } from './web/src/utils/VaultContractAPI';
+>
+> try {
+>   const result = await contract.createVault(100, 1000000);
+>   VaultContractAPI.checkResult(result);
+> } catch (err) {
+>   console.error('Vault creation failed:', err.message);
+>   alert('Error: ' + err.message);
+> }
+> ```
 
 | Code | Constant | Meaning |
 |------|----------|---------|
