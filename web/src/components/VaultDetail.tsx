@@ -37,6 +37,15 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   const [showBeneficiaryForm, setShowBeneficiaryForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [showPenaltyModal, setShowPenaltyModal] = useState<boolean>(false);
+  const [copyAnnouncement, setCopyAnnouncement] = useState<string>('');
+
+  const handleAddressCopied = (text: string, success: boolean) => {
+    const truncated = text.length > 12 ? `${text.slice(0, 6)}…${text.slice(-4)}` : text;
+    setCopyAnnouncement(
+      success ? `Copied ${truncated} to clipboard` : 'Failed to copy address'
+    );
+    setTimeout(() => setCopyAnnouncement(''), 2500);
+  };
 
   useEffect(() => {
     const fetchVault = async () => {
@@ -103,6 +112,15 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
 
   return (
     <div className="vault-detail">
+      {/* Screen-reader live region for copy announcements */}
+      <span
+        className="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {copyAnnouncement}
+      </span>
+
       <header className="vault-header">
         <h2>Vault #{vault.vaultId}</h2>
         <span className={vault.isWithdrawn ? 'status withdrawn' : 'status active'}>
@@ -115,7 +133,11 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
           <label>Creator</label>
           <span className="address-with-copy">
             <code>{vault.creator}</code>
-            <CopyButton text={vault.creator} label="Copy creator address" />
+            <CopyButton
+                text={vault.creator}
+                label="Copy creator address"
+                onCopy={handleAddressCopied}
+              />
           </span>
         </div>
 
@@ -155,7 +177,11 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
             <label>Beneficiary Address</label>
             <span className="address-with-copy">
               <code>{vault.beneficiary}</code>
-              <CopyButton text={vault.beneficiary} label="Copy beneficiary address" />
+              <CopyButton
+                  text={vault.beneficiary}
+                  label="Copy beneficiary address"
+                  onCopy={handleAddressCopied}
+                />
             </span>
           </div>
           <p className="info-text">
