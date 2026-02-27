@@ -22,6 +22,36 @@ export interface StackingInfo {
   estimatedApyPercent: number;
 }
 
+// ------------------------------------------------------------------
+// Error code mapping utilities (mirrors contract constants)
+// ------------------------------------------------------------------
+export const ERROR_MESSAGES: Record<number, string> = {
+  1: "Vault not found",
+  2: "Unauthorized: not vault owner",
+  3: "Vault still locked",
+  4: "Already withdrawn",
+  5: "Invalid amount",
+  6: "Invalid unlock height",
+  7: "Invalid penalty rate",
+  8: "Caller is not penalty owner",
+  9: "Stacking pool missing",
+  10: "Stacking not enabled",
+  11: "Invalid beneficiary shares",
+  12: "Too many beneficiaries",
+  13: "Beneficiary already exists",
+  14: "Invalid beneficiary address",
+  15: "Beneficiary cannot be creator",
+  20: "Insufficient balance",
+  21: "Invalid withdrawal amount",
+  22: "Recipient cannot withdraw yet",
+  23: "Withdrawal not allowed",
+  24: "Emergency withdrawals disabled",
+};
+
+export function formatError(code: number): string {
+  return ERROR_MESSAGES[code] || `Unknown error code ${code}`;
+}
+
 /**
  * VaultContractAPI
  * Provides methods to interact with the Flut smart contract
