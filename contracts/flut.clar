@@ -63,6 +63,16 @@
   { last-attempt-block: uint }
 )
 
+;; Track withdrawn vaults per user
+(define-map user-withdrawn-vaults
+  { user: principal }
+  { vault-ids: (list 100 uint) }
+)
+
+;; Config flag to enable/disable emergency withdrawals globally
+(define-data-var emergency-withdrawal-enabled bool true)
+
+
 ;; Error codes
 (define-constant ERR-VAULT-NOT-FOUND (err u1))
 (define-constant ERR-UNAUTHORIZED (err u2))
@@ -422,6 +432,12 @@
       }
     )
     
+    ;; Track withdrawal under user for later queries
+    (let ((record (default-to { vault-ids: (list) } (map-get? user-withdrawn-vaults { user: (get creator vault) })))
+          (updated (unwrap! (as-max-len? (append (get vault-ids record) vault-id) u100) ERR-INVALID-AMOUNT)))
+      (map-set user-withdrawn-vaults { user: (get creator vault) } { vault-ids: updated })
+    )
+    
     ;; Mark as withdrawn
     (map-set vaults
       { vault-id: vault-id }
@@ -439,6 +455,67 @@
       timestamp: block-timestamp
     })
     
+    (ok true)
+  )
+)
+
+;; Partial withdraw from a vault
+;; This function allows users to withdraw a specific amount from their vault.
+;; Passing zero for `amount` results in a full withdrawal. The vault balance is
+;; reduced by the withdrawn amount, and if the remaining balance is zero, the
+;; vault is marked as withdrawn.
+;;
+;; @param vault-id - ID of the vault to withdraw from
+;; @param amount - Amount to withdraw (u0 for full withdrawal)
+;;
+;; @return (ok true) on successful withdrawal or error code analogous to
+;;         standard withdraw errors plus ERR-INVALID-WITHDRAWAL-AMOUNT
+(define-public (partial-withdraw (vault-id uint) (amount uint))
+  (let
+    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
+     (recipient (get-withdrawal-recipient vault))
+     (vault-amount (get amount vault))
+     (withdrawal-amt (if (is-eq amount u0) vault-amount amount)))
+    
+    ;; Authorization
+    (asserts! (is-authorized-withdrawer (get creator vault) tx-sender) ERR-UNAUTHORIZED)
+    ;; Unlocked & not withdrawn
+    (asserts! (>= block-height (get unlock-height vault)) ERR-NOT-UNLOCKED)
+    (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+
+    ;; Validate amount
+    (asserts! (is-valid-withdrawal-amount vault-amount withdrawal-amt) ERR-INVALID-WITHDRAWAL-AMOUNT)
+    (asserts! (> vault-amount u0) ERR-INSUFFICIENT-BALANCE)
+    (asserts! (is-valid-beneficiary recipient) ERR-RECIPIENT-CANNOT-WITHDRAW)
+
+    ;; Revoke stacking if needed
+    (if (get stacking-enabled vault)
+      (try-revoke-stacking)
+      false
+    )
+
+    ;; Transfer
+    (try! (as-contract (stx-transfer? withdrawal-amt tx-sender recipient)))
+
+    ;; Update vault amount and status
+    (let ((new-total (- vault-amount withdrawal-amt)))
+      (map-set vaults
+        { vault-id: vault-id }
+        (merge vault { amount: new-total, is-withdrawn: (is-eq new-total u0) })
+      )
+    )
+
+    ;; Audit and history
+    (map-set withdrawal-attempts { vault-id: vault-id } { last-attempt-block: block-height })
+    (map-set withdrawal-history { vault-id: vault-id }
+      { withdrawal-time: block-height, withdrawal-block: block-height, amount-withdrawn: withdrawal-amt, recipient: recipient, was-emergency: false })
+    (let ((record (default-to { vault-ids: (list) } (map-get? user-withdrawn-vaults { user: (get creator vault) })))
+          (updated (unwrap! (as-max-len? (append (get vault-ids record) vault-id) u100) ERR-INVALID-AMOUNT)))
+      (map-set user-withdrawn-vaults { user: (get creator vault) } { vault-ids: updated }))
+
+    ;; Emit event
+    (print { event: "partial-withdraw", vault-id: vault-id, amount: withdrawal-amt, remaining: (- vault-amount withdrawal-amt), recipient: recipient, block-height: block-height })
+
     (ok true)
   )
 )
@@ -677,30 +754,33 @@
 
 ;; Emergency withdraw before unlock with penalty
 (define-public (emergency-withdraw (vault-id uint))
-  (let
-    ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
-     (penalty-amount (calculate-penalty (get amount vault)))
-     (user-amount (- (get amount vault) penalty-amount))
-     (recipient (get-withdrawal-recipient vault))
-     (vault-amount (get amount vault))
-    )
-    
-    ;; Verify caller is authorized to withdraw (vault creator)
-    (asserts! (is-authorized-withdrawer (get creator vault) tx-sender) ERR-UNAUTHORIZED)
-    
-    ;; Verify vault hasn't been withdrawn
-    (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
-    
-    ;; Validate withdrawal amount is valid
-    (asserts! (is-valid-withdrawal-amount vault-amount u0) ERR-INVALID-WITHDRAWAL-AMOUNT)
-    
-    ;; Verify sufficient balance
-    (asserts! (> vault-amount u0) ERR-INSUFFICIENT-BALANCE)
-    
-    ;; Verify recipient is valid
-    (asserts! (is-valid-beneficiary recipient) ERR-RECIPIENT-CANNOT-WITHDRAW)
+  (begin
+    ;; Check if emergency withdrawals are enabled
+    (asserts! (var-get emergency-withdrawal-enabled) ERR-EMERGENCY-WITHDRAWAL-DISABLED)
+    (let
+      ((vault (unwrap! (map-get? vaults { vault-id: vault-id }) ERR-VAULT-NOT-FOUND))
+       (penalty-amount (calculate-penalty (get amount vault)))
+       (user-amount (- (get amount vault) penalty-amount))
+       (recipient (get-withdrawal-recipient vault))
+       (vault-amount (get amount vault))
+      )
+      
+      ;; Verify caller is authorized to withdraw (vault creator)
+      (asserts! (is-authorized-withdrawer (get creator vault) tx-sender) ERR-UNAUTHORIZED)
+      
+      ;; Verify vault hasn't been withdrawn
+      (asserts! (not (get is-withdrawn vault)) ERR-ALREADY-WITHDRAWN)
+      
+      ;; Validate withdrawal amount is valid
+      (asserts! (is-valid-withdrawal-amount vault-amount u0) ERR-INVALID-WITHDRAWAL-AMOUNT)
+      
+      ;; Verify sufficient balance
+      (asserts! (> vault-amount u0) ERR-INSUFFICIENT-BALANCE)
+      
+      ;; Verify recipient is valid
+      (asserts! (is-valid-beneficiary recipient) ERR-RECIPIENT-CANNOT-WITHDRAW)
 
-    ;; Revoke stacking delegation before transferring funds out
+      ;; Revoke stacking delegation before transferring funds out
     (if (get stacking-enabled vault)
       (try-revoke-stacking)
       false
@@ -728,6 +808,12 @@
         recipient: recipient,
         was-emergency: true
       }
+    )
+    
+    ;; Track withdrawal under user for later queries
+    (let ((record (default-to { vault-ids: (list) } (map-get? user-withdrawn-vaults { user: (get creator vault) })))
+          (updated (unwrap! (as-max-len? (append (get vault-ids record) vault-id) u100) ERR-INVALID-AMOUNT)))
+      (map-set user-withdrawn-vaults { user: (get creator vault) } { vault-ids: updated })
     )
     
     ;; Emit detailed event for indexing and auditing
@@ -764,6 +850,25 @@
     (asserts! (is-eq tx-sender (var-get penalty-destination)) (err u8))
     
     (var-set penalty-destination new-destination)
+    (ok true)
+  )
+)
+
+;; Enable or disable emergency withdrawals (contract owner only)
+;;
+;; This administrative function allows the designated owner (currently the
+;; penalty-destination address) to toggle the emergency withdrawal feature
+;; on or off. Disabling the feature prevents any emergency-withdraw calls,
+;; which can be useful during an investigation or after migration.
+;;
+;; @param enabled - boolean flag to enable (true) or disable (false)
+;; @return (ok true) on success or error code (ERR-NOT-PENALTY-OWNER if caller
+;; is not the owner)
+(define-public (set-emergency-withdrawal-enabled (enabled bool))
+  (begin
+    ;; Restrict to contract owner (reuse penalty-destination for ownership)
+    (asserts! (is-eq tx-sender (var-get penalty-destination)) (err u8))
+    (var-set emergency-withdrawal-enabled enabled)
     (ok true)
   )
 )
@@ -836,6 +941,13 @@
   MAX_VAULT_TOTAL_AMOUNT
 )
 
+;; Get emergency withdrawal enabled flag
+;;
+;; @return bool - true if emergency withdrawals are currently enabled
+(define-read-only (get-emergency-withdrawal-enabled)
+  (var-get emergency-withdrawal-enabled)
+)
+
 ;; Check if additional deposit would exceed limits
 (define-read-only (can-deposit-amount (vault-id uint) (deposit-amount uint))
   (let ((vault (map-get? vaults { vault-id: vault-id })))
@@ -884,6 +996,124 @@
     (match vault
       v (- (get amount v) (calculate-penalty (get amount v)))
       u0
+    )
+  )
+)
+
+;; ============================================
+;; Read-Only Functions - Withdrawal Status
+;; ============================================
+
+;; Check if vault has been withdrawn
+(define-read-only (is-vault-withdrawn (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (get is-withdrawn v)
+      false
+    )
+  )
+)
+
+;; Check readiness for withdrawal (creator and unlocked)
+(define-read-only (can-withdraw-vault (vault-id uint) (caller principal))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (and
+          (is-authorized-withdrawer (get creator v) caller)
+          (>= block-height (get unlock-height v))
+          (not (get is-withdrawn v))
+        )
+      false
+    )
+  )
+)
+
+;; Get withdrawal history for vault
+(define-read-only (get-withdrawal-history (vault-id uint))
+  (map-get? withdrawal-history { vault-id: vault-id })
+)
+
+;; Get list of vault IDs withdrawn by a specific user
+(define-read-only (get-user-withdrawn-vaults (user principal))
+  (let ((record (map-get? user-withdrawn-vaults { user: user })))
+    (match record
+      r (some (get vault-ids r))
+      none
+    )
+  )
+)
+
+;; Get last withdrawal attempt block
+(define-read-only (get-vault-last-withdrawal-attempt (vault-id uint))
+  (let ((attempt-record (map-get? withdrawal-attempts { vault-id: vault-id })))
+    (match attempt-record
+      record (some (get last-attempt-block record))
+      none
+    )
+  )
+)
+
+;; Check if vault is ready for emergency withdrawal
+(define-read-only (can-emergency-withdraw-vault (vault-id uint) (caller principal))
+  (and
+    (var-get emergency-withdrawal-enabled)
+    (let
+      ((vault (map-get? vaults { vault-id: vault-id })))
+      (match vault
+        v (and
+            (is-authorized-withdrawer (get creator v) caller)
+            (not (get is-withdrawn v))
+            (> (get amount v) u0)
+          )
+        false
+      )
+    )
+  )
+)
+
+;; Pre-check withdrawals for a given amount
+;; This helper can be used by frontends to verify whether a partial or full
+;; withdrawal of `amount` is valid, without sending a transaction.
+;;
+;; @param vault-id - ID of vault to check
+;; @param amount - Desired withdrawal amount (u0 for full)
+;; @param caller - Principal attempting withdrawal
+;; @return bool - true if withdrawal would succeed, false otherwise
+(define-read-only (can-withdraw-amount (vault-id uint) (amount uint) (caller principal))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (and
+          (is-authorized-withdrawer (get creator v) caller)
+          (not (get is-withdrawn v))
+          (>= block-height (get unlock-height v))
+          (is-valid-withdrawal-amount (get amount v) amount)
+        )
+      false
+    )
+  )
+)
+
+;; Get expected amounts for emergency withdrawal (including penalty)
+(define-read-only (get-emergency-withdrawal-info (vault-id uint))
+  (let
+    ((vault (map-get? vaults { vault-id: vault-id })))
+    (match vault
+      v (let
+          ((total-amount (get amount v))
+           (penalty (calculate-penalty total-amount))
+           (user-receives (- total-amount penalty)))
+          (some {
+            total-amount: total-amount,
+            penalty-amount: penalty,
+            user-receives: user-receives,
+            penalty-rate: PENALTY_RATE,
+            penalty-destination: (var-get penalty-destination)
+          })
+        )
+      none
     )
   )
 )

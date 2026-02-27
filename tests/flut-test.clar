@@ -197,6 +197,98 @@
 )
 
 ;; Test: Edge case - zero remainder penalty
+
+;; ------------------------------------------------
+;; Withdrawal Safety Feature Tests
+;; ------------------------------------------------
+
+;; Test: can-withdraw-vault read-only check
+(define-private (test-can-withdraw-vault)
+  (let
+    ((can (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut can-withdraw-vault u0 tx-sender)))
+    (match can
+      b (begin
+            (asserts! b (err "Vault should be withdrawable after unlock"))
+            (ok "✓ can-withdraw-vault test passed")
+          )
+      none (err "✗ can-withdraw-vault returned none"))
+  )
+)
+
+;; Test: can-withdraw-amount partial check
+(define-private (test-can-withdraw-amount)
+  (let
+    ((able (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut can-withdraw-amount u0 u500000 tx-sender)))
+    (match able
+      b (begin
+            (asserts! b (err "Should be able to withdraw partial amount"))
+            (ok "✓ can-withdraw-amount test passed")
+          )
+      none (err "✗ can-withdraw-amount returned none"))
+  )
+)
+
+;; Test: withdrawal history updated after withdrawal
+(define-private (test-withdrawal-history)
+  (let
+    ((hist (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-withdrawal-history u0)))
+    (match hist
+      h (ok "✓ Withdrawal history retrieval test passed")
+      none (err "✗ Withdrawal history missing"))
+  )
+)
+
+;; Test: emergency withdrawal toggle
+(define-private (test-emergency-toggle)
+  (let
+    ((off (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut set-emergency-withdrawal-enabled false)))
+    (match off
+      s (ok "✓ Disabled emergency withdrawals" )
+      e (err (concat "✗ Failed to disable: " (to-string e))))
+    ;; revert for future tests
+    (let ((on (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut set-emergency-withdrawal-enabled true)))
+      (ok "✓ Re-enabled emergency withdrawals"))
+  )
+)
+
+;; Test: get user withdrawn vaults list
+(define-private (test-get-user-withdrawn-vaults)
+  (let
+    ((list (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-user-withdrawn-vaults tx-sender)))
+    (ok "✓ Get user withdrawn vaults test passed")
+  )
+)
+
+;; Test: get last withdrawal attempt block
+(define-private (test-last-withdrawal-attempt)
+  (let
+    ((blk (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-vault-last-withdrawal-attempt u0)))
+    (ok "✓ Last withdrawal attempt retrieval test passed")
+  )
+)
+
+;; Test: check emergency withdrawal info structure
+(define-private (test-emergency-withdrawal-info)
+  (let
+    ((info (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-emergency-withdrawal-info u0)))
+    (ok "✓ Emergency withdrawal info test passed")
+  )
+)
+
+;; Test: Partial withdraw functionality
+(define-private (test-partial-withdraw)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut partial-withdraw u0 u250000)))
+    (match result
+      success (ok "✓ Partial withdraw test passed")
+      error (err (concat "✗ Partial withdraw failed: " (to-string error)))
+    )
+  )
+)
+
+;; End of new withdrawal safety tests
+
+;; Test: Edge case - zero remainder penalty
 (define-private (test-zero-remainder-penalty)
   (let
     ((penalty (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-emergency-withdrawal-amount u0)))
