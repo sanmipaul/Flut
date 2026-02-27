@@ -15,6 +15,7 @@
  *   label    – accessible label (default "Copy to clipboard")
  *   size     – "sm" | "md" (default "sm")
  *   showText – whether to show a short label beside the icon (default false)
+ *   onCopy   – optional callback invoked with (text, success) after each attempt
  */
 import React from 'react';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
@@ -27,6 +28,7 @@ export interface CopyButtonProps {
   size?: CopyButtonSize;
   showText?: boolean;
   className?: string;
+  onCopy?: (text: string, success: boolean) => void;
 }
 
 const ICONS: Record<string, string> = {
@@ -47,12 +49,16 @@ const CopyButton: React.FC<CopyButtonProps> = ({
   size = 'sm',
   showText = false,
   className = '',
+  onCopy,
 }) => {
   const { copyState, copy } = useCopyToClipboard();
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    copy(text);
+    await copy(text);
+    if (onCopy) {
+      onCopy(text, copyState !== 'error');
+    }
   };
 
   const stateClass = `copy-btn--${copyState}`;
