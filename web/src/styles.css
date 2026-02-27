@@ -108,6 +108,20 @@ body {
   padding: var(--spacing-xl);
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.app-header-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.app-header-toggle {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
 }
 
 .app-header h1 {
