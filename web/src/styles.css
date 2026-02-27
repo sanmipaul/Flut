@@ -831,3 +831,33 @@ button:disabled {
   border-color: var(--primary-color);
   color: var(--primary-color);
 }
+
+/* Filter summary row */
+.filter-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 2px;
+}
+
+.result-count {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.clear-filters-btn {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 0;
+  font-weight: 600;
+  text-decoration: underline;
+  transition: opacity 0.15s;
+}
+
+.clear-filters-btn:hover {
+  opacity: 0.75;
+}
