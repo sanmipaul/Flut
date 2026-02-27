@@ -55,6 +55,11 @@ export interface ToastShortcuts {
   info: (message: string, opts?: Omit<ToastOptions, 'variant'>) => string;
 }
 
+export interface UseToastOptions {
+  /** Called with the toast id whenever a toast is fully removed */
+  onDismiss?: (id: string) => void;
+}
+
 export interface UseToastReturn {
   /** Current list of toasts (newest first) */
   toasts: Toast[];
@@ -72,14 +77,19 @@ export interface UseToastReturn {
 // Hook
 // ---------------------------------------------------------------------------
 
-export function useToast(): UseToastReturn {
+export function useToast(hookOptions: UseToastOptions = {}): UseToastReturn {
+  const { onDismiss: onDismissCb } = hookOptions;
   const [toasts, setToasts] = useState<Toast[]>([]);
   const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-    timersRef.current.delete(id);
-  }, []);
+  const removeToast = useCallback(
+    (id: string) => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+      timersRef.current.delete(id);
+      onDismissCb?.(id);
+    },
+    [onDismissCb]
+  );
 
   const dismissToast = useCallback(
     (id: string) => {
