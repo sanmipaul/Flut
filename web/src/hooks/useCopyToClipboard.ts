@@ -13,7 +13,7 @@ export interface UseCopyToClipboardReturn {
 }
 
 /** Milliseconds the "copied" or "error" state persists before reverting to idle */
-const RESET_DELAY_MS = 2000;
+export const RESET_DELAY_MS = 2000;
 
 /**
  * Writes `text` to the clipboard using the modern async Clipboard API.
