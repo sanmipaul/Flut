@@ -159,3 +159,13 @@ export function isMainnetAddress(address: string): boolean {
 export function isTestnetAddress(address: string): boolean {
   return getAddressNetwork(address) === 'testnet';
 }
+
+/**
+ * Normalises a Stacks address to its canonical form:
+ * trims whitespace and converts to uppercase.
+ * Returns an empty string when the input is falsy.
+ */
+export function normalizeAddress(address: string): string {
+  if (!address) return '';
+  return address.trim().toUpperCase();
+}
