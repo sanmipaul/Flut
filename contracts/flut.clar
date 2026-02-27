@@ -63,6 +63,10 @@
   { last-attempt-block: uint }
 )
 
+;; Config flag to enable/disable emergency withdrawals globally
+(define-data-var emergency-withdrawal-enabled bool true)
+
+
 ;; Error codes
 (define-constant ERR-VAULT-NOT-FOUND (err u1))
 (define-constant ERR-UNAUTHORIZED (err u2))
