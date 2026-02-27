@@ -155,7 +155,8 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
           <button
             className="btn-primary"
             onClick={handleCreateVault}
-            disabled={loading || !isBeneficiaryValid}
+            disabled={loading || (hasBeneficiary && !isBeneficiaryValid)}
+          title={hasBeneficiary && !isBeneficiaryValid ? 'Enter a valid Stacks address before creating the vault' : undefined}
           >
             {loading ? 'Creating...' : 'Create Vault'}
           </button>
