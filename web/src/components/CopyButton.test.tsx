@@ -122,4 +122,25 @@ describe('CopyButton', () => {
     render(<CopyButton text="SP123" className="my-custom-class" />);
     expect(screen.getByRole('button').className).toContain('my-custom-class');
   });
+
+  it('is disabled when disabled prop is true', () => {
+    render(<CopyButton text="SP123" disabled />);
+    const btn = screen.getByRole('button');
+    expect((btn as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('does not call copy when disabled', () => {
+    render(<CopyButton text="SP123" disabled />);
+    fireEvent.click(screen.getByRole('button'));
+    expect(mockCopy).not.toHaveBeenCalled();
+  });
+
+  it('calls onCopy callback after successful copy', async () => {
+    const onCopy = vi.fn();
+    render(<CopyButton text="SP456" onCopy={onCopy} />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button'));
+    });
+    expect(mockCopy).toHaveBeenCalledWith('SP456');
+  });
 });
