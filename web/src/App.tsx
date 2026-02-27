@@ -178,6 +178,10 @@ export const App: React.FC = () => {
                   key={vault.vaultId}
                   className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''}`}
                   onClick={() => setSelectedVaultId(vault.vaultId)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Vault ${vault.vaultId}, ${vault.amount} STX${vault.isWithdrawn ? ', withdrawn' : ''}`}
+                  onKeyDown={(e) => e.key === 'Enter' && setSelectedVaultId(vault.vaultId)}
                 >
                   <span className="vault-id">Vault #{vault.vaultId}</span>
                   <span className="vault-amount">{vault.amount} STX</span>
