@@ -112,6 +112,15 @@
     u13 "Beneficiary already exists"
     u14 "Invalid beneficiary address"
     u15 "Beneficiary cannot be creator"
+    u16 "Too many vaults for user"
+    u17 "Deposit cooldown active"
+    u18 "Deposit amount exceeded"
+    u19 "Vault total amount exceeded"
+    u20 "Insufficient balance"
+    u21 "Invalid withdrawal amount"
+    u22 "Recipient cannot withdraw yet"
+    u23 "Withdrawal not allowed"
+    u24 "Emergency withdrawals disabled"
     _ "Unknown error"))
 
 ;; Operation limit errors
