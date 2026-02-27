@@ -25,6 +25,8 @@ export interface StackingInfo {
 // ------------------------------------------------------------------
 // Error code mapping utilities (mirrors contract constants)
 // ------------------------------------------------------------------
+export type ErrorCode = keyof typeof ERROR_MESSAGES;
+
 export const ERROR_MESSAGES: Record<number, string> = {
   1: "Vault not found",
   2: "Unauthorized: not vault owner",
