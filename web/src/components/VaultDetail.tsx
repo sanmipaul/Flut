@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import CopyButton from './CopyButton';
 import PenaltyWarningModal from './PenaltyWarningModal';
 
 interface Vault {
@@ -39,6 +40,15 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   const [showBeneficiaryForm, setShowBeneficiaryForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [showPenaltyModal, setShowPenaltyModal] = useState<boolean>(false);
+  const [copyAnnouncement, setCopyAnnouncement] = useState<string>('');
+
+  const handleAddressCopied = (text: string, success: boolean) => {
+    const truncated = text.length > 12 ? `${text.slice(0, 6)}…${text.slice(-4)}` : text;
+    setCopyAnnouncement(
+      success ? `Copied ${truncated} to clipboard` : 'Failed to copy address'
+    );
+    setTimeout(() => setCopyAnnouncement(''), 2500);
+  };
 
   useEffect(() => {
     const fetchVault = async () => {
@@ -127,6 +137,15 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
 
   return (
     <div className="vault-detail">
+      {/* Screen-reader live region for copy announcements */}
+      <span
+        className="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {copyAnnouncement}
+      </span>
+
       <header className="vault-header">
         <h2>Vault #{vault.vaultId}</h2>
         <span className={vault.isWithdrawn ? 'status withdrawn' : 'status active'}>
@@ -137,7 +156,14 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
       <section className="vault-info">
         <div className="info-item">
           <label>Creator</label>
-          <code>{vault.creator}</code>
+          <span className="address-with-copy">
+            <code>{vault.creator}</code>
+            <CopyButton
+                text={vault.creator}
+                label="Copy creator address"
+                onCopy={handleAddressCopied}
+              />
+          </span>
         </div>
 
         <div className="info-item">
@@ -174,7 +200,14 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
           <h3>Beneficiary Details</h3>
           <div className="info-item">
             <label>Beneficiary Address</label>
-            <code>{vault.beneficiary}</code>
+            <span className="address-with-copy">
+              <code>{vault.beneficiary}</code>
+              <CopyButton
+                  text={vault.beneficiary}
+                  label="Copy beneficiary address"
+                  onCopy={handleAddressCopied}
+                />
+            </span>
           </div>
           <p className="info-text">
             When unlocked, funds will be transferred to this beneficiary address instead of the creator.

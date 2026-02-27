@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import AddressInput from './AddressInput';
-import { AddressValidationResult } from '../utils/StacksAddressUtils';
+import CopyButton from './CopyButton';
 
 interface CreateVaultModalProps {
   isOpen: boolean;
@@ -134,56 +133,27 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
         </div>
 
         {hasBeneficiary && (
-          <AddressInput
-            id="beneficiary"
-            value={beneficiaryAddress}
-            onChange={handleBeneficiaryChange}
-            label="Beneficiary Address"
-            helpText="The Stacks address that will receive funds when the vault unlocks"
-            disabled={loading}
-            required
-            validateOnBlur={false}
-          />
-        )}
-
-        <div className="form-group checkbox">
-          <input
-            id="enableStacking"
-            type="checkbox"
-            checked={enableStacking}
-            onChange={(e) => setEnableStacking(e.target.checked)}
-            disabled={loading}
-          />
-          <label htmlFor="enableStacking">Enable STX Stacking (earn BTC yield while locked)</label>
-        </div>
-
-        {enableStacking && (
-          <>
-            <div className="form-group">
-              <label htmlFor="stackingPool">Stacking Pool Address</label>
+          <div className="form-group">
+            <label htmlFor="beneficiary">Beneficiary Address</label>
+            <div className="input-with-copy">
               <input
-                id="stackingPool"
+                id="beneficiary"
                 type="text"
-                value={stackingPool}
-                onChange={(e) => setStackingPool(e.target.value)}
-                placeholder="SP... stacking pool principal"
+                value={beneficiaryAddress}
+                onChange={(e) => setBeneficiaryAddress(e.target.value)}
+                placeholder="SP... or ST..."
                 disabled={loading}
               />
-              <small>Your STX will be delegated to this pool via pox-4 while the vault is locked</small>
+              {beneficiaryAddress.trim() && (
+                <CopyButton
+                  text={beneficiaryAddress.trim()}
+                  label="Copy beneficiary address"
+                  size="sm"
+                />
+              )}
             </div>
-
-            <div className="stacking-apy-banner">
-              <div className="apy-info">
-                <span className="apy-label">Estimated BTC Yield APY</span>
-                <span className="apy-value">~8–12%</span>
-              </div>
-              <p className="apy-note">
-                BTC rewards are distributed each Stacking cycle (~2 weeks). Actual APY varies
-                with network participation. Rewards accrue to the pool and are claimable
-                separately from your STX principal.
-              </p>
-            </div>
-          </>
+            <small>The address that will receive funds when the vault unlocks</small>
+          </div>
         )}
 
         {error && <div className="error-message">{error}</div>}

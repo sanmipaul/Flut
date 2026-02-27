@@ -71,6 +71,19 @@
   box-sizing: border-box;
 }
 
+/* Visually hidden but accessible to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -1052,246 +1065,143 @@ button:disabled {
   }
 }
 
-/* Screen-reader-only utility class */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+/* ============================================================
+   Input-with-copy layout (form inputs paired with CopyButton)
+   ============================================================ */
+
+.input-with-copy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input-with-copy input {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* ============================================================
-   Vault Search Bar
+   Address-with-copy layout
    ============================================================ */
 
-.vault-search-bar {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  background: var(--bg-surface, white);
-}
-
-/* Search input */
-.search-input-wrapper {
-  position: relative;
-  display: flex;
+.address-with-copy {
+  display: inline-flex;
   align-items: center;
+  gap: 6px;
+  max-width: 100%;
 }
 
-.search-icon {
-  position: absolute;
-  left: var(--spacing-sm);
-  font-size: 0.85rem;
-  pointer-events: none;
-  line-height: 1;
+.address-with-copy code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-.search-input {
-  width: 100%;
-  padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-xs) calc(var(--spacing-sm) * 3);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-family: inherit;
-  background: var(--bg-input, white);
-  color: var(--text-dark);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
+/* ============================================================
+   CopyButton
+   ============================================================ */
 
-.search-input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(85, 70, 255, 0.1);
-}
-
-.search-input::-webkit-search-cancel-button {
-  display: none;
-}
-
-.search-clear-btn {
-  position: absolute;
-  right: var(--spacing-xs);
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--text-light);
-  padding: 2px 4px;
-  border-radius: 3px;
-  transition: color 0.15s;
-}
-
-.search-clear-btn:hover {
-  color: var(--text-dark);
-}
-
-.search-hint {
-  font-size: 0.74rem;
-  color: var(--text-light);
-  opacity: 0.7;
-}
-
-.search-hint kbd {
-  font-family: inherit;
-  font-size: 0.74rem;
-  background: var(--secondary-color);
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  padding: 1px 4px;
-}
-
-/* Filter chip rows */
-.filter-row,
-.sort-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-xs);
+.copy-btn {
+  display: inline-flex;
   align-items: center;
-}
-
-.filter-chip,
-.sort-chip {
-  padding: 3px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  font-size: 0.78rem;
-  font-weight: 500;
+  gap: 4px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 4px;
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-dark, #1a1a2e);
   cursor: pointer;
-  background: none;
-  color: var(--text-light);
-  transition: all 0.15s;
+  font-family: inherit;
+  line-height: 1;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   white-space: nowrap;
 }
 
-.filter-chip:hover,
-.sort-chip:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+.copy-btn:focus-visible {
+  outline: 2px solid var(--accent-color, #6f3ff5);
+  outline-offset: 2px;
 }
 
-.filter-chip.active,
-.sort-chip.active {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-  color: white;
-  font-weight: 600;
+/* Size variants */
+.copy-btn--sm {
+  padding: 3px 6px;
+  font-size: 0.75rem;
 }
 
-.sort-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-light);
-  margin-right: 2px;
+.copy-btn--md {
+  padding: 5px 10px;
+  font-size: 0.875rem;
 }
 
-.sort-direction {
-  font-size: 0.8rem;
+/* State: idle */
+.copy-btn--idle {
+  border-color: var(--border-color, #d1d5db);
 }
 
-.sort-dir-btn {
-  margin-left: auto;
-  background: none;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  color: var(--text-light);
-  transition: all 0.15s;
+.copy-btn--idle:hover {
+  background: var(--bg-input, #f3f4f6);
+  border-color: var(--accent-color, #6f3ff5);
 }
 
-.sort-dir-btn:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+/* State: copied */
+.copy-btn--copied {
+  color: #15803d;
+  border-color: #86efac;
+  background: #f0fdf4;
+  animation: copy-flash 0.3s ease;
 }
 
-/* Filter summary row */
-.filter-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 2px;
+/* State: error */
+.copy-btn--error {
+  color: #b91c1c;
+  border-color: #fca5a5;
+  background: #fef2f2;
 }
 
-.result-count {
-  font-size: 0.78rem;
-  color: var(--text-light);
-  font-weight: 500;
+/* State: disabled */
+.copy-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
-.clear-filters-btn {
-  background: none;
-  border: none;
-  font-size: 0.78rem;
-  color: var(--primary-color);
-  cursor: pointer;
-  padding: 0;
-  font-weight: 600;
-  text-decoration: underline;
-  transition: opacity 0.15s;
+.copy-btn__icon {
+  font-style: normal;
+  user-select: none;
 }
 
-.clear-filters-btn:hover {
-  opacity: 0.75;
+.copy-btn__text {
+  font-size: inherit;
+  user-select: none;
 }
 
-/* Dark mode overrides for search bar */
-[data-theme='dark'] .vault-search-bar {
-  background: var(--bg-surface);
-  border-bottom-color: var(--border-color);
+@keyframes copy-flash {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
 }
 
-[data-theme='dark'] .search-input {
-  background: var(--bg-input);
-  color: var(--text-dark);
-  border-color: var(--border-color);
+/* Dark mode overrides for CopyButton */
+[data-theme='dark'] .copy-btn {
+  background: var(--bg-surface, #1e1e2e);
+  border-color: var(--border-color, #3a3a5c);
+  color: var(--text-dark, #e2e8f0);
 }
 
-[data-theme='dark'] .search-input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(123, 111, 255, 0.15);
+[data-theme='dark'] .copy-btn--idle:hover {
+  background: var(--bg-input, #2a2a3e);
+  border-color: #a78bfa;
 }
 
-[data-theme='dark'] .filter-chip,
-[data-theme='dark'] .sort-chip,
-[data-theme='dark'] .sort-dir-btn {
-  border-color: var(--border-color);
-  color: var(--text-light);
+[data-theme='dark'] .copy-btn--copied {
+  color: #4ade80;
+  border-color: #166534;
+  background: #052e16;
 }
 
-[data-theme='dark'] .filter-chip:hover,
-[data-theme='dark'] .sort-chip:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-[data-theme='dark'] .badge-unlocked {
-  background-color: var(--success-color);
-}
-
-/* Empty search / filter results state */
-.vault-list-empty {
-  padding: var(--spacing-lg) var(--spacing-md);
-  text-align: center;
-  color: var(--text-light);
-}
-
-.vault-list-empty p {
-  margin: 0 0 var(--spacing-sm) 0;
-  font-size: 0.9rem;
-}
-
-.vault-list-empty .empty-icon {
-  font-size: 2rem;
-  display: block;
-  margin-bottom: var(--spacing-sm);
-  opacity: 0.5;
+[data-theme='dark'] .copy-btn--error {
+  color: #f87171;
+  border-color: #7f1d1d;
+  background: #450a0a;
 }
