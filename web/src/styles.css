@@ -698,3 +698,32 @@ button:disabled {
     width: 100%;
   }
 }
+
+/* ============================================================
+   StxAmount — semantic amount display
+   ============================================================ */
+
+.stx-amount {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.stx-amount--positive {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.stx-amount--negative {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.stx-amount--warning {
+  color: #d97706;
+  font-weight: 600;
+}
+
+/* Dark mode overrides */
+[data-theme='dark'] .stx-amount--positive { color: #4ade80; }
+[data-theme='dark'] .stx-amount--negative { color: #f87171; }
+[data-theme='dark'] .stx-amount--warning  { color: #fbbf24; }
