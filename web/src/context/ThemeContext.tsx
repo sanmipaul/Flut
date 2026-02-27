@@ -42,6 +42,20 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [theme]);
 
+  // Respond to OS-level dark mode changes if the user has no stored preference
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (e: MediaQueryListEvent) => {
+      let stored: string | null = null;
+      try { stored = localStorage.getItem(STORAGE_KEY); } catch { /* ignore */ }
+      if (!stored) {
+        setThemeState(e.matches ? 'dark' : 'light');
+      }
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
   // Keyboard shortcut: Alt+D toggles dark mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
