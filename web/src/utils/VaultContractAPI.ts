@@ -78,6 +78,16 @@ export class VaultContractAPI {
    * @param enableStacking - Opt-in to PoX stacking while locked
    * @param stackingPool - Pool principal (required when enableStacking is true)
    */
+  // helper to check response object from contract calls and throw humanized error
+  static checkResult(result: any): void {
+    // contract calls return { ok: value } or { err: uint }
+    if (result && result.err != null) {
+      const code = parseInt(String(result.err).replace(/^u/, ''), 10);
+      const msg = formatError(code);
+      throw new Error(msg);
+    }
+  }
+
   async createVault(
     lockDuration: number,
     initialAmount: bigint,
