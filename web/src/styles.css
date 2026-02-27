@@ -895,6 +895,33 @@ button:disabled {
   border-color: rgba(255, 153, 0, 0.2);
 }
 
+[data-theme='dark'] .status-badge {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+[data-theme='dark'] .status-badge.unlocked {
+  background-color: rgba(45, 214, 92, 0.12);
+}
+
+[data-theme='dark'] .status-badge.locked {
+  background-color: rgba(255, 152, 0, 0.12);
+}
+
+[data-theme='dark'] .status.active {
+  background-color: rgba(45, 214, 92, 0.12);
+}
+
+[data-theme='dark'] .status.withdrawn {
+  background-color: rgba(200, 200, 200, 0.08);
+  color: #999;
+}
+
+[data-theme='dark'] .offline-indicator {
+  background-color: #2d2000;
+  border-color: #665500;
+  color: #fbbf24;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .app-main {
