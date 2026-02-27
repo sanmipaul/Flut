@@ -38,6 +38,16 @@ const SORT_OPTIONS: { label: string; value: VaultSortField }[] = [
   { label: 'Created', value: 'createdAt' },
 ];
 
+function getSortFieldLabel(field: VaultSortField): string {
+  const map: Record<VaultSortField, string> = {
+    id: 'Vault ID',
+    amount: 'Amount',
+    unlockHeight: 'Unlock block',
+    createdAt: 'Created block',
+  };
+  return map[field];
+}
+
 const VaultSearchBar: React.FC<VaultSearchBarProps> = ({
   filterState,
   resultCount,
@@ -152,10 +162,13 @@ const VaultSearchBar: React.FC<VaultSearchBarProps> = ({
 
       {/* Results summary + clear */}
       <div className="filter-summary">
-        <span className="result-count">
+        <span
+          className="result-count"
+          title={hasActiveFilters ? `Sorted by ${getSortFieldLabel(filterState.sortField)}` : undefined}
+        >
           {resultCount === totalCount
             ? `${totalCount} vault${totalCount !== 1 ? 's' : ''}`
-            : `${resultCount} of ${totalCount}`}
+            : `${resultCount} of ${totalCount} vaults`}
         </span>
         {hasActiveFilters && (
           <button
