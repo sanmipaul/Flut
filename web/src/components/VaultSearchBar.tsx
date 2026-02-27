@@ -120,6 +120,13 @@ const VaultSearchBar: React.FC<VaultSearchBarProps> = ({
         )}
       </div>
 
+      {/* Keyboard shortcut hint */}
+      {!filterState.searchQuery && (
+        <span className="search-hint" aria-hidden="true">
+          Press <kbd>Ctrl+F</kbd> to search
+        </span>
+      )}
+
       {/* Status filter */}
       <div className="filter-row" role="group" aria-label="Filter by status">
         {STATUS_OPTIONS.map((opt) => (

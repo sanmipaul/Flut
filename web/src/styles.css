@@ -793,6 +793,21 @@ button:disabled {
   color: var(--text-dark);
 }
 
+.search-hint {
+  font-size: 0.74rem;
+  color: var(--text-light);
+  opacity: 0.7;
+}
+
+.search-hint kbd {
+  font-family: inherit;
+  font-size: 0.74rem;
+  background: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+
 /* Filter chip rows */
 .filter-row,
 .sort-row {
