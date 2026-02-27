@@ -275,6 +275,17 @@
   )
 )
 
+;; Test: Partial withdraw functionality
+(define-private (test-partial-withdraw)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut partial-withdraw u0 u250000)))
+    (match result
+      success (ok "✓ Partial withdraw test passed")
+      error (err (concat "✗ Partial withdraw failed: " (to-string error)))
+    )
+  )
+)
+
 ;; End of new withdrawal safety tests
 
 ;; Test: Edge case - zero remainder penalty
