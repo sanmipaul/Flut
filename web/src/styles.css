@@ -875,6 +875,40 @@ button:disabled {
   opacity: 0.75;
 }
 
+/* Dark mode overrides for search bar */
+[data-theme='dark'] .vault-search-bar {
+  background: var(--bg-surface);
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme='dark'] .search-input {
+  background: var(--bg-input);
+  color: var(--text-dark);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .search-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(123, 111, 255, 0.15);
+}
+
+[data-theme='dark'] .filter-chip,
+[data-theme='dark'] .sort-chip,
+[data-theme='dark'] .sort-dir-btn {
+  border-color: var(--border-color);
+  color: var(--text-light);
+}
+
+[data-theme='dark'] .filter-chip:hover,
+[data-theme='dark'] .sort-chip:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+[data-theme='dark'] .badge-unlocked {
+  background-color: var(--success-color);
+}
+
 /* Empty search / filter results state */
 .vault-list-empty {
   padding: var(--spacing-lg) var(--spacing-md);
