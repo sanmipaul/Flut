@@ -1,3 +1,20 @@
+/**
+ * AddressInput
+ *
+ * A controlled text input designed specifically for entering Stacks (STX)
+ * addresses.  It validates the value on every keystroke and provides:
+ *
+ * - Real-time error messages explaining *why* the address is invalid.
+ * - A visual checkmark / cross icon inside the field.
+ * - A colour-coded "Mainnet" or "Testnet" badge when the address is valid.
+ * - Auto-normalisation (trim + uppercase) on blur.
+ * - Full accessibility attributes (aria-invalid, aria-required, aria-describedby).
+ *
+ * The component does NOT manage its own value — the caller controls `value`
+ * and receives updates through the `onChange` callback, which also forwards
+ * the full `AddressValidationResult` so that the parent can react to
+ * validity changes without re-running the validation itself.
+ */
 import React, { useState, useCallback } from 'react';
 import {
   validateAddress,
