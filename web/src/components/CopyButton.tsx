@@ -29,6 +29,7 @@ export interface CopyButtonProps {
   showText?: boolean;
   className?: string;
   onCopy?: (text: string, success: boolean) => void;
+  disabled?: boolean;
 }
 
 const ICONS: Record<string, string> = {
@@ -50,11 +51,13 @@ const CopyButton: React.FC<CopyButtonProps> = ({
   showText = false,
   className = '',
   onCopy,
+  disabled = false,
 }) => {
   const { copyState, copy } = useCopyToClipboard();
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (disabled) return;
     await copy(text);
     if (onCopy) {
       onCopy(text, copyState !== 'error');
@@ -71,6 +74,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({
       onClick={handleClick}
       aria-label={copyState === 'idle' ? label : LABELS[copyState]}
       title={copyState === 'idle' ? label : LABELS[copyState]}
+      disabled={disabled}
     >
       <span className="copy-btn__icon" aria-hidden="true">
         {ICONS[copyState]}
