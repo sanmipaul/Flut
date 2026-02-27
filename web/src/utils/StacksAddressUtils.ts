@@ -37,3 +37,38 @@ export const ALL_VALID_PREFIXES: ReadonlyArray<string> = [
   ...MAINNET_PREFIXES,
   ...TESTNET_PREFIXES,
 ];
+
+/**
+ * Returns true when `address` is a syntactically valid Stacks address.
+ *
+ * Checks performed:
+ *  1. Non-empty after trimming.
+ *  2. Starts with a known two-character prefix (SP, SM, ST, SN).
+ *  3. Total length is within the expected range.
+ *  4. Every character after the prefix belongs to the c32 alphabet.
+ */
+export function isValidStacksAddress(address: string): boolean {
+  if (!address || typeof address !== 'string') return false;
+
+  const trimmed = address.trim().toUpperCase();
+
+  // Must start with 'S'
+  if (!trimmed.startsWith('S')) return false;
+
+  // Second character must form a recognised prefix
+  const prefix = trimmed.slice(0, 2);
+  if (!ALL_VALID_PREFIXES.includes(prefix)) return false;
+
+  // Length guard
+  if (trimmed.length < MIN_ADDRESS_LENGTH || trimmed.length > MAX_ADDRESS_LENGTH) {
+    return false;
+  }
+
+  // All characters after the prefix must be in the c32 alphabet
+  const body = trimmed.slice(2);
+  for (const ch of body) {
+    if (!C32_ALPHABET.includes(ch)) return false;
+  }
+
+  return true;
+}
