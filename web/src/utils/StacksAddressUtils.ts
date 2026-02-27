@@ -141,8 +141,13 @@ export function getAddressErrorMessage(address: string): string {
   }
 
   const body = trimmed.slice(2);
+  const COMMONLY_CONFUSED = new Set(['I', 'L', 'O', 'U']);
+
   for (const ch of body) {
     if (!C32_ALPHABET.includes(ch)) {
+      if (COMMONLY_CONFUSED.has(ch)) {
+        return `Invalid character "${ch}" — the c32 alphabet excludes I, L, O and U to avoid visual confusion with similar characters`;
+      }
       return `Invalid character "${ch}" — Stacks addresses use only 0–9 and A–Z (excluding I, L, O, U)`;
     }
   }
