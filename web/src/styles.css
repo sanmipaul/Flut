@@ -774,3 +774,27 @@ button:disabled {
   40%  { transform: scale(1.12); }
   100% { transform: scale(1); }
 }
+
+/* Dark mode overrides for CopyButton */
+[data-theme='dark'] .copy-btn {
+  background: var(--bg-surface, #1e1e2e);
+  border-color: var(--border-color, #3a3a5c);
+  color: var(--text-dark, #e2e8f0);
+}
+
+[data-theme='dark'] .copy-btn--idle:hover {
+  background: var(--bg-input, #2a2a3e);
+  border-color: #a78bfa;
+}
+
+[data-theme='dark'] .copy-btn--copied {
+  color: #4ade80;
+  border-color: #166534;
+  background: #052e16;
+}
+
+[data-theme='dark'] .copy-btn--error {
+  color: #f87171;
+  border-color: #7f1d1d;
+  background: #450a0a;
+}
