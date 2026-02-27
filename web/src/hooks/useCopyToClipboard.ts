@@ -50,14 +50,22 @@ function execCommandCopy(text: string): boolean {
   }
 }
 
+export interface UseCopyToClipboardOptions {
+  /** Override the auto-reset delay in ms (default: RESET_DELAY_MS = 2000) */
+  resetDelay?: number;
+}
+
 /**
  * useCopyToClipboard
  *
  * Returns a `copy` function and a `copyState` indicator.
  * Tries the modern Clipboard API first, falls back to execCommand.
- * The state automatically resets to 'idle' after RESET_DELAY_MS.
+ * The state automatically resets to 'idle' after `resetDelay` ms.
  */
-export function useCopyToClipboard(): UseCopyToClipboardReturn {
+export function useCopyToClipboard(
+  options: UseCopyToClipboardOptions = {}
+): UseCopyToClipboardReturn {
+  const { resetDelay = RESET_DELAY_MS } = options;
   const [copyState, setCopyState] = useState<CopyState>('idle');
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -65,17 +73,20 @@ export function useCopyToClipboard(): UseCopyToClipboardReturn {
     setCopyState('idle');
   }, []);
 
-  const copy = useCallback(async (text: string) => {
-    // Cancel any pending auto-reset
-    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+  const copy = useCallback(
+    async (text: string) => {
+      // Cancel any pending auto-reset
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
 
-    const ok = (await writeToClipboard(text)) || execCommandCopy(text);
-    setCopyState(ok ? 'copied' : 'error');
+      const ok = (await writeToClipboard(text)) || execCommandCopy(text);
+      setCopyState(ok ? 'copied' : 'error');
 
-    resetTimerRef.current = setTimeout(() => {
-      setCopyState('idle');
-    }, RESET_DELAY_MS);
-  }, []);
+      resetTimerRef.current = setTimeout(() => {
+        setCopyState('idle');
+      }, resetDelay);
+    },
+    [resetDelay]
+  );
 
   return { copyState, copy, reset };
 }
