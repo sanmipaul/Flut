@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import PenaltyWarningModal from './PenaltyWarningModal';
+import CopyButton from './CopyButton';
 import PenaltyWarningModal from './PenaltyWarningModal';
 
 interface Vault {
@@ -64,7 +64,6 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
     try {
       setSubmitting(true);
       await onWithdraw(vault.vaultId);
-      // Refresh vault data
       const updated = await onFetchVault(vaultId);
       setVault(updated);
     } catch (err) {
@@ -81,7 +80,6 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
       await onSetBeneficiary(vault.vaultId, newBeneficiary);
       setNewBeneficiary('');
       setShowBeneficiaryForm(false);
-      // Refresh vault data
       const updated = await onFetchVault(vaultId);
       setVault(updated);
     } catch (err) {
@@ -115,7 +113,10 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
       <section className="vault-info">
         <div className="info-item">
           <label>Creator</label>
-          <code>{vault.creator}</code>
+          <span className="address-with-copy">
+            <code>{vault.creator}</code>
+            <CopyButton text={vault.creator} label="Copy creator address" />
+          </span>
         </div>
 
         <div className="info-item">
@@ -152,7 +153,10 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
           <h3>Beneficiary Details</h3>
           <div className="info-item">
             <label>Beneficiary Address</label>
-            <code>{vault.beneficiary}</code>
+            <span className="address-with-copy">
+              <code>{vault.beneficiary}</code>
+              <CopyButton text={vault.beneficiary} label="Copy beneficiary address" />
+            </span>
           </div>
           <p className="info-text">
             When unlocked, funds will be transferred to this beneficiary address instead of the creator.
@@ -250,7 +254,6 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
                 await onEmergencyWithdraw(id);
               }
               setShowPenaltyModal(false);
-              // Refresh vault data
               const updated = await onFetchVault(vaultId);
               setVault(updated);
             } catch (err) {
