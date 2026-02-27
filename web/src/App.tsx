@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import VaultDetail from './components/VaultDetail';
+import StxAmount from './components/StxAmount';
 
 interface Vault {
   vaultId: number;
@@ -163,7 +164,9 @@ export const App: React.FC = () => {
                   onClick={() => setSelectedVaultId(vault.vaultId)}
                 >
                   <span className="vault-id">Vault #{vault.vaultId}</span>
-                  <span className="vault-amount">{vault.amount} STX</span>
+                  <span className="vault-amount">
+                    <StxAmount amount={vault.amount} compact={vault.amount >= 1_000_000} />
+                  </span>
                   {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
                   {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
                 </li>
