@@ -91,6 +91,29 @@
 (define-constant ERR-INVALID-BENEFICIARY (err u14))        ;; Beneficiary address is invalid
 (define-constant ERR-BENEFICIARY-SAME-AS-CREATOR (err u15)) ;; Cannot set creator as beneficiary
 
+;; Human readable descriptions for error codes. This read-only helper can be
+;; queried by frontends or integrated into testing to provide a more helpful
+;; message based on the returned code. It intentionally uses a fixed
+;; string-ascii size to avoid dynamic memory allocation issues.
+(define-read-only (get-error-description (code uint)) (string-ascii 128)
+  (match code
+    u1 "Vault not found"
+    u2 "Unauthorized: not vault owner"
+    u3 "Vault still locked"
+    u4 "Vault already withdrawn"
+    u5 "Invalid amount"
+    u6 "Invalid unlock height"
+    u7 "Invalid penalty rate"
+    u8 "Not authorized penalty owner"
+    u9 "Missing stacking pool"
+    u10 "Stacking not enabled"
+    u11 "Invalid beneficiary share configuration"
+    u12 "Too many beneficiaries"
+    u13 "Beneficiary already exists"
+    u14 "Invalid beneficiary address"
+    u15 "Beneficiary cannot be creator"
+    _ "Unknown error"))
+
 ;; Operation limit errors
 (define-constant ERR-TOO-MANY-VAULTS (err u16))             ;; User has reached max vault limit
 (define-constant ERR-DEPOSIT-COOLDOWN-ACTIVE (err u17))     ;; Must wait before next deposit
