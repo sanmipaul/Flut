@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import VaultDetail from './components/VaultDetail';
+import { useAllVaultSettings } from './hooks/useAllVaultSettings';
 
 interface Vault {
   vaultId: number;
@@ -20,6 +21,16 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [userAddress, setUserAddress] = useState<string | null>(null);
+  const [settingsVersion, setSettingsVersion] = useState(0);
+
+  const vaultIds = useMemo(() => vaults.map((v) => v.vaultId), [vaults]);
+  const { getSettings, refresh: refreshSettings } = useAllVaultSettings(vaultIds);
+
+  // Refresh sidebar settings when VaultSettingsPanel signals a change
+  const handleSettingsChange = () => {
+    setSettingsVersion((v) => v + 1);
+    refreshSettings();
+  };
 
   useEffect(() => {
     // Initialize user connection
@@ -130,6 +141,18 @@ export const App: React.FC = () => {
 
   const selectedVault = selectedVaultId !== null ? vaults.find((v) => v.vaultId === selectedVaultId) : null;
 
+  // Sort vaults: pinned first, then by vaultId
+  const sortedVaults = useMemo(() => {
+    return [...vaults].sort((a, b) => {
+      const aPinned = getSettings(a.vaultId).pinned ? 0 : 1;
+      const bPinned = getSettings(b.vaultId).pinned ? 0 : 1;
+      if (aPinned !== bPinned) return aPinned - bPinned;
+      return a.vaultId - b.vaultId;
+    });
+  // settingsVersion triggers re-sort when settings change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vaults, getSettings, settingsVersion]);
+
   return (
     <div className="app">
       <header className="app-header">
@@ -150,24 +173,32 @@ export const App: React.FC = () => {
             </button>
           </div>
 
-          {vaults.length === 0 ? (
+          {sortedVaults.length === 0 ? (
             <div className="empty-state">
               <p>No vaults yet. Create one to get started!</p>
             </div>
           ) : (
             <ul className="vault-list">
-              {vaults.map((vault) => (
-                <li
-                  key={vault.vaultId}
-                  className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''}`}
-                  onClick={() => setSelectedVaultId(vault.vaultId)}
-                >
-                  <span className="vault-id">Vault #{vault.vaultId}</span>
-                  <span className="vault-amount">{vault.amount} STX</span>
-                  {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
-                  {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
-                </li>
-              ))}
+              {sortedVaults.map((vault) => {
+                const vs = getSettings(vault.vaultId);
+                const colorClass = vs.colorTag !== 'none' ? `vault-item--tag-${vs.colorTag}` : '';
+                const pinnedClass = vs.pinned ? 'vault-item--pinned' : '';
+                return (
+                  <li
+                    key={vault.vaultId}
+                    className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''} ${colorClass} ${pinnedClass}`}
+                    onClick={() => setSelectedVaultId(vault.vaultId)}
+                  >
+                    <span className="vault-id">
+                      {vs.pinned && <span className="pin-icon" aria-label="Pinned" title="Pinned">📌</span>}
+                      {vs.nickname ? vs.nickname : `Vault #${vault.vaultId}`}
+                    </span>
+                    <span className="vault-amount">{vault.amount} STX</span>
+                    {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
+                    {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
