@@ -57,4 +57,24 @@ describe('useStxFormat', () => {
     expect(typeof result.current.locale).toBe('string');
     expect(result.current.locale.length).toBeGreaterThan(0);
   });
+
+  it('fmtDiff prefixes positive with +', () => {
+    const { result } = renderHook(() => useStxFormat());
+    const out = result.current.fmtDiff(500);
+    expect(out).toContain('+');
+    expect(out).toContain('500');
+    expect(out).toContain('STX');
+  });
+
+  it('fmtDiff prefixes negative with −', () => {
+    const { result } = renderHook(() => useStxFormat());
+    const out = result.current.fmtDiff(-100);
+    expect(out).toContain('−');
+    expect(out).toContain('100');
+  });
+
+  it('fmtDiff formats zero without sign', () => {
+    const { result } = renderHook(() => useStxFormat());
+    expect(result.current.fmtDiff(0)).toBe('0 STX');
+  });
 });

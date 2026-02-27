@@ -27,6 +27,8 @@ export interface StxAmountProps {
   showSymbol?: boolean;
   className?: string;
   highlight?: StxAmountHighlight;
+  /** Override the accessible label for screen readers */
+  'aria-label'?: string;
 }
 
 const StxAmount: React.FC<StxAmountProps> = ({
@@ -37,6 +39,7 @@ const StxAmount: React.FC<StxAmountProps> = ({
   showSymbol = true,
   className = '',
   highlight = 'neutral',
+  'aria-label': ariaLabel,
 }) => {
   const { fmt, fmtMicro } = useStxFormat();
 
@@ -51,6 +54,7 @@ const StxAmount: React.FC<StxAmountProps> = ({
       className={`stx-amount ${highlightClass} ${className}`.trim()}
       data-amount={amount}
       data-unit={fromMicroStx ? 'microstx' : 'stx'}
+      aria-label={ariaLabel ?? displayValue}
     >
       {displayValue}
     </span>
