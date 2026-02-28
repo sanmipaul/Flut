@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import VaultDetail from './components/VaultDetail';
+import VaultLockProgress from './components/VaultLockProgress';
 
 interface Vault {
   vaultId: number;
@@ -164,6 +165,13 @@ export const App: React.FC = () => {
                 >
                   <span className="vault-id">Vault #{vault.vaultId}</span>
                   <span className="vault-amount">{vault.amount} STX</span>
+                  <VaultLockProgress
+                    createdAt={vault.createdAt}
+                    unlockHeight={vault.unlockHeight}
+                    currentBlockHeight={vault.currentBlockHeight}
+                    isWithdrawn={vault.isWithdrawn}
+                    compact
+                  />
                   {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
                   {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
                 </li>
