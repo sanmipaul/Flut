@@ -765,6 +765,11 @@ button:disabled {
   background: var(--secondary-color);
 }
 
+.modal-close-btn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
 .export-modal__description {
   color: var(--text-light);
   font-size: 0.875rem;
