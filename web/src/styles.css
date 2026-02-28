@@ -697,6 +697,27 @@ button:disabled {
   .modal-content {
     width: 100%;
   }
+
+  /* Settings panel: full-width on mobile */
+  .vault-settings-panel {
+    margin-top: var(--spacing-md);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .color-tag-picker {
+    gap: var(--spacing-md);
+  }
+
+  .color-tag-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .settings-row--inline {
+    gap: var(--spacing-sm);
+  }
 }
 
 /* ============================================================
