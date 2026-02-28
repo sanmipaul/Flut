@@ -859,3 +859,90 @@ button:disabled {
 .analytics-distribution__legend-item--locked::before   { background: #d97706; }
 .analytics-distribution__legend-item--unlocked::before { background: #16a34a; }
 .analytics-distribution__legend-item--withdrawn::before { background: #6b7280; }
+
+/* =========================================================================
+   Lock duration stats
+   ========================================================================= */
+
+.analytics-duration__list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.analytics-duration__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.analytics-duration__row dt {
+  color: var(--text-light);
+}
+
+.analytics-duration__row dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* =========================================================================
+   Dark mode overrides for analytics dashboard
+   ========================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  .analytics-dashboard {
+    border-bottom-color: #3a3a4a;
+  }
+
+  .analytics-dashboard__toggle {
+    background: #1e1e30;
+    color: #e0e0f0;
+  }
+
+  .analytics-dashboard__toggle:hover {
+    background: #26263a;
+  }
+
+  .analytics-metric-card {
+    background: #2a2a3e;
+    border-color: #3a3a4a;
+  }
+
+  .analytics-metric-card__value {
+    color: #e0e0f0;
+  }
+
+  .analytics-distribution__bar {
+    background: #3a3a4a;
+  }
+
+  .analytics-duration__row dd {
+    color: #e0e0f0;
+  }
+}
+
+/* =========================================================================
+   Reduced motion: disable distribution segment width transition
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .analytics-distribution__segment {
+    transition: none;
+  }
+}
+
+/* sr-only utility (if not already defined) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
