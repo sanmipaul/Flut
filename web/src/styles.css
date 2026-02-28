@@ -2262,3 +2262,62 @@ button:disabled {
     gap: 2px;
   }
 }
+
+/* =========================================================================
+   Stacking Yield Card — container and header
+   ========================================================================= */
+
+.stacking-yield-card {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1px solid #fbbf24;
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.stacking-yield-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stacking-yield-card__title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.stacking-yield-card__reset-btn {
+  padding: 3px 10px;
+  border: 1px solid #fbbf24;
+  border-radius: 5px;
+  background: white;
+  color: #92400e;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.stacking-yield-card__reset-btn:hover {
+  background: #fef3c7;
+}
+
+.stacking-yield-card__no-yield {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #92400e;
+  font-style: italic;
+}
+
+.stacking-yield-card__disclaimer {
+  margin: 0;
+  font-size: 0.68rem;
+  color: #a16207;
+  font-style: italic;
+  border-top: 1px solid #fde68a;
+  padding-top: var(--spacing-xs);
+}
