@@ -92,8 +92,16 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
               value={settings.nickname}
               maxLength={40}
               placeholder="e.g. Emergency Fund"
+              aria-describedby={`nickname-count-${vaultId}`}
               onChange={(e) => handleUpdate('nickname', e.target.value)}
             />
+            <span
+              id={`nickname-count-${vaultId}`}
+              className="settings-char-count"
+              aria-live="polite"
+            >
+              {settings.nickname.length}/40
+            </span>
           </div>
 
           {/* Compact display */}
