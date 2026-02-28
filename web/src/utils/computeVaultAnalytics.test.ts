@@ -163,4 +163,22 @@ describe('computeVaultAnalytics — edge cases', () => {
     expect(result.statusCounts.unlocked).toBe(1);
     expect(result.statusCounts.locked).toBe(0);
   });
+
+  it('average amount for a single vault equals that vault amount', () => {
+    const result = computeVaultAnalytics([locked]);
+    expect(result.amountTotals.average).toBe(locked.amount);
+  });
+
+  it('grandTotal is 0 when all vaults have amount=0', () => {
+    const zero: AnalyticsVaultInput = { ...locked, amount: 0 };
+    const result = computeVaultAnalytics([zero]);
+    expect(result.amountTotals.grandTotal).toBe(0);
+    expect(result.amountTotals.average).toBe(0);
+  });
+
+  it('shortestLockBlocks is 0 for zero-duration vault', () => {
+    const noLock: AnalyticsVaultInput = { ...locked, createdAt: 200, unlockHeight: 200 };
+    const result = computeVaultAnalytics([noLock]);
+    expect(result.lockDurationStats.shortestLockBlocks).toBe(0);
+  });
 });
