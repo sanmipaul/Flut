@@ -157,3 +157,35 @@ describe('VaultSearchBar — interactions', () => {
     expect(onReset).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('VaultSearchBar — chip active states', () => {
+  it('applies --active class to the "all" chip when statusFilter is "all"', () => {
+    render(<VaultSearchBar {...defaultProps} statusFilter="all" />);
+    const allBtn = screen.getByText('All').closest('button');
+    expect(allBtn?.className).toContain('vault-search-bar__chip--active');
+  });
+
+  it('applies --active class to the "locked" chip when statusFilter is "locked"', () => {
+    render(<VaultSearchBar {...defaultProps} statusFilter="locked" />);
+    const lockedBtn = screen.getByText('Locked').closest('button');
+    expect(lockedBtn?.className).toContain('vault-search-bar__chip--active');
+  });
+
+  it('does not apply --active to non-selected chips', () => {
+    render(<VaultSearchBar {...defaultProps} statusFilter="locked" />);
+    const allBtn = screen.getByText('All').closest('button');
+    expect(allBtn?.className).not.toContain('vault-search-bar__chip--active');
+  });
+
+  it('sort select shows selected field', () => {
+    render(<VaultSearchBar {...defaultProps} sortField="amount" />);
+    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    expect(select.value).toBe('amount');
+  });
+
+  it('input reflects controlled query value', () => {
+    render(<VaultSearchBar {...defaultProps} query="hello" />);
+    const input = screen.getByRole('searchbox') as HTMLInputElement;
+    expect(input.value).toBe('hello');
+  });
+});
