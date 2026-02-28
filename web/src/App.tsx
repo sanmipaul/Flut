@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import VaultDetail from './components/VaultDetail';
+import VaultExportModal from './components/VaultExportModal';
+import VaultImportModal from './components/VaultImportModal';
 
 interface Vault {
   vaultId: number;
@@ -17,6 +19,8 @@ export const App: React.FC = () => {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [userAddress, setUserAddress] = useState<string | null>(null);
@@ -141,13 +145,30 @@ export const App: React.FC = () => {
         <section className="sidebar">
           <div className="sidebar-header">
             <h2>Your Vaults</h2>
-            <button
-              className="btn-primary btn-small"
-              onClick={() => setShowCreateModal(true)}
-              disabled={loading}
-            >
-              New Vault
-            </button>
+            <div className="sidebar-header__actions">
+              <button
+                className="btn-primary btn-small"
+                onClick={() => setShowCreateModal(true)}
+                disabled={loading}
+              >
+                New Vault
+              </button>
+              <button
+                className="btn-secondary btn-small"
+                onClick={() => setShowExportModal(true)}
+                disabled={vaults.length === 0}
+                title="Export vault backup"
+              >
+                Export
+              </button>
+              <button
+                className="btn-secondary btn-small"
+                onClick={() => setShowImportModal(true)}
+                title="Import vault backup"
+              >
+                Import
+              </button>
+            </div>
           </div>
 
           {vaults.length === 0 ? (
@@ -195,6 +216,21 @@ export const App: React.FC = () => {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onCreateVault={handleCreateVault}
+      />
+
+      <VaultExportModal
+        isOpen={showExportModal}
+        vaults={vaults}
+        onClose={() => setShowExportModal(false)}
+      />
+
+      <VaultImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportComplete={() => {
+          // Trigger a re-render so settings read from localStorage are fresh
+          setVaults((prev) => [...prev]);
+        }}
       />
 
       {error && <div className="error-banner">{error}</div>}
