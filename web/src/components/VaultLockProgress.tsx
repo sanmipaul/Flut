@@ -86,6 +86,7 @@ const VaultLockProgress: React.FC<VaultLockProgressProps> = ({
         <div
           className={`vault-lock-progress__fill ${isNearlyUnlocked ? 'vault-lock-progress__fill--pulse' : ''}`}
           style={{ width: `${percentComplete}%` }}
+          data-testid="lock-progress-fill"
         />
 
         {/* Milestone markers */}
