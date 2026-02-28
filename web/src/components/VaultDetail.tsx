@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
-import StxAmount from './StxAmount';
+import VaultSettingsPanel from './VaultSettingsPanel';
+import { useVaultSettings } from '../hooks/useVaultSettings';
 
 interface Vault {
   vaultId: number;
@@ -22,6 +23,8 @@ interface VaultDetailProps {
   onFetchVault: (vaultId: number) => Promise<Vault>;
   onEmergencyWithdraw?: (vaultId: number) => Promise<void>;
   penaltyRate?: number;
+  /** Called when the user changes any vault setting, so the parent can refresh its sidebar */
+  onSettingsChange?: () => void;
 }
 
 export const VaultDetail: React.FC<VaultDetailProps> = ({
@@ -31,6 +34,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   onFetchVault,
   onEmergencyWithdraw,
   penaltyRate = 10,
+  onSettingsChange,
 }) => {
   const [vault, setVault] = useState<Vault | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -49,6 +53,8 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
     );
     setTimeout(() => setCopyAnnouncement(''), 2500);
   };
+
+  const { settings } = useVaultSettings(vaultId);
 
   useEffect(() => {
     const fetchVault = async () => {
@@ -135,23 +141,32 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
     return <div className="vault-detail not-found">Vault not found</div>;
   }
 
-  return (
-    <div className="vault-detail">
-      {/* Screen-reader live region for copy announcements */}
-      <span
-        className="sr-only"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {copyAnnouncement}
-      </span>
+  const colorTagClass = settings.colorTag !== 'none'
+    ? `vault-detail--tag-${settings.colorTag}`
+    : '';
 
+  return (
+    <div className={`vault-detail ${colorTagClass}`}>
       <header className="vault-header">
-        <h2>Vault #{vault.vaultId}</h2>
+        <div className="vault-header__title-group">
+          <h2>
+            {settings.nickname ? settings.nickname : `Vault #${vault.vaultId}`}
+          </h2>
+          {settings.nickname && (
+            <span className="vault-header__id">#{vault.vaultId}</span>
+          )}
+        </div>
         <span className={vault.isWithdrawn ? 'status withdrawn' : 'status active'}>
           {vault.isWithdrawn ? 'Withdrawn' : 'Active'}
         </span>
       </header>
+
+      {settings.note && (
+        <div className="vault-note" role="note">
+          <span className="vault-note__icon" aria-hidden="true">📝</span>
+          <p className="vault-note__text">{settings.note}</p>
+        </div>
+      )}
 
       <section className="vault-info">
         <div className="info-item">
@@ -168,7 +183,11 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
 
         <div className="info-item">
           <label>Amount</label>
-          <StxAmount amount={vault.amount} highlight="positive" />
+          <span className="amount">
+            {settings.compactDisplay && vault.amount >= 1_000
+              ? `${(vault.amount / (vault.amount >= 1_000_000 ? 1_000_000 : 1_000)).toFixed(1)}${vault.amount >= 1_000_000 ? 'M' : 'k'} STX`
+              : `${vault.amount.toLocaleString()} STX`}
+          </span>
         </div>
 
         <div className="info-item">
@@ -332,6 +351,8 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
           </p>
         </section>
       )}
+
+      <VaultSettingsPanel vaultId={vaultId} onSettingsChange={onSettingsChange} />
 
       {error && <div className="error-message">{error}</div>}
 

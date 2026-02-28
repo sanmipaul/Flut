@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
-import StxAmount from './components/StxAmount';
+import { useAllVaultSettings } from './hooks/useAllVaultSettings';
 
 interface Vault {
   vaultId: number;
@@ -23,6 +23,16 @@ const AppInner: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [userAddress, setUserAddress] = useState<string | null>(null);
+  const [settingsVersion, setSettingsVersion] = useState(0);
+
+  const vaultIds = useMemo(() => vaults.map((v) => v.vaultId), [vaults]);
+  const { getSettings, refresh: refreshSettings } = useAllVaultSettings(vaultIds);
+
+  // Refresh sidebar settings when VaultSettingsPanel signals a change
+  const handleSettingsChange = () => {
+    setSettingsVersion((v) => v + 1);
+    refreshSettings();
+  };
 
   const { toasts, dismissToast, clearAll, toast } = useToast();
 
@@ -153,6 +163,18 @@ const AppInner: React.FC = () => {
     ? vaults.find((v) => v.vaultId === selectedVaultId)
     : null;
 
+  // Sort vaults: pinned first, then by vaultId
+  const sortedVaults = useMemo(() => {
+    return [...vaults].sort((a, b) => {
+      const aPinned = getSettings(a.vaultId).pinned ? 0 : 1;
+      const bPinned = getSettings(b.vaultId).pinned ? 0 : 1;
+      if (aPinned !== bPinned) return aPinned - bPinned;
+      return a.vaultId - b.vaultId;
+    });
+  // settingsVersion triggers re-sort when settings change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vaults, getSettings, settingsVersion]);
+
   return (
     <div className="app">
       <header className="app-header">
@@ -178,34 +200,7 @@ const AppInner: React.FC = () => {
             </button>
           </div>
 
-          {/* Live region announces filter result count to screen readers */}
-          <div
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-            className="sr-only"
-          >
-            {hasActiveFilters
-              ? `${resultCount} of ${vaults.length} vaults shown`
-              : ''}
-          </div>
-
-          {vaults.length > 0 && (
-            <VaultSearchBar
-              filterState={filterState}
-              resultCount={resultCount}
-              totalCount={vaults.length}
-              hasActiveFilters={hasActiveFilters}
-              onSearchChange={setSearchQuery}
-              onStatusFilterChange={setStatusFilter}
-              onLockFilterChange={setLockFilter}
-              onSortFieldChange={setSortField}
-              onToggleSortDirection={toggleSortDirection}
-              onClearFilters={clearFilters}
-            />
-          )}
-
-          {vaults.length === 0 ? (
+          {sortedVaults.length === 0 ? (
             <div className="empty-state">
               <p>No vaults yet. Create one to get started!</p>
             </div>
@@ -221,47 +216,45 @@ const AppInner: React.FC = () => {
             </div>
           ) : (
             <ul className="vault-list">
-              {filteredVaults.map((vault) => (
-                <li
-                  key={vault.vaultId}
-                  className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''}`}
-                  onClick={() => setSelectedVaultId(vault.vaultId)}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Vault ${vault.vaultId}, ${vault.amount} STX${vault.isWithdrawn ? ', withdrawn' : ''}`}
-                  onKeyDown={(e) => e.key === 'Enter' && setSelectedVaultId(vault.vaultId)}
-                >
-                  <span className="vault-id">Vault #{vault.vaultId}</span>
-                  <span className="vault-amount">
-                    <StxAmount amount={vault.amount} compact={vault.amount >= 1_000_000} />
-                  </span>
-                  {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
-                  {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
-                  {!vault.isWithdrawn && vault.currentBlockHeight >= vault.unlockHeight && (
-                    <span className="badge-unlocked">Unlocked</span>
-                  )}
-                </li>
-              ))}
+              {sortedVaults.map((vault) => {
+                const vs = getSettings(vault.vaultId);
+                const colorClass = vs.colorTag !== 'none' ? `vault-item--tag-${vs.colorTag}` : '';
+                const pinnedClass = vs.pinned ? 'vault-item--pinned' : '';
+                return (
+                  <li
+                    key={vault.vaultId}
+                    className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''} ${colorClass} ${pinnedClass}`}
+                    onClick={() => setSelectedVaultId(vault.vaultId)}
+                  >
+                    <span className="vault-id">
+                      {vs.pinned && <span className="pin-icon" aria-label="Pinned" title="Pinned">📌</span>}
+                      {vs.nickname ? vs.nickname : `Vault #${vault.vaultId}`}
+                    </span>
+                    <span className="vault-amount">
+                      {vs.compactDisplay && vault.amount >= 1_000
+                        ? `${(vault.amount / (vault.amount >= 1_000_000 ? 1_000_000 : 1_000)).toFixed(1)}${vault.amount >= 1_000_000 ? 'M' : 'k'} STX`
+                        : `${vault.amount.toLocaleString()} STX`}
+                    </span>
+                    {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
+                    {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
 
         <section className="content">
           {selectedVault ? (
-            <>
-              <VaultDetail
-                vaultId={selectedVault.vaultId}
-                onWithdraw={handleWithdraw}
-                onSetBeneficiary={handleSetBeneficiary}
-                onFetchVault={handleFetchVault}
-                onEmergencyWithdraw={handleEmergencyWithdraw}
-                penaltyRate={10}
-              />
-              <VaultHistory
-                vaultId={selectedVault.vaultId}
-                events={getEvents(selectedVault.vaultId)}
-              />
-            </>
+            <VaultDetail
+              vaultId={selectedVault.vaultId}
+              onWithdraw={handleWithdraw}
+              onSetBeneficiary={handleSetBeneficiary}
+              onFetchVault={handleFetchVault}
+              onEmergencyWithdraw={handleEmergencyWithdraw}
+              penaltyRate={10}
+              onSettingsChange={handleSettingsChange}
+            />
           ) : (
             <div className="empty-content">
               <h2>No vault selected</h2>
