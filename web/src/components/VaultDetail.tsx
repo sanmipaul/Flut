@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import CopyButton from './CopyButton';
 import PenaltyWarningModal from './PenaltyWarningModal';
+import StxAmount from './StxAmount';
 
 interface Vault {
   vaultId: number;
@@ -168,7 +168,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
 
         <div className="info-item">
           <label>Amount</label>
-          <span className="amount">{vault.amount} STX</span>
+          <StxAmount amount={vault.amount} highlight="positive" />
         </div>
 
         <div className="info-item">

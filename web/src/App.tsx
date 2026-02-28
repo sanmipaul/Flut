@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
-import ToastContainer from './components/ToastContainer';
-import { useToast } from './hooks/useToast';
+import StxAmount from './components/StxAmount';
 
 interface Vault {
   vaultId: number;
@@ -232,29 +231,10 @@ const AppInner: React.FC = () => {
                   aria-label={`Vault ${vault.vaultId}, ${vault.amount} STX${vault.isWithdrawn ? ', withdrawn' : ''}`}
                   onKeyDown={(e) => e.key === 'Enter' && setSelectedVaultId(vault.vaultId)}
                 >
-                  <span className="vault-id">
-                    Vault #{vault.vaultId}
-                    <CopyButton
-                      text={String(vault.vaultId)}
-                      label={`Copy vault ${vault.vaultId} ID`}
-                      size="sm"
-                    />
+                  <span className="vault-id">Vault #{vault.vaultId}</span>
+                  <span className="vault-amount">
+                    <StxAmount amount={vault.amount} compact={vault.amount >= 1_000_000} />
                   </span>
-                  <span className="vault-amount">{vault.amount} STX</span>
-                  {vault.creator && (
-                    <span className="vault-creator address-with-copy">
-                      <code title={vault.creator}>
-                        {vault.creator.length > 12
-                          ? `${vault.creator.slice(0, 6)}…${vault.creator.slice(-4)}`
-                          : vault.creator}
-                      </code>
-                      <CopyButton
-                        text={vault.creator}
-                        label="Copy creator address"
-                        size="sm"
-                      />
-                    </span>
-                  )}
                   {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
                   {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
                   {!vault.isWithdrawn && vault.currentBlockHeight >= vault.unlockHeight && (
