@@ -122,4 +122,27 @@ describe('useLockProgress', () => {
     );
     expect(result.current.timeRemaining).toBe('Withdrawn');
   });
+
+  it('blocksElapsed is 0 when currentBlockHeight equals createdAt', () => {
+    const { result } = renderHook(() =>
+      useLockProgress({ ...base, currentBlockHeight: 100 })
+    );
+    expect(result.current.blocksElapsed).toBe(0);
+    expect(result.current.percentComplete).toBe(0);
+  });
+
+  it('withdrawn state has percentComplete=100 regardless of currentBlockHeight', () => {
+    const { result } = renderHook(() =>
+      useLockProgress({ ...base, currentBlockHeight: 110, isWithdrawn: true })
+    );
+    expect(result.current.percentComplete).toBe(100);
+  });
+
+  it('calculates blocksElapsed correctly at 75%', () => {
+    const { result } = renderHook(() =>
+      useLockProgress({ ...base, currentBlockHeight: 175 })
+    );
+    expect(result.current.blocksElapsed).toBe(75);
+    expect(result.current.percentComplete).toBe(75);
+  });
 });
