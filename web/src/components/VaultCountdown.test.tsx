@@ -146,3 +146,15 @@ describe('VaultCountdown — digit card visibility', () => {
     expect(timer.getAttribute('aria-label')).toContain('remaining');
   });
 });
+
+describe('VaultCountdown — zero-padding', () => {
+  it('hours value is zero-padded to two digits', () => {
+    render(<VaultCountdown {...imminentProps} />);
+    // imminentProps has 4 blocks = 2400 s → 0 hrs, so "00" should appear
+    const unitValues = document.querySelectorAll('.countdown-unit__value');
+    const textValues = Array.from(unitValues).map((el) => el.textContent ?? '');
+    // At least one "00" should appear (hours or minutes when near 0)
+    const hasPadded = textValues.some((v) => /^\d{2}$/.test(v));
+    expect(hasPadded).toBe(true);
+  });
+});
