@@ -90,15 +90,20 @@ const VaultLockProgress: React.FC<VaultLockProgressProps> = ({
         />
 
         {/* Milestone markers */}
-        {MILESTONES.map((milestone) => (
-          <span
-            key={milestone}
-            className={`vault-lock-progress__milestone ${percentComplete >= milestone ? 'vault-lock-progress__milestone--reached' : ''}`}
-            style={{ left: `${milestone}%` }}
-            aria-hidden="true"
-            title={`${milestone}%`}
-          />
-        ))}
+        {MILESTONES.map((milestone) => {
+          const blocksAtMilestone = Math.round((milestone / 100) * totalLockBlocks);
+          const label = `${milestone}% — block ${(createdAt + blocksAtMilestone).toLocaleString()}`;
+          return (
+            <span
+              key={milestone}
+              className={`vault-lock-progress__milestone ${percentComplete >= milestone ? 'vault-lock-progress__milestone--reached' : ''}`}
+              style={{ left: `${milestone}%` }}
+              aria-hidden="true"
+              title={label}
+              data-milestone={milestone}
+            />
+          );
+        })}
       </div>
 
       {/* Labels row */}
