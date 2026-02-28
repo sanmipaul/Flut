@@ -1,2 +1,2 @@
-export { default as VaultAnalyticsDashboard } from './VaultAnalyticsDashboard';
-export type { VaultAnalyticsDashboardProps } from './VaultAnalyticsDashboard';
+export { default as VaultCountdown } from './VaultCountdown';
+export type { VaultCountdownProps } from './VaultCountdown';

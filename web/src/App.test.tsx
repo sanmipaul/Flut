@@ -2,21 +2,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-describe('App — VaultAnalyticsDashboard integration', () => {
+describe('App — smoke test', () => {
   it('renders without crashing', () => {
     render(<App />);
     expect(screen.getByText(/Flut/i)).toBeDefined();
-  });
-
-  it('renders the Analytics toggle in the sidebar', () => {
-    render(<App />);
-    expect(screen.getByText('Analytics')).toBeDefined();
-  });
-
-  it('analytics toggle is collapsed by default', () => {
-    render(<App />);
-    const btn = screen.getByRole('button', { name: /analytics/i });
-    expect(btn.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('renders the sidebar heading', () => {
@@ -29,8 +18,13 @@ describe('App — VaultAnalyticsDashboard integration', () => {
     expect(screen.getByText('New Vault')).toBeDefined();
   });
 
-  it('shows empty vault state below analytics panel', () => {
+  it('shows empty vault state', () => {
     render(<App />);
     expect(screen.getByText(/No vaults yet/i)).toBeDefined();
+  });
+
+  it('does not show VaultCountdown when no vault is selected', () => {
+    render(<App />);
+    expect(screen.queryByRole('timer')).toBeNull();
   });
 });

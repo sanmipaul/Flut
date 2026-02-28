@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
-import VaultLockProgress from './VaultLockProgress';
+import VaultCountdown from './VaultCountdown';
 
 interface Vault {
   vaultId: number;
@@ -160,7 +160,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
         </span>
       </header>
 
-      <VaultLockProgress
+      <VaultCountdown
         createdAt={vault.createdAt}
         unlockHeight={vault.unlockHeight}
         currentBlockHeight={vault.currentBlockHeight}
