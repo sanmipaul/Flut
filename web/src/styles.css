@@ -811,3 +811,68 @@ button:disabled {
   font-size: 0.8125rem;
   color: var(--text-light);
 }
+
+/* Milestone markers */
+.vault-lock-progress__milestone {
+  position: absolute;
+  top: -3px;
+  width: 6px;
+  height: 18px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: background 0.3s, border-color 0.3s;
+  pointer-events: none;
+}
+
+.vault-lock-progress__milestone--reached {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.vault-lock-progress--unlocked .vault-lock-progress__milestone--reached {
+  background: var(--success-color);
+  border-color: var(--success-color);
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  .vault-lock-progress {
+    background: #1e1e1e;
+    border-color: #3a3a3a;
+  }
+
+  .vault-lock-progress__track {
+    background: #2a2a2a;
+  }
+
+  .vault-lock-progress__milestone {
+    background: #1e1e1e;
+    border-color: #555;
+  }
+
+  .vault-lock-progress__milestone--reached {
+    background: #7c6fff;
+    border-color: #7c6fff;
+  }
+
+  .vault-lock-progress__pct {
+    color: #e5e5e5;
+  }
+
+  .vault-lock-progress__badge--locked {
+    background: #451a03;
+    color: #fbbf24;
+  }
+
+  .vault-lock-progress__badge--unlocked {
+    background: #022c22;
+    color: #34d399;
+  }
+
+  .vault-lock-progress__badge--withdrawn {
+    background: #2a2a2a;
+    color: #888;
+  }
+}
