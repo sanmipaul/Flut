@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import StxAmount from './StxAmount';
 
 interface PenaltyWarningModalProps {
   isOpen: boolean;
@@ -61,7 +62,7 @@ export const PenaltyWarningModal: React.FC<PenaltyWarningModalProps> = ({
           <div className="penalty-calculation">
             <div className="calc-row">
               <span className="calc-label">Vault Amount:</span>
-              <span className="calc-value">{vaultAmount} STX</span>
+              <StxAmount amount={vaultAmount} className="calc-value" />
             </div>
 
             <div className="calc-row penalty-row">
@@ -71,14 +72,14 @@ export const PenaltyWarningModal: React.FC<PenaltyWarningModalProps> = ({
 
             <div className="calc-row penalty-amount">
               <span className="calc-label">Penalty Amount:</span>
-              <span className="calc-value red-text">-{penaltyAmount} STX</span>
+              <StxAmount amount={penaltyAmount} highlight="negative" className="calc-value" />
             </div>
 
             <div className="calc-divider"></div>
 
             <div className="calc-row total-row">
               <span className="calc-label">You Will Receive:</span>
-              <span className="calc-value green-text">{userReceiveAmount} STX</span>
+              <StxAmount amount={userReceiveAmount} highlight="positive" className="calc-value" />
             </div>
           </div>
 
