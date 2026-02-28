@@ -81,3 +81,35 @@ describe('formatVaultCount', () => {
     expect(formatVaultCount(5)).toBe('5 vaults');
   });
 });
+
+describe('formatBlockDuration — boundary values', () => {
+  it('exactly 6 blocks returns hours', () => {
+    expect(formatBlockDuration(6)).toContain('hr');
+  });
+
+  it('5 blocks (just under 1 hr) returns minutes', () => {
+    expect(formatBlockDuration(5)).toContain('min');
+  });
+
+  it('exactly 144 blocks returns "~1 day"', () => {
+    expect(formatBlockDuration(144)).toBe('~1 day');
+  });
+
+  it('143 blocks (just under 1 day) returns hours', () => {
+    expect(formatBlockDuration(143)).toContain('hr');
+  });
+
+  it('1 block returns minutes', () => {
+    expect(formatBlockDuration(1)).toContain('min');
+  });
+});
+
+describe('formatStxAmount — large values', () => {
+  it('formats large amounts without crashing', () => {
+    expect(() => formatStxAmount(1_000_000)).not.toThrow();
+  });
+
+  it('contains "STX" suffix for large amount', () => {
+    expect(formatStxAmount(1_000_000)).toContain('STX');
+  });
+});
