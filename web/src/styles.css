@@ -794,6 +794,22 @@ button:disabled {
   font-weight: 600;
 }
 
+/* Status chip colour variants (active state per status) */
+.vault-search-bar__chip--locked.vault-search-bar__chip--active {
+  background: #d97706;
+  border-color: #d97706;
+}
+
+.vault-search-bar__chip--unlocked.vault-search-bar__chip--active {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.vault-search-bar__chip--withdrawn.vault-search-bar__chip--active {
+  background: #6b7280;
+  border-color: #6b7280;
+}
+
 /* Sort controls */
 .vault-search-bar__sort-row {
   display: flex;
