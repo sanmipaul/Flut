@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
-import VaultSettingsPanel from './VaultSettingsPanel';
-import { useVaultSettings } from '../hooks/useVaultSettings';
+import VaultLockProgress from './VaultLockProgress';
 
 interface Vault {
   vaultId: number;
@@ -161,12 +160,12 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
         </span>
       </header>
 
-      {settings.note && (
-        <div className="vault-note" role="note">
-          <span className="vault-note__icon" aria-hidden="true">📝</span>
-          <p className="vault-note__text">{settings.note}</p>
-        </div>
-      )}
+      <VaultLockProgress
+        createdAt={vault.createdAt}
+        unlockHeight={vault.unlockHeight}
+        currentBlockHeight={vault.currentBlockHeight}
+        isWithdrawn={vault.isWithdrawn}
+      />
 
       <section className="vault-info">
         <div className="info-item">

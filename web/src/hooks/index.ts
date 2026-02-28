@@ -1,5 +1,5 @@
-export { useVaultExport } from './useVaultExport';
-export type { UseVaultExportReturn } from './useVaultExport';
+export { useLockProgress, blocksToTimeString } from './useLockProgress';
+export type { UseLockProgressInput } from './useLockProgress';
 
-export { useVaultImport } from './useVaultImport';
-export type { UseVaultImportReturn, ImportState } from './useVaultImport';
+// Re-export LockProgressState for consumers who import from hooks
+export type { LockProgressState, VaultLockStatus } from '../types/LockProgress';

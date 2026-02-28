@@ -2,39 +2,23 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import VaultDetail from './VaultDetail';
 
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: jest.fn((key: string) => store[key] ?? null),
-    setItem: jest.fn((key: string, value: string) => { store[key] = value; }),
-    removeItem: jest.fn((key: string) => { delete store[key]; }),
-    clear: jest.fn(() => { store = {}; }),
-    get length() { return Object.keys(store).length; },
-    key: jest.fn((i: number) => Object.keys(store)[i] ?? null),
-  };
-})();
-
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
-
-beforeEach(() => {
-  localStorageMock.clear();
-  jest.clearAllMocks();
-});
-
 const mockVault = {
   vaultId: 1,
-  creator: 'SP1ABCDEF',
+  creator: 'SP1ABC',
   amount: 5000,
-  unlockHeight: 100,
-  createdAt: 10,
+  unlockHeight: 200,
+  createdAt: 100,
   isWithdrawn: false,
-  currentBlockHeight: 50,
+  currentBlockHeight: 150,
 };
 
 const onFetchVault = jest.fn().mockResolvedValue(mockVault);
 const onWithdraw = jest.fn().mockResolvedValue(undefined);
 const onSetBeneficiary = jest.fn().mockResolvedValue(undefined);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('VaultDetail', () => {
   it('renders loading state initially', () => {
@@ -49,7 +33,7 @@ describe('VaultDetail', () => {
     expect(screen.getByText(/loading/i)).toBeDefined();
   });
 
-  it('renders VaultSettingsPanel toggle after load', async () => {
+  it('renders VaultLockProgress after vault loads', async () => {
     render(
       <VaultDetail
         vaultId={1}
@@ -58,11 +42,11 @@ describe('VaultDetail', () => {
         onSetBeneficiary={onSetBeneficiary}
       />
     );
-    const toggle = await screen.findByRole('button', { name: /vault settings/i });
-    expect(toggle).toBeDefined();
+    const bar = await screen.findByRole('progressbar');
+    expect(bar).toBeDefined();
   });
 
-  it('shows vault id in header when no nickname is set', async () => {
+  it('progressbar shows correct percentage when vault is 50% through lock', async () => {
     render(
       <VaultDetail
         vaultId={1}
@@ -71,15 +55,11 @@ describe('VaultDetail', () => {
         onSetBeneficiary={onSetBeneficiary}
       />
     );
-    const heading = await screen.findByRole('heading', { level: 2 });
-    expect(heading.textContent).toContain('#1');
+    const bar = await screen.findByRole('progressbar');
+    expect(bar.getAttribute('aria-valuenow')).toBe('50');
   });
 
-  it('shows nickname in header when set in localStorage', async () => {
-    localStorageMock.setItem(
-      'flut:vault-settings:1',
-      JSON.stringify({ nickname: 'Savings Goal', note: '', colorTag: 'none', compactDisplay: false, pinned: false })
-    );
+  it('shows Lock Progress title', async () => {
     render(
       <VaultDetail
         vaultId={1}
@@ -88,42 +68,6 @@ describe('VaultDetail', () => {
         onSetBeneficiary={onSetBeneficiary}
       />
     );
-    const heading = await screen.findByRole('heading', { level: 2 });
-    expect(heading.textContent).toContain('Savings Goal');
-  });
-
-  it('shows note banner when note is set', async () => {
-    localStorageMock.setItem(
-      'flut:vault-settings:1',
-      JSON.stringify({ nickname: '', note: 'My reminder', colorTag: 'none', compactDisplay: false, pinned: false })
-    );
-    render(
-      <VaultDetail
-        vaultId={1}
-        onFetchVault={onFetchVault}
-        onWithdraw={onWithdraw}
-        onSetBeneficiary={onSetBeneficiary}
-      />
-    );
-    const note = await screen.findByText('My reminder');
-    expect(note).toBeDefined();
-  });
-
-  it('applies color tag CSS class when colorTag is set', async () => {
-    localStorageMock.setItem(
-      'flut:vault-settings:1',
-      JSON.stringify({ nickname: '', note: '', colorTag: 'blue', compactDisplay: false, pinned: false })
-    );
-    render(
-      <VaultDetail
-        vaultId={1}
-        onFetchVault={onFetchVault}
-        onWithdraw={onWithdraw}
-        onSetBeneficiary={onSetBeneficiary}
-      />
-    );
-    await screen.findByRole('heading', { level: 2 });
-    const detail = document.querySelector('.vault-detail--tag-blue');
-    expect(detail).not.toBeNull();
+    expect(await screen.findByText('Lock Progress')).toBeDefined();
   });
 });

@@ -2,8 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
-import VaultExportModal from './components/VaultExportModal';
-import VaultImportModal from './components/VaultImportModal';
+import VaultLockProgress from './components/VaultLockProgress';
 
 interface Vault {
   vaultId: number;
@@ -238,30 +237,25 @@ const AppInner: React.FC = () => {
             </div>
           ) : (
             <ul className="vault-list">
-              {sortedVaults.map((vault) => {
-                const vs = getSettings(vault.vaultId);
-                const colorClass = vs.colorTag !== 'none' ? `vault-item--tag-${vs.colorTag}` : '';
-                const pinnedClass = vs.pinned ? 'vault-item--pinned' : '';
-                return (
-                  <li
-                    key={vault.vaultId}
-                    className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''} ${colorClass} ${pinnedClass}`}
-                    onClick={() => setSelectedVaultId(vault.vaultId)}
-                  >
-                    <span className="vault-id">
-                      {vs.pinned && <span className="pin-icon" aria-label="Pinned" title="Pinned">📌</span>}
-                      {vs.nickname ? vs.nickname : `Vault #${vault.vaultId}`}
-                    </span>
-                    <span className="vault-amount">
-                      {vs.compactDisplay && vault.amount >= 1_000
-                        ? `${(vault.amount / (vault.amount >= 1_000_000 ? 1_000_000 : 1_000)).toFixed(1)}${vault.amount >= 1_000_000 ? 'M' : 'k'} STX`
-                        : `${vault.amount.toLocaleString()} STX`}
-                    </span>
-                    {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
-                    {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
-                  </li>
-                );
-              })}
+              {vaults.map((vault) => (
+                <li
+                  key={vault.vaultId}
+                  className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''}`}
+                  onClick={() => setSelectedVaultId(vault.vaultId)}
+                >
+                  <span className="vault-id">Vault #{vault.vaultId}</span>
+                  <span className="vault-amount">{vault.amount} STX</span>
+                  <VaultLockProgress
+                    createdAt={vault.createdAt}
+                    unlockHeight={vault.unlockHeight}
+                    currentBlockHeight={vault.currentBlockHeight}
+                    isWithdrawn={vault.isWithdrawn}
+                    compact
+                  />
+                  {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
+                  {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
+                </li>
+              ))}
             </ul>
           )}
         </section>

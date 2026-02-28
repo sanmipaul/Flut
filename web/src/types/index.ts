@@ -1,15 +1,2 @@
-/**
- * Types barrel.
- */
-export type {
-  VaultExportData,
-  ExportedVault,
-  ExportedVaultSettings,
-  VaultImportResult,
-} from './VaultExport';
-
-export {
-  VAULT_EXPORT_SCHEMA_VERSION,
-  VAULT_EXPORT_MIME_TYPE,
-  VAULT_EXPORT_FILENAME,
-} from './VaultExport';
+export type { LockProgressState, VaultLockStatus } from './LockProgress';
+export { BLOCKS_PER_DAY, BLOCKS_PER_HOUR, BLOCKS_PER_MINUTE } from './LockProgress';
