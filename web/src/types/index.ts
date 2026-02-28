@@ -1,2 +1,10 @@
-export type { LockProgressState, VaultLockStatus } from './LockProgress';
-export { BLOCKS_PER_DAY, BLOCKS_PER_HOUR, BLOCKS_PER_MINUTE } from './LockProgress';
+export type {
+  VaultStatusFilter,
+  VaultSortField,
+  VaultSortDirection,
+  VaultSearchState,
+  VaultSnapshot,
+} from './VaultSearch';
+export { defaultVaultSearchState } from './VaultSearch';
+
+export type { VaultSearchResult } from './VaultSearchResult';

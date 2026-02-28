@@ -1,209 +1,170 @@
 /**
  * VaultSearchBar
  *
- * A compact control panel that lives at the top of the vault sidebar and
- * lets users:
+ * Controls for filtering and sorting the vault list. Renders:
+ *   - A text input for free-text search (vault ID or nickname)
+ *   - Status filter chips: All / Locked / Unlocked / Withdrawn
+ *   - A sort dropdown (ID, Amount, Unlock height, Created)
+ *   - A sort-direction toggle button
+ *   - A result count label and a "Clear" button when filters are active
  *
- * - Free-text search by vault ID or creator address
- * - Filter by vault status (All / Active / Withdrawn)
- * - Filter by lock state (All / Locked / Unlocked)
- * - Sort by Vault ID, Amount, Unlock block, or Created block
- * - Toggle sort direction (ascending / descending)
- * - Clear all active filters with a single click
- *
- * A keyboard shortcut (Ctrl/Cmd + F) focuses the search input.
- * The result count in the footer provides a tooltip with the active
- * sort field label when any filter is active.
+ * All state lives in the parent via useVaultSearch; this component is purely
+ * presentational and calls the provided callbacks on user interaction.
  */
-import React, { useRef, useEffect, useCallback } from 'react';
-import {
-  VaultFilterState,
-  VaultStatusFilter,
-  VaultLockFilter,
-  VaultSortField,
-} from '../types/VaultFilterTypes';
+import React, { useId } from 'react';
+import type { VaultStatusFilter, VaultSortField, VaultSortDirection } from '../types/VaultSearch';
+
+// ---------------------------------------------------------------------------
+// Chip data
+// ---------------------------------------------------------------------------
+
+const STATUS_CHIPS: { value: VaultStatusFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'locked', label: 'Locked' },
+  { value: 'unlocked', label: 'Unlocked' },
+  { value: 'withdrawn', label: 'Withdrawn' },
+];
+
+const SORT_OPTIONS: { value: VaultSortField; label: string }[] = [
+  { value: 'id', label: 'Vault ID' },
+  { value: 'amount', label: 'Amount' },
+  { value: 'unlockHeight', label: 'Unlock height' },
+  { value: 'createdAt', label: 'Created' },
+];
+
+// ---------------------------------------------------------------------------
+// Props
+// ---------------------------------------------------------------------------
 
 export interface VaultSearchBarProps {
-  filterState: VaultFilterState;
-  resultCount: number;
+  query: string;
+  statusFilter: VaultStatusFilter;
+  sortField: VaultSortField;
+  sortDirection: VaultSortDirection;
+  matchCount: number;
   totalCount: number;
-  hasActiveFilters: boolean;
-  onSearchChange: (q: string) => void;
-  onStatusFilterChange: (f: VaultStatusFilter) => void;
-  onLockFilterChange: (f: VaultLockFilter) => void;
-  onSortFieldChange: (f: VaultSortField) => void;
-  onToggleSortDirection: () => void;
-  onClearFilters: () => void;
+  isFiltered: boolean;
+  onQueryChange: (query: string) => void;
+  onStatusFilterChange: (filter: VaultStatusFilter) => void;
+  onSortFieldChange: (field: VaultSortField) => void;
+  onSortDirectionToggle: () => void;
+  onReset: () => void;
 }
 
-const STATUS_OPTIONS: { label: string; value: VaultStatusFilter }[] = [
-  { label: 'All', value: 'all' },
-  { label: 'Active', value: 'active' },
-  { label: 'Withdrawn', value: 'withdrawn' },
-];
-
-const LOCK_OPTIONS: { label: string; value: VaultLockFilter }[] = [
-  { label: 'All', value: 'all' },
-  { label: 'Locked', value: 'locked' },
-  { label: 'Unlocked', value: 'unlocked' },
-];
-
-const SORT_OPTIONS: { label: string; value: VaultSortField }[] = [
-  { label: 'ID', value: 'id' },
-  { label: 'Amount', value: 'amount' },
-  { label: 'Unlock', value: 'unlockHeight' },
-  { label: 'Created', value: 'createdAt' },
-];
-
-function getSortFieldLabel(field: VaultSortField): string {
-  const map: Record<VaultSortField, string> = {
-    id: 'Vault ID',
-    amount: 'Amount',
-    unlockHeight: 'Unlock block',
-    createdAt: 'Created block',
-  };
-  return map[field];
-}
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 const VaultSearchBar: React.FC<VaultSearchBarProps> = ({
-  filterState,
-  resultCount,
+  query,
+  statusFilter,
+  sortField,
+  sortDirection,
+  matchCount,
   totalCount,
-  hasActiveFilters,
-  onSearchChange,
+  isFiltered,
+  onQueryChange,
   onStatusFilterChange,
-  onLockFilterChange,
   onSortFieldChange,
-  onToggleSortDirection,
-  onClearFilters,
+  onSortDirectionToggle,
+  onReset,
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const searchId = useId();
+  const sortId = useId();
 
-  // Ctrl/Cmd + F focuses the search input
-  const handleGlobalKeyDown = useCallback((e: KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-      e.preventDefault();
-      inputRef.current?.focus();
-    }
-  }, []);
+  const directionLabel = sortDirection === 'asc' ? '↑ Asc' : '↓ Desc';
+  const directionAriaLabel =
+    sortDirection === 'asc' ? 'Sort ascending (click for descending)' : 'Sort descending (click for ascending)';
 
-  useEffect(() => {
-    document.addEventListener('keydown', handleGlobalKeyDown);
-    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [handleGlobalKeyDown]);
-
-  const sortIcon = filterState.sortDirection === 'asc' ? '↑' : '↓';
+  const resultLabel =
+    isFiltered
+      ? `${matchCount} of ${totalCount} vault${totalCount !== 1 ? 's' : ''}`
+      : `${totalCount} vault${totalCount !== 1 ? 's' : ''}`;
 
   return (
-    <div className="vault-search-bar">
-      {/* Search input */}
-      <div className="search-input-wrapper">
-        <span className="search-icon" aria-hidden="true">🔍</span>
+    <div className="vault-search-bar" role="search" aria-label="Search and filter vaults">
+      {/* Text search */}
+      <div className="vault-search-bar__input-row">
+        <label htmlFor={searchId} className="sr-only">
+          Search vaults
+        </label>
         <input
-          ref={inputRef}
+          id={searchId}
           type="search"
-          className="search-input"
-          value={filterState.searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search by ID or address…"
-          aria-label="Search vaults"
+          className="vault-search-bar__input"
+          placeholder="Search by ID or name…"
+          value={query}
+          onChange={(e) => onQueryChange(e.target.value)}
+          aria-label="Search vaults by ID or name"
         />
-        {filterState.searchQuery && (
+        {isFiltered && (
           <button
-            className="search-clear-btn"
-            onClick={() => onSearchChange('')}
-            aria-label="Clear search"
             type="button"
+            className="vault-search-bar__clear-btn"
+            onClick={onReset}
+            aria-label="Clear all filters"
+            title="Clear all filters"
           >
-            ×
+            ✕
           </button>
         )}
       </div>
 
-      {/* Keyboard shortcut hint */}
-      {!filterState.searchQuery && (
-        <span className="search-hint" aria-hidden="true">
-          Press <kbd>Ctrl+F</kbd> to search
-        </span>
-      )}
-
-      {/* Status filter */}
-      <div className="filter-row" role="group" aria-label="Filter by status">
-        {STATUS_OPTIONS.map((opt) => (
+      {/* Status filter chips */}
+      <div className="vault-search-bar__chips" role="group" aria-label="Filter by vault status">
+        {STATUS_CHIPS.map(({ value, label }) => (
           <button
-            key={opt.value}
-            className={`filter-chip ${filterState.statusFilter === opt.value ? 'active' : ''}`}
-            onClick={() => onStatusFilterChange(opt.value)}
+            key={value}
             type="button"
+            className={`vault-search-bar__chip vault-search-bar__chip--${value} ${
+              statusFilter === value ? 'vault-search-bar__chip--active' : ''
+            }`}
+            onClick={() => onStatusFilterChange(value)}
+            aria-pressed={statusFilter === value}
           >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Lock filter */}
-      <div className="filter-row" role="group" aria-label="Filter by lock state">
-        {LOCK_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            className={`filter-chip ${filterState.lockFilter === opt.value ? 'active' : ''}`}
-            onClick={() => onLockFilterChange(opt.value)}
-            type="button"
-          >
-            {opt.label}
+            {label}
           </button>
         ))}
       </div>
 
       {/* Sort controls */}
-      <div className="sort-row">
-        <span className="sort-label">Sort:</span>
-        {SORT_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            className={`sort-chip ${filterState.sortField === opt.value ? 'active' : ''}`}
-            onClick={() => onSortFieldChange(opt.value)}
-            type="button"
-          >
-            {opt.label}
-            {filterState.sortField === opt.value && (
-              <span className="sort-direction" aria-hidden="true">
-                {' '}{sortIcon}
-              </span>
-            )}
-          </button>
-        ))}
-        <button
-          className="sort-dir-btn"
-          onClick={onToggleSortDirection}
-          aria-label={`Sort ${filterState.sortDirection === 'asc' ? 'descending' : 'ascending'}`}
-          title="Toggle sort direction"
-          type="button"
+      <div className="vault-search-bar__sort-row">
+        <label htmlFor={sortId} className="vault-search-bar__sort-label">
+          Sort
+        </label>
+        <select
+          id={sortId}
+          className="vault-search-bar__sort-select"
+          value={sortField}
+          onChange={(e) => onSortFieldChange(e.target.value as VaultSortField)}
+          aria-label="Sort vaults by field"
         >
-          {sortIcon}
+          {SORT_OPTIONS.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+
+        <button
+          type="button"
+          className="vault-search-bar__direction-btn"
+          onClick={onSortDirectionToggle}
+          aria-label={directionAriaLabel}
+          title={directionAriaLabel}
+        >
+          {directionLabel}
         </button>
       </div>
 
-      {/* Results summary + clear */}
-      <div className="filter-summary">
-        <span
-          className="result-count"
-          title={hasActiveFilters ? `Sorted by ${getSortFieldLabel(filterState.sortField)}` : undefined}
-        >
-          {resultCount === totalCount
-            ? `${totalCount} vault${totalCount !== 1 ? 's' : ''}`
-            : `${resultCount} of ${totalCount} vaults`}
-        </span>
-        {hasActiveFilters && (
-          <button
-            className="clear-filters-btn"
-            onClick={onClearFilters}
-            type="button"
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
+      {/* Result count — aria-live so screen readers announce changes */}
+      <p
+        className="vault-search-bar__result-count"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {resultLabel}
+      </p>
     </div>
   );
 };

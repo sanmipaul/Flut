@@ -1479,3 +1479,307 @@ button:disabled {
     transition: none;
   }
 }
+
+/* =========================================================================
+   Vault Search Bar
+   ========================================================================= */
+
+.vault-search-bar {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Search input row */
+.vault-search-bar__input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.vault-search-bar__input {
+  flex: 1;
+  padding: 6px var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: white;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.vault-search-bar__input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(85, 70, 255, 0.15);
+}
+
+.vault-search-bar__input::placeholder {
+  color: var(--text-light);
+}
+
+/* Clear button */
+.vault-search-bar__clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--border-color);
+  color: var(--text-light);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.vault-search-bar__clear-btn:hover {
+  background: #bbb;
+  color: white;
+}
+
+/* Status filter chips */
+.vault-search-bar__chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.vault-search-bar__chip {
+  padding: 3px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  background: white;
+  color: var(--text-light);
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.vault-search-bar__chip:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.vault-search-bar__chip--active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+/* Status chip color variants (active state per status) */
+.vault-search-bar__chip--locked.vault-search-bar__chip--active {
+  background: #d97706;
+  border-color: #d97706;
+}
+
+.vault-search-bar__chip--unlocked.vault-search-bar__chip--active {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.vault-search-bar__chip--withdrawn.vault-search-bar__chip--active {
+  background: #6b7280;
+  border-color: #6b7280;
+}
+
+/* Sort controls */
+.vault-search-bar__sort-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.vault-search-bar__sort-label {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  white-space: nowrap;
+}
+
+.vault-search-bar__sort-select {
+  flex: 1;
+  padding: 4px var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  background: white;
+  color: var(--text-dark);
+  cursor: pointer;
+  outline: none;
+}
+
+.vault-search-bar__sort-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(85, 70, 255, 0.15);
+}
+
+.vault-search-bar__direction-btn {
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  background: white;
+  color: var(--text-dark);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.vault-search-bar__direction-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* Result count */
+.vault-search-bar__result-count {
+  margin: 0;
+  font-size: 0.73rem;
+  color: var(--text-light);
+}
+
+/* Empty search state */
+.empty-state--search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* sr-only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* btn-ghost utility */
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-ghost:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* =========================================================================
+   Dark mode overrides for VaultSearchBar
+   ========================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  .vault-search-bar {
+    background: #1e1e2e;
+    border-bottom-color: #3a3a4a;
+  }
+
+  .vault-search-bar__input {
+    background: #2a2a3e;
+    border-color: #3a3a4a;
+    color: #e0e0f0;
+  }
+
+  .vault-search-bar__input::placeholder {
+    color: #888;
+  }
+
+  .vault-search-bar__chip {
+    background: #2a2a3e;
+    border-color: #3a3a4a;
+    color: #aaa;
+  }
+
+  .vault-search-bar__sort-select {
+    background: #2a2a3e;
+    border-color: #3a3a4a;
+    color: #e0e0f0;
+  }
+
+  .vault-search-bar__direction-btn {
+    background: #2a2a3e;
+    border-color: #3a3a4a;
+    color: #e0e0f0;
+  }
+
+  .vault-search-bar__clear-btn {
+    background: #3a3a4a;
+    color: #aaa;
+  }
+
+  .vault-search-bar__result-count {
+    color: #888;
+  }
+
+  .btn-ghost {
+    border-color: #3a3a4a;
+    color: #aaa;
+  }
+}
+
+/* =========================================================================
+   Responsive: compact search bar on narrow sidebar
+   ========================================================================= */
+
+@media (max-width: 480px) {
+  .vault-search-bar__chips {
+    gap: 3px;
+  }
+
+  .vault-search-bar__chip {
+    padding: 2px 8px;
+    font-size: 0.7rem;
+  }
+
+  .vault-search-bar__sort-row {
+    flex-wrap: wrap;
+  }
+
+  .vault-search-bar__sort-select {
+    min-width: 0;
+  }
+}
+
+/* =========================================================================
+   Reduced motion: disable chip transition animations
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .vault-search-bar__chip,
+  .vault-search-bar__input,
+  .vault-search-bar__clear-btn,
+  .vault-search-bar__direction-btn {
+    transition: none;
+  }
+}
+
+/* =========================================================================
+   Focus-visible keyboard accessibility for VaultSearchBar controls
+   ========================================================================= */
+
+.vault-search-bar__chip:focus-visible,
+.vault-search-bar__direction-btn:focus-visible,
+.vault-search-bar__clear-btn:focus-visible,
+.vault-search-bar__sort-select:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}

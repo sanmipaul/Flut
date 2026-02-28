@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
-import VaultLockProgress from './components/VaultLockProgress';
+import VaultSearchBar from './components/VaultSearchBar';
+import { useVaultSearch } from './hooks/useVaultSearch';
 
 interface Vault {
   vaultId: number;
@@ -177,6 +178,16 @@ const AppInner: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vaults, getSettings, settingsVersion]);
 
+  const {
+    result: searchResult,
+    searchState,
+    setQuery,
+    setStatusFilter,
+    setSortField,
+    toggleSortDirection,
+    resetSearch,
+  } = useVaultSearch(vaults);
+
   return (
     <div className="app">
       <header className="app-header">
@@ -236,27 +247,50 @@ const AppInner: React.FC = () => {
               )}
             </div>
           ) : (
-            <ul className="vault-list">
-              {vaults.map((vault) => (
-                <li
-                  key={vault.vaultId}
-                  className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''}`}
-                  onClick={() => setSelectedVaultId(vault.vaultId)}
-                >
-                  <span className="vault-id">Vault #{vault.vaultId}</span>
-                  <span className="vault-amount">{vault.amount} STX</span>
-                  <VaultLockProgress
-                    createdAt={vault.createdAt}
-                    unlockHeight={vault.unlockHeight}
-                    currentBlockHeight={vault.currentBlockHeight}
-                    isWithdrawn={vault.isWithdrawn}
-                    compact
-                  />
-                  {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
-                  {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
-                </li>
-              ))}
-            </ul>
+            <>
+              <VaultSearchBar
+                query={searchState.query}
+                statusFilter={searchState.statusFilter}
+                sortField={searchState.sortField}
+                sortDirection={searchState.sortDirection}
+                matchCount={searchResult.matchCount}
+                totalCount={searchResult.totalCount}
+                isFiltered={searchResult.isFiltered}
+                onQueryChange={setQuery}
+                onStatusFilterChange={setStatusFilter}
+                onSortFieldChange={setSortField}
+                onSortDirectionToggle={toggleSortDirection}
+                onReset={resetSearch}
+              />
+
+              {searchResult.vaults.length === 0 ? (
+                <div className="empty-state empty-state--search">
+                  <p>No vaults match your search.</p>
+                  <button type="button" className="btn-ghost" onClick={resetSearch}>
+                    Clear filters
+                  </button>
+                </div>
+              ) : (
+                <ul className="vault-list">
+                  {searchResult.vaults.map((vault) => (
+                    <li
+                      key={vault.vaultId}
+                      className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''}`}
+                      onClick={() => setSelectedVaultId(vault.vaultId)}
+                    >
+                      <span className="vault-id">
+                        {vault.nickname ? vault.nickname : `Vault #${vault.vaultId}`}
+                      </span>
+                      <span className="vault-amount">{vault.amount} STX</span>
+                      {(vault as Vault).beneficiary && (
+                        <span className="badge-beneficiary">Has Beneficiary</span>
+                      )}
+                      {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
           )}
         </section>
 
