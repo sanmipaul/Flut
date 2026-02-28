@@ -144,3 +144,36 @@ describe('VaultAnalyticsDashboard — interactions', () => {
     expect(screen.getByText('Active STX')).toBeDefined();
   });
 });
+
+describe('VaultAnalyticsDashboard — distribution bar', () => {
+  it('renders at least one distribution segment when vaults exist', () => {
+    render(<VaultAnalyticsDashboard vaults={vaults} defaultExpanded />);
+    const segments = document.querySelectorAll('.analytics-distribution__segment');
+    expect(segments.length).toBeGreaterThan(0);
+  });
+
+  it('locked segment has a title with "Locked"', () => {
+    render(<VaultAnalyticsDashboard vaults={[locked]} defaultExpanded />);
+    const lockedSeg = document.querySelector('.analytics-distribution__segment--locked');
+    expect(lockedSeg?.getAttribute('title')).toContain('Locked');
+  });
+
+  it('withdrawn segment has a title with "Withdrawn"', () => {
+    render(<VaultAnalyticsDashboard vaults={[withdrawn]} defaultExpanded />);
+    const wdSeg = document.querySelector('.analytics-distribution__segment--withdrawn');
+    expect(wdSeg?.getAttribute('title')).toContain('Withdrawn');
+  });
+
+  it('distribution bar has an accessible aria-label', () => {
+    render(<VaultAnalyticsDashboard vaults={vaults} defaultExpanded />);
+    const bar = document.querySelector('[aria-label*="Locked"]');
+    expect(bar).not.toBeNull();
+  });
+
+  it('renders legend items for each status', () => {
+    render(<VaultAnalyticsDashboard vaults={vaults} defaultExpanded />);
+    const legend = document.querySelector('.analytics-distribution__legend');
+    expect(legend).not.toBeNull();
+    expect(legend?.querySelectorAll('.analytics-distribution__legend-item').length).toBe(3);
+  });
+});
