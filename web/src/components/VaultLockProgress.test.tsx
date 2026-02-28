@@ -127,4 +127,24 @@ describe('VaultLockProgress', () => {
     render(<VaultLockProgress {...lockedProps} />);
     expect(document.querySelector('.vault-lock-progress__fill--pulse')).toBeNull();
   });
+
+  it('compact mode renders a progressbar', () => {
+    render(<VaultLockProgress {...lockedProps} compact />);
+    expect(screen.getByRole('progressbar')).toBeDefined();
+  });
+
+  it('compact mode applies --compact class', () => {
+    render(<VaultLockProgress {...lockedProps} compact />);
+    expect(document.querySelector('.vault-lock-progress--compact')).not.toBeNull();
+  });
+
+  it('compact mode shows percentage', () => {
+    render(<VaultLockProgress {...lockedProps} compact />);
+    expect(screen.getByText('50%')).toBeDefined();
+  });
+
+  it('compact mode does not show milestone markers', () => {
+    render(<VaultLockProgress {...lockedProps} compact />);
+    expect(document.querySelectorAll('.vault-lock-progress__milestone').length).toBe(0);
+  });
 });
