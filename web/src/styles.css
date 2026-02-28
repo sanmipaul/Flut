@@ -698,3 +698,56 @@ button:disabled {
     width: 100%;
   }
 }
+
+/* ============================================================
+   Vault Lock Progress Indicator
+   ============================================================ */
+
+.vault-lock-progress {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Header row: title + status badge */
+.vault-lock-progress__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.vault-lock-progress__title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-light);
+}
+
+/* Status badge */
+.vault-lock-progress__badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vault-lock-progress__badge--locked {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.vault-lock-progress__badge--unlocked {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.vault-lock-progress__badge--withdrawn {
+  background: var(--secondary-color);
+  color: var(--text-light);
+}
