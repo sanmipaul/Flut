@@ -203,6 +203,21 @@ describe('useVaultSearch — sort', () => {
     act(() => { result.current.toggleSortDirection(); });
     expect(result.current.searchState.sortDirection).toBe('asc');
   });
+
+  it('setSortDirection to "desc" sorts correctly', () => {
+    const { result } = renderHook(() => useVaultSearch(sortVaults));
+    act(() => { result.current.setSortDirection('desc'); });
+    const ids = result.current.result.vaults.map((v) => v.vaultId);
+    expect(ids).toEqual([3, 2, 1]);
+  });
+
+  it('setSortDirection to "asc" after "desc" restores ascending order', () => {
+    const { result } = renderHook(() => useVaultSearch(sortVaults));
+    act(() => { result.current.setSortDirection('desc'); });
+    act(() => { result.current.setSortDirection('asc'); });
+    const ids = result.current.result.vaults.map((v) => v.vaultId);
+    expect(ids).toEqual([1, 2, 3]);
+  });
 });
 
 // ---------------------------------------------------------------------------
