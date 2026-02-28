@@ -736,3 +736,51 @@ button:disabled {
   color: var(--text-light);
   font-style: italic;
 }
+
+/* =========================================================================
+   Countdown digit cards and separator
+   ========================================================================= */
+
+.vault-countdown__digits {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  border: 1px solid #d4ccff;
+  border-radius: 6px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  min-width: 52px;
+  box-shadow: 0 1px 3px rgba(85, 70, 255, 0.08);
+}
+
+.countdown-unit__value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.countdown-unit__label {
+  font-size: 0.62rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+.countdown-sep {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  opacity: 0.5;
+  line-height: 1;
+  padding-bottom: 14px;
+}
