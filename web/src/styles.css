@@ -954,3 +954,39 @@ button:disabled {
     color: #aaa;
   }
 }
+
+/* =========================================================================
+   Responsive: compact search bar on narrow sidebar
+   ========================================================================= */
+
+@media (max-width: 480px) {
+  .vault-search-bar__chips {
+    gap: 3px;
+  }
+
+  .vault-search-bar__chip {
+    padding: 2px 8px;
+    font-size: 0.7rem;
+  }
+
+  .vault-search-bar__sort-row {
+    flex-wrap: wrap;
+  }
+
+  .vault-search-bar__sort-select {
+    min-width: 0;
+  }
+}
+
+/* =========================================================================
+   Reduced motion: disable chip transition animations
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .vault-search-bar__chip,
+  .vault-search-bar__input,
+  .vault-search-bar__clear-btn,
+  .vault-search-bar__direction-btn {
+    transition: none;
+  }
+}
