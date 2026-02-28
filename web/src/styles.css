@@ -794,7 +794,7 @@ button:disabled {
   font-weight: 600;
 }
 
-/* Status chip colour variants (active state per status) */
+/* Status chip color variants (active state per status) */
 .vault-search-bar__chip--locked.vault-search-bar__chip--active {
   background: #d97706;
   border-color: #d97706;
