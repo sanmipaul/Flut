@@ -147,4 +147,19 @@ describe('VaultLockProgress', () => {
     render(<VaultLockProgress {...lockedProps} compact />);
     expect(document.querySelectorAll('.vault-lock-progress__milestone').length).toBe(0);
   });
+
+  it('milestone markers have data-milestone attribute', () => {
+    render(<VaultLockProgress {...lockedProps} />);
+    const markers = document.querySelectorAll('[data-milestone]');
+    expect(markers.length).toBe(3);
+    expect(markers[0].getAttribute('data-milestone')).toBe('25');
+    expect(markers[1].getAttribute('data-milestone')).toBe('50');
+    expect(markers[2].getAttribute('data-milestone')).toBe('75');
+  });
+
+  it('milestone markers have a title attribute with block info', () => {
+    render(<VaultLockProgress {...lockedProps} />);
+    const marker25 = document.querySelector('[data-milestone="25"]');
+    expect(marker25?.getAttribute('title')).toContain('25%');
+  });
 });
