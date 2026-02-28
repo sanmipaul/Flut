@@ -984,3 +984,88 @@ button:disabled {
 .vault-item--pinned {
   background: linear-gradient(to right, rgba(85, 70, 255, 0.05), transparent);
 }
+
+/* ============================================================
+   Dark mode overrides — Vault Settings Panel
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .vault-settings-panel {
+    border-color: #3a3a3a;
+  }
+
+  .vault-settings-panel__toggle {
+    background: #2a2a2a;
+    color: #e5e5e5;
+  }
+
+  .vault-settings-panel__toggle:hover {
+    background: #333;
+  }
+
+  .vault-settings-panel__body {
+    background: #1e1e1e;
+    border-top-color: #3a3a3a;
+  }
+
+  .settings-fieldset__legend {
+    color: #999;
+  }
+
+  .settings-label {
+    color: #e5e5e5;
+  }
+
+  .settings-input,
+  .settings-textarea {
+    background: #2a2a2a;
+    border-color: #3a3a3a;
+    color: #e5e5e5;
+  }
+
+  .settings-input:focus,
+  .settings-textarea:focus {
+    border-color: #7c6fff;
+    box-shadow: 0 0 0 2px rgba(124, 111, 255, 0.25);
+  }
+
+  .settings-char-count {
+    color: #888;
+  }
+
+  .settings-actions {
+    border-top-color: #3a3a3a;
+  }
+
+  .btn-ghost {
+    border-color: #3a3a3a;
+    color: #999;
+  }
+
+  .btn-ghost:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+  }
+
+  .vault-note {
+    background: #2d2210;
+    border-color: #78350f;
+  }
+
+  .vault-note__text {
+    color: #fbbf24;
+  }
+
+  .vault-header__id {
+    color: #888;
+  }
+
+  .color-tag-btn--none {
+    background: #555;
+    color: #555;
+  }
+
+  .vault-item--pinned {
+    background: linear-gradient(to right, rgba(124, 111, 255, 0.1), transparent);
+  }
+}
