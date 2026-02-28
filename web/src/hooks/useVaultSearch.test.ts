@@ -248,3 +248,77 @@ describe('useVaultSearch — combined and reset', () => {
     expect(result.current.searchState.sortDirection).toBe('asc');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Edge cases
+// ---------------------------------------------------------------------------
+
+describe('useVaultSearch — edge cases', () => {
+  it('handles an empty vault list gracefully', () => {
+    const { result } = renderHook(() => useVaultSearch([]));
+    expect(result.current.result.totalCount).toBe(0);
+    expect(result.current.result.matchCount).toBe(0);
+    expect(result.current.result.vaults).toHaveLength(0);
+  });
+
+  it('isFiltered is false for empty list with no filter', () => {
+    const { result } = renderHook(() => useVaultSearch([]));
+    expect(result.current.result.isFiltered).toBe(false);
+  });
+
+  it('handles vault with no nickname — does not crash on query match', () => {
+    const noNick: VaultSnapshot = {
+      vaultId: 99,
+      amount: 100,
+      unlockHeight: 200,
+      createdAt: 100,
+      isWithdrawn: false,
+      currentBlockHeight: 150,
+    };
+    const { result } = renderHook(() => useVaultSearch([noNick]));
+    act(() => { result.current.setQuery('99'); });
+    expect(result.current.result.matchCount).toBe(1);
+  });
+
+  it('vault exactly at unlockHeight is treated as unlocked', () => {
+    const atUnlock: VaultSnapshot = {
+      vaultId: 10,
+      amount: 100,
+      unlockHeight: 200,
+      createdAt: 100,
+      isWithdrawn: false,
+      currentBlockHeight: 200,
+    };
+    const { result } = renderHook(() => useVaultSearch([atUnlock]));
+    act(() => { result.current.setStatusFilter('unlocked'); });
+    expect(result.current.result.matchCount).toBe(1);
+  });
+
+  it('vault past unlockHeight is also treated as unlocked', () => {
+    const past: VaultSnapshot = {
+      vaultId: 11,
+      amount: 100,
+      unlockHeight: 200,
+      createdAt: 100,
+      isWithdrawn: false,
+      currentBlockHeight: 500,
+    };
+    const { result } = renderHook(() => useVaultSearch([past]));
+    act(() => { result.current.setStatusFilter('unlocked'); });
+    expect(result.current.result.matchCount).toBe(1);
+  });
+
+  it('withdrawn vault is not counted as unlocked even past unlockHeight', () => {
+    const wd: VaultSnapshot = {
+      vaultId: 12,
+      amount: 100,
+      unlockHeight: 200,
+      createdAt: 100,
+      isWithdrawn: true,
+      currentBlockHeight: 500,
+    };
+    const { result } = renderHook(() => useVaultSearch([wd]));
+    act(() => { result.current.setStatusFilter('unlocked'); });
+    expect(result.current.result.matchCount).toBe(0);
+  });
+});
