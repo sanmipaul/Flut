@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
-import PenaltyWarningModal from './PenaltyWarningModal';
+import VaultLockProgress from './VaultLockProgress';
 
 interface Vault {
   vaultId: number;
@@ -111,6 +111,13 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
           {vault.isWithdrawn ? 'Withdrawn' : 'Active'}
         </span>
       </header>
+
+      <VaultLockProgress
+        createdAt={vault.createdAt}
+        unlockHeight={vault.unlockHeight}
+        currentBlockHeight={vault.currentBlockHeight}
+        isWithdrawn={vault.isWithdrawn}
+      />
 
       <section className="vault-info">
         <div className="info-item">
