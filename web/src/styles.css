@@ -876,3 +876,26 @@ button:disabled {
     color: #888;
   }
 }
+
+/* Responsive: stack label row on narrow screens */
+@media (max-width: 640px) {
+  .vault-lock-progress__labels {
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+/* Reduced motion: disable fill transition and pulse */
+@media (prefers-reduced-motion: reduce) {
+  .vault-lock-progress__fill {
+    transition: none;
+  }
+
+  .vault-lock-progress__fill--pulse {
+    animation: none;
+  }
+
+  .vault-lock-progress__milestone {
+    transition: none;
+  }
+}
