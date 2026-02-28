@@ -90,4 +90,17 @@ describe('VaultExportModal', () => {
     render(<VaultExportModal isOpen vaults={vaults} onClose={jest.fn()} />);
     expect(screen.getByText('✓ Yes')).toBeDefined();
   });
+
+  it('closes on Escape key press', () => {
+    const onClose = jest.fn();
+    render(<VaultExportModal isOpen vaults={vaults} onClose={onClose} />);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('renders dialog with aria-modal attribute', () => {
+    render(<VaultExportModal isOpen vaults={vaults} onClose={jest.fn()} />);
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+  });
 });
