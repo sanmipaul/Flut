@@ -181,3 +181,31 @@ describe('useCountdown — boundary conditions', () => {
     expect(result.current.phase).toBe('imminent');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Cleanup
+// ---------------------------------------------------------------------------
+
+describe('useCountdown — cleanup', () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it('totalSecondsRemaining clamps to 0 and does not go negative', () => {
+    const shortInput: UseCountdownInput = {
+      createdAt: 100,
+      unlockHeight: 101, // 1 block = 600 s
+      currentBlockHeight: 100,
+      isWithdrawn: false,
+    };
+    const { result } = renderHook(() => useCountdown(shortInput));
+    act(() => { jest.advanceTimersByTime(700_000); }); // advance well past 600 s
+    expect(result.current.totalSecondsRemaining).toBeGreaterThanOrEqual(0);
+  });
+
+  it('decrements multiple times over multiple seconds', () => {
+    const { result } = renderHook(() => useCountdown(locked));
+    const initial = result.current.totalSecondsRemaining;
+    act(() => { jest.advanceTimersByTime(3_000); });
+    expect(result.current.totalSecondsRemaining).toBe(initial - 3);
+  });
+});
