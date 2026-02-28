@@ -103,4 +103,18 @@ describe('VaultExportModal', () => {
     const dialog = screen.getByRole('dialog');
     expect(dialog.getAttribute('aria-modal')).toBe('true');
   });
+
+  it('shows JSON preview when Preview JSON button is clicked', () => {
+    render(<VaultExportModal isOpen vaults={vaults} onClose={jest.fn()} />);
+    fireEvent.click(screen.getByText(/preview json/i));
+    expect(document.querySelector('.export-modal__json-preview')).not.toBeNull();
+  });
+
+  it('hides JSON preview after toggling twice', () => {
+    render(<VaultExportModal isOpen vaults={vaults} onClose={jest.fn()} />);
+    const btn = screen.getByText(/preview json/i);
+    fireEvent.click(btn);
+    fireEvent.click(screen.getByText(/hide json/i));
+    expect(document.querySelector('.export-modal__json-preview')).toBeNull();
+  });
 });
