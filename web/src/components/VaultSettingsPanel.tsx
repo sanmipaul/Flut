@@ -75,6 +75,7 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
       <div
         id={`vault-settings-${vaultId}`}
         className={`vault-settings-panel__body ${isOpen ? 'vault-settings-panel__body--open' : ''}`}
+        data-testid={`vault-settings-body-${vaultId}`}
         hidden={!isOpen}
       >
         <fieldset className="settings-fieldset">
@@ -161,9 +162,15 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
             maxLength={300}
             placeholder="Add a private reminder or note about this vault…"
             rows={3}
+            aria-label="Personal note"
+            aria-describedby={`note-count-${vaultId}`}
             onChange={(e) => handleUpdate('note', e.target.value)}
           />
-          <span className="settings-char-count">
+          <span
+            id={`note-count-${vaultId}`}
+            className="settings-char-count"
+            aria-live="polite"
+          >
             {settings.note.length}/300
           </span>
         </fieldset>
