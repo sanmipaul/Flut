@@ -178,3 +178,39 @@ describe('secondsToUnits — rounding', () => {
     expect(result.hours).toBe(23);
   });
 });
+
+describe('padTwo — additional cases', () => {
+  it('handles 9', () => {
+    expect(padTwo(9)).toBe('09');
+  });
+
+  it('handles 10', () => {
+    expect(padTwo(10)).toBe('10');
+  });
+
+  it('handles 99', () => {
+    expect(padTwo(99)).toBe('99');
+  });
+
+  it('handles 100 (three digits, no truncation)', () => {
+    expect(padTwo(100)).toBe('100');
+  });
+});
+
+describe('buildAriaLabel — multi-unit', () => {
+  it('includes all four non-zero units', () => {
+    const label = buildAriaLabel({ days: 1, hours: 2, minutes: 3, seconds: 4 });
+    expect(label).toContain('1 day');
+    expect(label).toContain('2 hours');
+    expect(label).toContain('3 minutes');
+    expect(label).toContain('4 seconds');
+  });
+
+  it('uses singular for all units when count is 1', () => {
+    const label = buildAriaLabel({ days: 1, hours: 1, minutes: 1, seconds: 1 });
+    expect(label).toContain('1 day ');
+    expect(label).toContain('1 hour ');
+    expect(label).toContain('1 minute ');
+    expect(label).toContain('1 second ');
+  });
+});
