@@ -2,8 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
-import VaultSearchBar from './components/VaultSearchBar';
-import { useVaultSearch } from './hooks/useVaultSearch';
+import VaultAnalyticsDashboard from './components/VaultAnalyticsDashboard';
 
 interface Vault {
   vaultId: number;
@@ -232,7 +231,9 @@ const AppInner: React.FC = () => {
             </div>
           </div>
 
-          {sortedVaults.length === 0 ? (
+          <VaultAnalyticsDashboard vaults={vaults} />
+
+          {vaults.length === 0 ? (
             <div className="empty-state">
               <p>No vaults yet. Create one to get started!</p>
             </div>

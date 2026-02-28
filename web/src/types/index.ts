@@ -1,10 +1,8 @@
 export type {
-  VaultStatusFilter,
-  VaultSortField,
-  VaultSortDirection,
-  VaultSearchState,
-  VaultSnapshot,
-} from './VaultSearch';
-export { defaultVaultSearchState } from './VaultSearch';
-
-export type { VaultSearchResult } from './VaultSearchResult';
+  VaultStatusCounts,
+  VaultStatusDistribution,
+  VaultAmountTotals,
+  VaultLockDurationStats,
+  VaultAnalytics,
+  AnalyticsVaultInput,
+} from './VaultAnalytics';

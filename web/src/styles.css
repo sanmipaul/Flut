@@ -1783,3 +1783,267 @@ button:disabled {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
+
+/* =========================================================================
+   Vault Analytics Dashboard — container and toggle
+   ========================================================================= */
+
+.analytics-dashboard {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.analytics-dashboard__toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: #f5f5fb;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  transition: background-color 0.15s;
+}
+
+.analytics-dashboard__toggle:hover {
+  background: #ededf8;
+}
+
+.analytics-dashboard__toggle:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.analytics-dashboard__toggle-icon {
+  font-size: 0.65rem;
+  color: var(--text-light);
+}
+
+.analytics-dashboard__body {
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.analytics-dashboard__empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-light);
+  text-align: center;
+  padding: var(--spacing-sm) 0;
+}
+
+/* =========================================================================
+   Analytics metric cards
+   ========================================================================= */
+
+.analytics-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xs);
+}
+
+.analytics-metric-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.analytics-metric-card--positive {
+  border-left: 3px solid var(--success-color);
+}
+
+.analytics-metric-card--muted {
+  border-left: 3px solid var(--border-color);
+}
+
+.analytics-metric-card__value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.analytics-metric-card__label {
+  font-size: 0.68rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.analytics-metric-card__sub {
+  font-size: 0.68rem;
+  color: var(--text-light);
+}
+
+/* =========================================================================
+   Status distribution bar
+   ========================================================================= */
+
+.analytics-distribution__heading,
+.analytics-duration__heading {
+  margin: 0 0 4px;
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.analytics-distribution__bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--border-color);
+}
+
+.analytics-distribution__segment {
+  display: block;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.analytics-distribution__segment--locked   { background: #d97706; }
+.analytics-distribution__segment--unlocked { background: #16a34a; }
+.analytics-distribution__segment--withdrawn { background: #6b7280; }
+
+.analytics-distribution__legend {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.analytics-distribution__legend-item {
+  font-size: 0.68rem;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.analytics-distribution__legend-item::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.analytics-distribution__legend-item--locked::before   { background: #d97706; }
+.analytics-distribution__legend-item--unlocked::before { background: #16a34a; }
+.analytics-distribution__legend-item--withdrawn::before { background: #6b7280; }
+
+/* =========================================================================
+   Lock duration stats
+   ========================================================================= */
+
+.analytics-duration__list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.analytics-duration__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.analytics-duration__row dt {
+  color: var(--text-light);
+}
+
+.analytics-duration__row dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* =========================================================================
+   Dark mode overrides for analytics dashboard
+   ========================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  .analytics-dashboard {
+    border-bottom-color: #3a3a4a;
+  }
+
+  .analytics-dashboard__toggle {
+    background: #1e1e30;
+    color: #e0e0f0;
+  }
+
+  .analytics-dashboard__toggle:hover {
+    background: #26263a;
+  }
+
+  .analytics-metric-card {
+    background: #2a2a3e;
+    border-color: #3a3a4a;
+  }
+
+  .analytics-metric-card__value {
+    color: #e0e0f0;
+  }
+
+  .analytics-distribution__bar {
+    background: #3a3a4a;
+  }
+
+  .analytics-duration__row dd {
+    color: #e0e0f0;
+  }
+}
+
+/* =========================================================================
+   Reduced motion: disable distribution segment width transition
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .analytics-distribution__segment {
+    transition: none;
+  }
+}
+
+/* sr-only utility (if not already defined) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =========================================================================
+   Responsive: stack metric cards on narrow viewports
+   ========================================================================= */
+
+@media (max-width: 400px) {
+  .analytics-metric-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 280px) {
+  .analytics-metric-grid {
+    grid-template-columns: 1fr;
+  }
+}

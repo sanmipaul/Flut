@@ -1,2 +1,2 @@
-export { default as VaultSearchBar } from './VaultSearchBar';
-export type { VaultSearchBarProps } from './VaultSearchBar';
+export { default as VaultAnalyticsDashboard } from './VaultAnalyticsDashboard';
+export type { VaultAnalyticsDashboardProps } from './VaultAnalyticsDashboard';

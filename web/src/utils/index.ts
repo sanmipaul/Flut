@@ -1,11 +1,2 @@
-/**
- * Utils barrel.
- */
-export {
-  serializeVaultExport,
-  serializeToJson,
-  parseVaultImport,
-  applyImportedSettings,
-} from './vaultExport';
-
-export type { VaultSnapshot } from './vaultExport';
+export { computeVaultAnalytics } from './computeVaultAnalytics';
+export { formatStxAmount, formatBlockDuration, formatPct, formatVaultCount } from './formatAnalytics';
