@@ -177,3 +177,27 @@ describe('VaultAnalyticsDashboard — distribution bar', () => {
     expect(legend?.querySelectorAll('.analytics-distribution__legend-item').length).toBe(3);
   });
 });
+
+describe('VaultAnalyticsDashboard — metric sub-text', () => {
+  it('shows "withdrawn" sub-text on Avg. amount when there are withdrawn vaults', () => {
+    render(<VaultAnalyticsDashboard vaults={[locked, withdrawn]} defaultExpanded />);
+    expect(screen.getByText(/withdrawn/i)).toBeDefined();
+  });
+
+  it('does not show withdrawn sub-text when no vaults are withdrawn', () => {
+    render(<VaultAnalyticsDashboard vaults={[locked]} defaultExpanded />);
+    const cards = document.querySelectorAll('.analytics-metric-card__sub');
+    const hasWithdrawn = Array.from(cards).some((el) => el.textContent?.includes('withdrawn'));
+    expect(hasWithdrawn).toBe(false);
+  });
+
+  it('total vaults metric shows correct count', () => {
+    render(<VaultAnalyticsDashboard vaults={vaults} defaultExpanded />);
+    expect(screen.getByText('3')).toBeDefined();
+  });
+
+  it('locked count appears in sub-text of total vaults card', () => {
+    render(<VaultAnalyticsDashboard vaults={[locked, unlocked, withdrawn]} defaultExpanded />);
+    expect(screen.getByText(/1 vault locked/i)).toBeDefined();
+  });
+});
