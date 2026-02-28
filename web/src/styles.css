@@ -784,3 +784,53 @@ button:disabled {
   line-height: 1;
   padding-bottom: 14px;
 }
+
+/* =========================================================================
+   Imminent pulse animation and status badges
+   ========================================================================= */
+
+@keyframes countdown-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.75; transform: scale(0.97); }
+}
+
+.vault-countdown__digits--imminent .countdown-unit {
+  border-color: #f59e0b;
+  animation: countdown-pulse 1s ease-in-out infinite;
+}
+
+.vault-countdown__digits--imminent .countdown-unit__value {
+  color: #d97706;
+}
+
+.vault-countdown__digits--imminent .countdown-sep {
+  color: #d97706;
+}
+
+.vault-countdown__imminent-note {
+  margin: var(--spacing-xs) 0 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #d97706;
+}
+
+/* Status badges (unlocked / withdrawn states) */
+.vault-countdown__badge {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.vault-countdown__badge--unlocked {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.vault-countdown__badge--withdrawn {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid var(--border-color);
+}
