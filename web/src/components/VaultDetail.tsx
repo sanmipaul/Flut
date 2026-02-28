@@ -21,6 +21,8 @@ interface VaultDetailProps {
   onFetchVault: (vaultId: number) => Promise<Vault>;
   onEmergencyWithdraw?: (vaultId: number) => Promise<void>;
   penaltyRate?: number;
+  /** Called when the user changes any vault setting, so the parent can refresh its sidebar */
+  onSettingsChange?: () => void;
 }
 
 export const VaultDetail: React.FC<VaultDetailProps> = ({
@@ -30,6 +32,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   onFetchVault,
   onEmergencyWithdraw,
   penaltyRate = 10,
+  onSettingsChange,
 }) => {
   const [vault, setVault] = useState<Vault | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -254,7 +257,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
         </section>
       )}
 
-      <VaultSettingsPanel vaultId={vaultId} />
+      <VaultSettingsPanel vaultId={vaultId} onSettingsChange={onSettingsChange} />
 
       {error && <div className="error-message">{error}</div>}
 

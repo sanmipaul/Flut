@@ -212,6 +212,7 @@ export const App: React.FC = () => {
               onFetchVault={handleFetchVault}
               onEmergencyWithdraw={handleEmergencyWithdraw}
               penaltyRate={10}
+              onSettingsChange={handleSettingsChange}
             />
           ) : (
             <div className="empty-content">
