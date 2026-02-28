@@ -834,3 +834,82 @@ button:disabled {
   color: #6b7280;
   border: 1px solid var(--border-color);
 }
+
+/* =========================================================================
+   Dark mode overrides for VaultCountdown
+   ========================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  .vault-countdown {
+    background: linear-gradient(135deg, #1e1a3a, #1a1630);
+    border-color: #3d3480;
+  }
+
+  .vault-countdown--unlocked {
+    background: linear-gradient(135deg, #0d2e1a, #0a2416);
+    border-color: #1a5c35;
+  }
+
+  .vault-countdown--withdrawn {
+    background: #1e1e2e;
+    border-color: #3a3a4a;
+  }
+
+  .vault-countdown__heading {
+    color: #a89bff;
+  }
+
+  .countdown-unit {
+    background: #2a2440;
+    border-color: #3d3480;
+  }
+
+  .countdown-unit__value {
+    color: #a89bff;
+  }
+
+  .countdown-sep {
+    color: #a89bff;
+  }
+
+  .vault-countdown__badge--unlocked {
+    background: #052e16;
+    color: #6ee7b7;
+    border-color: #1a5c35;
+  }
+
+  .vault-countdown__badge--withdrawn {
+    background: #1e1e2e;
+    color: #6b7280;
+    border-color: #3a3a4a;
+  }
+}
+
+/* =========================================================================
+   Reduced motion: disable pulse animation
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .vault-countdown__digits--imminent .countdown-unit {
+    animation: none;
+  }
+}
+
+/* =========================================================================
+   Responsive: shrink digit cards on small screens
+   ========================================================================= */
+
+@media (max-width: 480px) {
+  .countdown-unit {
+    min-width: 40px;
+    padding: 4px var(--spacing-xs);
+  }
+
+  .countdown-unit__value {
+    font-size: 1.2rem;
+  }
+
+  .vault-countdown__digits {
+    gap: 2px;
+  }
+}
