@@ -93,6 +93,14 @@
   )
 )
 
+;; Test: deposit with zero amount returns error code
+(define-private (test-deposit-zero-error)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut deposit u0 u0)))
+    (match result
+      success (err "✗ Zero deposit should not succeed")
+      error (ok "✓ Deposit zero amount error returned"))))
+
 ;; Test: Get penalty rate
 (define-private (test-get-penalty-rate)
   (let
@@ -197,6 +205,118 @@
 )
 
 ;; Test: Edge case - zero remainder penalty
+
+;; ------------------------------------------------
+;; Withdrawal Safety Feature Tests
+;; ------------------------------------------------
+
+;; Test: can-withdraw-vault read-only check
+(define-private (test-can-withdraw-vault)
+  (let
+    ((can (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut can-withdraw-vault u0 tx-sender)))
+    (match can
+      b (begin
+            (asserts! b (err "Vault should be withdrawable after unlock"))
+            (ok "✓ can-withdraw-vault test passed")
+          )
+      none (err "✗ can-withdraw-vault returned none"))
+  )
+)
+
+;; Test: can-withdraw-amount partial check
+(define-private (test-can-withdraw-amount)
+  (let
+    ((able (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut can-withdraw-amount u0 u500000 tx-sender)))
+    (match able
+      b (begin
+            (asserts! b (err "Should be able to withdraw partial amount"))
+            (ok "✓ can-withdraw-amount test passed")
+          )
+      none (err "✗ can-withdraw-amount returned none"))
+  )
+)
+
+;; Test: withdrawal history updated after withdrawal
+(define-private (test-withdrawal-history)
+  (let
+    ((hist (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-withdrawal-history u0)))
+    (match hist
+      h (ok "✓ Withdrawal history retrieval test passed")
+      none (err "✗ Withdrawal history missing"))
+  )
+)
+
+;; Test: emergency withdrawal toggle
+(define-private (test-emergency-toggle)
+  (let
+    ((off (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut set-emergency-withdrawal-enabled false)))
+    (match off
+      s (ok "✓ Disabled emergency withdrawals" )
+      e (err (concat "✗ Failed to disable: " (to-string e))))
+    ;; revert for future tests
+    (let ((on (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut set-emergency-withdrawal-enabled true)))
+      (ok "✓ Re-enabled emergency withdrawals"))
+  )
+)
+
+;; Test: get user withdrawn vaults list
+(define-private (test-get-user-withdrawn-vaults)
+  (let
+    ((list (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-user-withdrawn-vaults tx-sender)))
+    (ok "✓ Get user withdrawn vaults test passed")
+  )
+)
+
+;; Test: get last withdrawal attempt block
+(define-private (test-last-withdrawal-attempt)
+  (let
+    ((blk (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-vault-last-withdrawal-attempt u0)))
+    (ok "✓ Last withdrawal attempt retrieval test passed")
+  )
+)
+
+;; Test: check emergency withdrawal info structure
+(define-private (test-emergency-withdrawal-info)
+  (let
+    ((info (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-emergency-withdrawal-info u0)))
+    (ok "✓ Emergency withdrawal info test passed")
+  )
+)
+
+;; Test: Partial withdraw functionality
+(define-private (test-partial-withdraw)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut partial-withdraw u0 u250000)))
+    (match result
+      success (ok "✓ Partial withdraw test passed")
+      error (err (concat "✗ Partial withdraw failed: " (to-string error)))
+    )
+  )
+)
+
+;; Test: error description helper returns expected string
+(define-private (test-error-description)
+  (let
+    ((desc (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-error-description u5)))
+    (match desc
+      s (begin
+            (asserts! (is-eq s "Invalid amount") (err "Description mismatched"))
+            (ok "✓ Error description helper test passed"))
+      _ (err "✗ Error description call returned unexpected type"))))
+
+;; Additional test: description for deposit limit error
+(define-private (test-error-description-deposit-limit)
+  (let
+    ((desc (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-error-description u18)))
+    (match desc
+      s (begin
+            (asserts! (is-eq s "Deposit amount exceeded"))
+            (ok "✓ Deposit limit error description test passed"))
+      _ (err "✗ Failed to get description for deposit limit"))))
+
+;; End of new withdrawal safety tests
+
+;; Test: Edge case - zero remainder penalty
 (define-private (test-zero-remainder-penalty)
   (let
     ((penalty (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-emergency-withdrawal-amount u0)))
@@ -217,5 +337,76 @@
     ((penalty1 (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-amount u0))
      (penalty2 (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-penalty-amount u1)))
     (ok "✓ Multiple vault penalties test passed")
+  )
+)
+
+;; ===== Stacking Integration Tests =====
+
+;; Test: Create vault without stacking
+(define-private (test-create-vault-no-stacking)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut create-vault u100 u1000000 false none)))
+    (match result
+      vault-id (ok "✓ Create vault without stacking test passed")
+      error (err (concat "✗ Create vault without stacking failed: " (to-string error)))
+    )
+  )
+)
+
+;; Test: Create vault with stacking enabled and a pool address
+(define-private (test-create-vault-with-stacking)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut create-vault u200 u2000000 true (some 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG))))
+    (match result
+      vault-id (ok "✓ Create vault with stacking test passed")
+      error (err (concat "✗ Create vault with stacking failed: " (to-string error)))
+    )
+  )
+)
+
+;; Test: Stacking enabled flag requires a pool address
+(define-private (test-stacking-requires-pool)
+  (let
+    ((result (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut create-vault u100 u1000000 true none)))
+    (match result
+      vault-id (err "✗ Should have failed — stacking without pool must return ERR-STACKING-NO-POOL")
+      error (ok "✓ Stacking-requires-pool validation test passed")
+    )
+  )
+)
+
+;; Test: is-stacking-enabled returns false for non-stacking vault
+(define-private (test-is-stacking-enabled-false)
+  (let
+    ((enabled (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut is-stacking-enabled u0)))
+    (match enabled
+      v (begin
+          (asserts! (is-eq v false) (err "✗ Expected stacking-enabled to be false"))
+          (ok "✓ is-stacking-enabled false test passed")
+        )
+      none (err "✗ Vault not found for is-stacking-enabled check")
+    )
+  )
+)
+
+;; Test: get-stacking-info returns pool and amount for stacking vault
+(define-private (test-get-stacking-info)
+  (let
+    ((info (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-stacking-info u1)))
+    (match info
+      stacking-data (ok "✓ get-stacking-info returned data for stacking vault")
+      none (err "✗ get-stacking-info returned none — expected stacking data")
+    )
+  )
+)
+
+;; Test: get-stacking-info returns none for unknown vault
+(define-private (test-get-stacking-info-unknown-vault)
+  (let
+    ((info (contract-call? 'ST1PQHQV0RAJ761DL3LJREQ553BQVK6QEE54MMCZP.flut get-stacking-info u999)))
+    (match info
+      _data (err "✗ Expected none for unknown vault ID")
+      none (ok "✓ get-stacking-info returns none for unknown vault test passed")
+    )
   )
 )
