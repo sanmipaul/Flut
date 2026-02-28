@@ -37,6 +37,26 @@ describe('blocksToTimeString', () => {
     const result = blocksToTimeString(144);
     expect(result).toBe('~1 day');
   });
+
+  it('returns hours for exactly BLOCKS_PER_HOUR blocks', () => {
+    // 6 blocks = exactly 1 hour boundary
+    const result = blocksToTimeString(6);
+    expect(result).toContain('hr');
+  });
+
+  it('returns minutes for 5 blocks (just under 1 hour)', () => {
+    const result = blocksToTimeString(5);
+    expect(result).toContain('min');
+  });
+
+  it('returns days for exactly BLOCKS_PER_DAY blocks', () => {
+    const result = blocksToTimeString(144);
+    expect(result).toContain('day');
+  });
+
+  it('starts with ~ prefix', () => {
+    expect(blocksToTimeString(10)).toMatch(/^~/);
+  });
 });
 
 describe('useLockProgress', () => {
