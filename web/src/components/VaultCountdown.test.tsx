@@ -121,3 +121,28 @@ describe('VaultCountdown — imminent state', () => {
     expect(screen.getByRole('status')).toBeDefined();
   });
 });
+
+describe('VaultCountdown — digit card visibility', () => {
+  it('does not render "days" label when < 1 day remains', () => {
+    render(<VaultCountdown {...imminentProps} />);
+    expect(screen.queryByText('days')).toBeNull();
+  });
+
+  it('renders "days" label when multiple days remain', () => {
+    render(<VaultCountdown {...lockedProps} />);
+    expect(screen.getByText('days')).toBeDefined();
+  });
+
+  it('always renders hrs, min, and sec labels', () => {
+    render(<VaultCountdown {...imminentProps} />);
+    expect(screen.getByText('hrs')).toBeDefined();
+    expect(screen.getByText('min')).toBeDefined();
+    expect(screen.getByText('sec')).toBeDefined();
+  });
+
+  it('timer aria-label updates to reflect imminent state', () => {
+    render(<VaultCountdown {...imminentProps} />);
+    const timer = screen.getByRole('timer');
+    expect(timer.getAttribute('aria-label')).toContain('remaining');
+  });
+});
