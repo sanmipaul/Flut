@@ -193,7 +193,11 @@ export const App: React.FC = () => {
                       {vs.pinned && <span className="pin-icon" aria-label="Pinned" title="Pinned">📌</span>}
                       {vs.nickname ? vs.nickname : `Vault #${vault.vaultId}`}
                     </span>
-                    <span className="vault-amount">{vault.amount} STX</span>
+                    <span className="vault-amount">
+                      {vs.compactDisplay && vault.amount >= 1_000
+                        ? `${(vault.amount / (vault.amount >= 1_000_000 ? 1_000_000 : 1_000)).toFixed(1)}${vault.amount >= 1_000_000 ? 'M' : 'k'} STX`
+                        : `${vault.amount.toLocaleString()} STX`}
+                    </span>
                     {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
                     {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
                   </li>
