@@ -144,7 +144,11 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
 
         <div className="info-item">
           <label>Amount</label>
-          <span className="amount">{vault.amount} STX</span>
+          <span className="amount">
+            {settings.compactDisplay && vault.amount >= 1_000
+              ? `${(vault.amount / (vault.amount >= 1_000_000 ? 1_000_000 : 1_000)).toFixed(1)}${vault.amount >= 1_000_000 ? 'M' : 'k'} STX`
+              : `${vault.amount.toLocaleString()} STX`}
+          </span>
         </div>
 
         <div className="info-item">
