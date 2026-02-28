@@ -1,14 +1,15 @@
 /**
  * Types barrel.
- * Import all shared types from this single entry-point.
  */
 export type {
-  VaultSettings,
-  VaultColorTag,
-} from './VaultSettings';
+  VaultExportData,
+  ExportedVault,
+  ExportedVaultSettings,
+  VaultImportResult,
+} from './VaultExport';
 
 export {
-  VAULT_COLOR_TAGS,
-  VAULT_COLOR_TAG_LABELS,
-  defaultVaultSettings,
-} from './VaultSettings';
+  VAULT_EXPORT_SCHEMA_VERSION,
+  VAULT_EXPORT_MIME_TYPE,
+  VAULT_EXPORT_FILENAME,
+} from './VaultExport';

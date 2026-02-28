@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
-import { useAllVaultSettings } from './hooks/useAllVaultSettings';
+import VaultExportModal from './components/VaultExportModal';
+import VaultImportModal from './components/VaultImportModal';
 
 interface Vault {
   vaultId: number;
@@ -21,6 +22,8 @@ const AppInner: React.FC = () => {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [userAddress, setUserAddress] = useState<string | null>(null);
   const [settingsVersion, setSettingsVersion] = useState(0);
@@ -191,13 +194,32 @@ const AppInner: React.FC = () => {
         <section className="sidebar">
           <div className="sidebar-header">
             <h2>Your Vaults</h2>
-            <button
-              className="btn-primary btn-small"
-              onClick={() => setShowCreateModal(true)}
-              disabled={loading}
-            >
-              New Vault
-            </button>
+            <div className="sidebar-header__actions">
+              <button
+                className="btn-primary btn-small"
+                onClick={() => setShowCreateModal(true)}
+                disabled={loading}
+              >
+                New Vault
+              </button>
+              <button
+                className="btn-secondary btn-small"
+                onClick={() => setShowExportModal(true)}
+                disabled={vaults.length === 0}
+                title="Export vault backup"
+                aria-label="Export vault backup as JSON"
+              >
+                Export
+              </button>
+              <button
+                className="btn-secondary btn-small"
+                onClick={() => setShowImportModal(true)}
+                title="Import vault backup"
+                aria-label="Import vault backup from JSON file"
+              >
+                Import
+              </button>
+            </div>
           </div>
 
           {sortedVaults.length === 0 ? (
@@ -270,7 +292,22 @@ const AppInner: React.FC = () => {
         onCreateVault={handleCreateVault}
       />
 
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} onClearAll={clearAll} />
+      <VaultExportModal
+        isOpen={showExportModal}
+        vaults={vaults}
+        onClose={() => setShowExportModal(false)}
+      />
+
+      <VaultImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportComplete={() => {
+          // Trigger a re-render so settings read from localStorage are fresh
+          setVaults((prev) => [...prev]);
+        }}
+      />
+
+      {error && <div className="error-banner">{error}</div>}
     </div>
   );
 };
