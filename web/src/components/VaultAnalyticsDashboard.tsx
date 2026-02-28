@@ -104,6 +104,11 @@ const VaultAnalyticsDashboard: React.FC<VaultAnalyticsDashboardProps> = ({
                 <MetricCard
                   label="Avg. amount"
                   value={formatStxAmount(amountTotals.average)}
+                  sub={
+                    amountTotals.withdrawnTotal > 0
+                      ? `${formatStxAmount(amountTotals.withdrawnTotal)} withdrawn`
+                      : undefined
+                  }
                   modifier="neutral"
                 />
               </div>
