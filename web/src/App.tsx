@@ -158,6 +158,7 @@ export const App: React.FC = () => {
                 onClick={() => setShowExportModal(true)}
                 disabled={vaults.length === 0}
                 title="Export vault backup"
+                aria-label="Export vault backup as JSON"
               >
                 Export
               </button>
@@ -165,6 +166,7 @@ export const App: React.FC = () => {
                 className="btn-secondary btn-small"
                 onClick={() => setShowImportModal(true)}
                 title="Import vault backup"
+                aria-label="Import vault backup from JSON file"
               >
                 Import
               </button>
