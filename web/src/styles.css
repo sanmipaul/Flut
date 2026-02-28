@@ -751,3 +751,63 @@ button:disabled {
   background: var(--secondary-color);
   color: var(--text-light);
 }
+
+/* Progress track and fill */
+.vault-lock-progress__track {
+  position: relative;
+  height: 12px;
+  background: var(--secondary-color);
+  border-radius: 999px;
+  overflow: visible;
+  margin-bottom: var(--spacing-sm);
+}
+
+.vault-lock-progress__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #5546ff 0%, #8b7fff 100%);
+  transition: width 0.6s ease;
+  position: relative;
+}
+
+.vault-lock-progress--unlocked .vault-lock-progress__fill {
+  background: linear-gradient(90deg, var(--success-color) 0%, #4ade80 100%);
+}
+
+.vault-lock-progress--withdrawn .vault-lock-progress__fill {
+  background: var(--border-color);
+}
+
+/* Nearly-unlocked pulse animation */
+.vault-lock-progress__fill--pulse {
+  animation: lock-progress-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes lock-progress-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.75; }
+}
+
+/* Labels row */
+.vault-lock-progress__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  margin-bottom: 4px;
+}
+
+.vault-lock-progress__pct {
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.vault-lock-progress__time {
+  color: var(--text-light);
+  font-style: italic;
+}
+
+/* Block detail row */
+.vault-lock-progress__blocks {
+  font-size: 0.8125rem;
+  color: var(--text-light);
+}
