@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
 import VaultDetail from './components/VaultDetail';
+import VaultAnalyticsDashboard from './components/VaultAnalyticsDashboard';
 
 interface Vault {
   vaultId: number;
@@ -149,6 +150,8 @@ export const App: React.FC = () => {
               New Vault
             </button>
           </div>
+
+          <VaultAnalyticsDashboard vaults={vaults} />
 
           {vaults.length === 0 ? (
             <div className="empty-state">
