@@ -698,3 +698,190 @@ button:disabled {
     width: 100%;
   }
 }
+
+/* =========================================================================
+   Vault Search Bar
+   ========================================================================= */
+
+.vault-search-bar {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Search input row */
+.vault-search-bar__input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.vault-search-bar__input {
+  flex: 1;
+  padding: 6px var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: white;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.vault-search-bar__input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(85, 70, 255, 0.15);
+}
+
+.vault-search-bar__input::placeholder {
+  color: var(--text-light);
+}
+
+/* Clear button */
+.vault-search-bar__clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--border-color);
+  color: var(--text-light);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.vault-search-bar__clear-btn:hover {
+  background: #bbb;
+  color: white;
+}
+
+/* Status filter chips */
+.vault-search-bar__chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.vault-search-bar__chip {
+  padding: 3px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  background: white;
+  color: var(--text-light);
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.vault-search-bar__chip:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.vault-search-bar__chip--active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+/* Sort controls */
+.vault-search-bar__sort-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.vault-search-bar__sort-label {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  white-space: nowrap;
+}
+
+.vault-search-bar__sort-select {
+  flex: 1;
+  padding: 4px var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  background: white;
+  color: var(--text-dark);
+  cursor: pointer;
+  outline: none;
+}
+
+.vault-search-bar__sort-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(85, 70, 255, 0.15);
+}
+
+.vault-search-bar__direction-btn {
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  background: white;
+  color: var(--text-dark);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.vault-search-bar__direction-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* Result count */
+.vault-search-bar__result-count {
+  margin: 0;
+  font-size: 0.73rem;
+  color: var(--text-light);
+}
+
+/* Empty search state */
+.empty-state--search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* sr-only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* btn-ghost utility */
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-ghost:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
