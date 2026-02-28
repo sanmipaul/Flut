@@ -141,3 +141,43 @@ describe('useCountdown — tick behaviour', () => {
     expect(result.current.totalSecondsRemaining).toBe(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Boundary conditions
+// ---------------------------------------------------------------------------
+
+describe('useCountdown — boundary conditions', () => {
+  it('vault at exact unlockHeight is unlocked', () => {
+    const atUnlock: UseCountdownInput = {
+      createdAt: 100,
+      unlockHeight: 200,
+      currentBlockHeight: 200,
+      isWithdrawn: false,
+    };
+    const { result } = renderHook(() => useCountdown(atUnlock));
+    expect(result.current.phase).toBe('unlocked');
+  });
+
+  it('withdrawn overrides unlocked phase', () => {
+    const withdrawnAtUnlock: UseCountdownInput = {
+      createdAt: 100,
+      unlockHeight: 200,
+      currentBlockHeight: 200,
+      isWithdrawn: true,
+    };
+    const { result } = renderHook(() => useCountdown(withdrawnAtUnlock));
+    expect(result.current.phase).toBe('withdrawn');
+  });
+
+  it('1 block remaining is in counting phase (> 1 hour)', () => {
+    // 1 block = 600 s < 3600 s, so actually imminent
+    const oneBlock: UseCountdownInput = {
+      createdAt: 100,
+      unlockHeight: 101,
+      currentBlockHeight: 100,
+      isWithdrawn: false,
+    };
+    const { result } = renderHook(() => useCountdown(oneBlock));
+    expect(result.current.phase).toBe('imminent');
+  });
+});
