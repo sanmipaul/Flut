@@ -884,3 +884,63 @@ button:disabled {
   font-weight: 600;
   margin-bottom: var(--spacing-sm);
 }
+
+/* ============================================================
+   Dark mode overrides — Export/Import modals
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .modal-close-btn {
+    color: #888;
+  }
+
+  .modal-close-btn:hover {
+    color: #e5e5e5;
+    background: #2a2a2a;
+  }
+
+  .export-summary {
+    background: #2a2a2a;
+  }
+
+  .export-modal__error,
+  .import-modal__error {
+    background: #2d1515;
+    border-color: #7f1d1d;
+    color: #f87171;
+  }
+
+  .export-modal__note,
+  .import-modal__note {
+    border-left-color: #3a3a3a;
+    color: #888;
+  }
+
+  .drop-zone {
+    border-color: #3a3a3a;
+    background: #1e1e1e;
+  }
+
+  .drop-zone:hover,
+  .drop-zone:focus-visible {
+    border-color: #7c6fff;
+    background: rgba(124, 111, 255, 0.06);
+  }
+
+  .drop-zone--active {
+    border-color: #7c6fff;
+    background: rgba(124, 111, 255, 0.1);
+  }
+
+  .drop-zone__label {
+    color: #e5e5e5;
+  }
+
+  .drop-zone__hint {
+    color: #888;
+  }
+
+  .export-summary__value {
+    color: #e5e5e5;
+  }
+}
