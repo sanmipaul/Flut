@@ -144,3 +144,107 @@ describe('useVaultSearch — status filter', () => {
     expect(result.current.result.isFiltered).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Sort
+// ---------------------------------------------------------------------------
+
+describe('useVaultSearch — sort', () => {
+  const sortVaults: VaultSnapshot[] = [
+    { vaultId: 3, amount: 3000, unlockHeight: 500, createdAt: 300, isWithdrawn: false, currentBlockHeight: 100 },
+    { vaultId: 1, amount: 1000, unlockHeight: 200, createdAt: 100, isWithdrawn: false, currentBlockHeight: 100 },
+    { vaultId: 2, amount: 2000, unlockHeight: 350, createdAt: 200, isWithdrawn: false, currentBlockHeight: 100 },
+  ];
+
+  it('sorts by id asc by default', () => {
+    const { result } = renderHook(() => useVaultSearch(sortVaults));
+    const ids = result.current.result.vaults.map((v) => v.vaultId);
+    expect(ids).toEqual([1, 2, 3]);
+  });
+
+  it('sorts by id desc when direction toggled', () => {
+    const { result } = renderHook(() => useVaultSearch(sortVaults));
+    act(() => { result.current.toggleSortDirection(); });
+    const ids = result.current.result.vaults.map((v) => v.vaultId);
+    expect(ids).toEqual([3, 2, 1]);
+  });
+
+  it('sorts by amount asc', () => {
+    const { result } = renderHook(() => useVaultSearch(sortVaults));
+    act(() => { result.current.setSortField('amount'); });
+    const amounts = result.current.result.vaults.map((v) => v.amount);
+    expect(amounts).toEqual([1000, 2000, 3000]);
+  });
+
+  it('sorts by amount desc', () => {
+    const { result } = renderHook(() => useVaultSearch(sortVaults));
+    act(() => { result.current.setSortField('amount'); result.current.setSortDirection('desc'); });
+    const amounts = result.current.result.vaults.map((v) => v.amount);
+    expect(amounts).toEqual([3000, 2000, 1000]);
+  });
+
+  it('sorts by unlockHeight asc', () => {
+    const { result } = renderHook(() => useVaultSearch(sortVaults));
+    act(() => { result.current.setSortField('unlockHeight'); });
+    const heights = result.current.result.vaults.map((v) => v.unlockHeight);
+    expect(heights).toEqual([200, 350, 500]);
+  });
+
+  it('sorts by createdAt asc', () => {
+    const { result } = renderHook(() => useVaultSearch(sortVaults));
+    act(() => { result.current.setSortField('createdAt'); });
+    const created = result.current.result.vaults.map((v) => v.createdAt);
+    expect(created).toEqual([100, 200, 300]);
+  });
+
+  it('toggleSortDirection twice returns to original direction', () => {
+    const { result } = renderHook(() => useVaultSearch(sortVaults));
+    act(() => { result.current.toggleSortDirection(); });
+    act(() => { result.current.toggleSortDirection(); });
+    expect(result.current.searchState.sortDirection).toBe('asc');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Combined filter + sort + reset
+// ---------------------------------------------------------------------------
+
+describe('useVaultSearch — combined and reset', () => {
+  it('applies text search and status filter together', () => {
+    const { result } = renderHook(() => useVaultSearch(vaults));
+    act(() => { result.current.setQuery('fund'); result.current.setStatusFilter('locked'); });
+    // 'Emergency fund' matches query and is locked
+    expect(result.current.result.matchCount).toBe(1);
+    expect(result.current.result.vaults[0].vaultId).toBe(1);
+  });
+
+  it('returns 0 when text and status filter conflict', () => {
+    const { result } = renderHook(() => useVaultSearch(vaults));
+    act(() => { result.current.setQuery('rainy'); result.current.setStatusFilter('locked'); });
+    // 'Rainy day' is withdrawn, not locked
+    expect(result.current.result.matchCount).toBe(0);
+  });
+
+  it('resetSearch clears query and statusFilter', () => {
+    const { result } = renderHook(() => useVaultSearch(vaults));
+    act(() => { result.current.setQuery('fund'); result.current.setStatusFilter('locked'); });
+    act(() => { result.current.resetSearch(); });
+    expect(result.current.searchState.query).toBe('');
+    expect(result.current.searchState.statusFilter).toBe('all');
+    expect(result.current.result.matchCount).toBe(3);
+  });
+
+  it('resetSearch resets sortField to id', () => {
+    const { result } = renderHook(() => useVaultSearch(vaults));
+    act(() => { result.current.setSortField('amount'); });
+    act(() => { result.current.resetSearch(); });
+    expect(result.current.searchState.sortField).toBe('id');
+  });
+
+  it('resetSearch resets sortDirection to asc', () => {
+    const { result } = renderHook(() => useVaultSearch(vaults));
+    act(() => { result.current.toggleSortDirection(); });
+    act(() => { result.current.resetSearch(); });
+    expect(result.current.searchState.sortDirection).toBe('asc');
+  });
+});
