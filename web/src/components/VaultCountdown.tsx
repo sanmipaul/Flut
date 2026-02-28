@@ -74,6 +74,8 @@ const VaultCountdown: React.FC<VaultCountdownProps> = (props) => {
       role="timer"
       aria-label={`Time remaining: ${ariaLabel}`}
       aria-live="off"
+      // aria-live="off" keeps screen readers quiet on every tick — the
+      // static ariaLabel on the container provides the accessible summary.
     >
       <p className="vault-countdown__heading">Time remaining (estimated)</p>
 
