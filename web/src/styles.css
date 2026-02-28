@@ -697,6 +697,24 @@ button:disabled {
   .modal-content {
     width: 100%;
   }
+
+  .sidebar-header__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sidebar-header__actions .btn-secondary {
+    flex: 1;
+  }
+
+  .export-modal,
+  .import-modal {
+    max-width: 100%;
+  }
+
+  .drop-zone {
+    padding: var(--spacing-lg);
+  }
 }
 
 /* ============================================================
