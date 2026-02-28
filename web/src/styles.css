@@ -903,6 +903,16 @@ button:disabled {
   margin-bottom: var(--spacing-sm);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .drop-zone--active {
+    animation: none;
+  }
+
+  .drop-zone {
+    transition: none;
+  }
+}
+
 /* ============================================================
    Dark mode overrides — Export/Import modals
    ============================================================ */
