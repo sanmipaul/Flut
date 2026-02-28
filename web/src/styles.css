@@ -749,7 +749,7 @@ button:disabled {
   background: #fff;
 }
 
-/* Fieldsets */
+/* Fieldset groups */
 .settings-fieldset {
   border: none;
   padding: 0;
@@ -905,4 +905,82 @@ button:disabled {
 .pin-icon {
   margin-right: 4px;
   font-size: 0.75rem;
+}
+
+/* ============================================================
+   Color Tag Picker (inside VaultSettingsPanel)
+   ============================================================ */
+
+.color-tag-picker {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  padding: var(--spacing-xs) 0;
+}
+
+.color-tag-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+
+.color-tag-btn:hover {
+  transform: scale(1.15);
+}
+
+.color-tag-btn--selected {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px currentColor;
+}
+
+.color-tag-btn--none {
+  background: var(--border-color);
+  color: var(--border-color);
+}
+
+.color-tag-btn--red {
+  background: #ef4444;
+  color: #ef4444;
+}
+
+.color-tag-btn--green {
+  background: #22c55e;
+  color: #22c55e;
+}
+
+.color-tag-btn--blue {
+  background: #3b82f6;
+  color: #3b82f6;
+}
+
+.color-tag-btn--orange {
+  background: #f97316;
+  color: #f97316;
+}
+
+.color-tag-btn--purple {
+  background: #a855f7;
+  color: #a855f7;
+}
+
+/* Color tag left border on vault-detail */
+.vault-detail--tag-red    { border-left: 4px solid #ef4444; }
+.vault-detail--tag-green  { border-left: 4px solid #22c55e; }
+.vault-detail--tag-blue   { border-left: 4px solid #3b82f6; }
+.vault-detail--tag-orange { border-left: 4px solid #f97316; }
+.vault-detail--tag-purple { border-left: 4px solid #a855f7; }
+
+/* Color tag left border on sidebar vault-item */
+.vault-item--tag-red    { border-left: 3px solid #ef4444; }
+.vault-item--tag-green  { border-left: 3px solid #22c55e; }
+.vault-item--tag-blue   { border-left: 3px solid #3b82f6; }
+.vault-item--tag-orange { border-left: 3px solid #f97316; }
+.vault-item--tag-purple { border-left: 3px solid #a855f7; }
+
+/* Pinned vault item highlight */
+.vault-item--pinned {
+  background: linear-gradient(to right, rgba(85, 70, 255, 0.05), transparent);
 }
