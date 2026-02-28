@@ -2321,3 +2321,78 @@ button:disabled {
   border-top: 1px solid #fde68a;
   padding-top: var(--spacing-xs);
 }
+
+/* =========================================================================
+   APY slider and summary metrics
+   ========================================================================= */
+
+.stacking-yield-card__slider-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.stacking-yield-card__slider-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #92400e;
+  white-space: nowrap;
+}
+
+.stacking-yield-card__slider {
+  flex: 1;
+  accent-color: #f59e0b;
+  cursor: pointer;
+  height: 4px;
+}
+
+.stacking-yield-card__slider:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.stacking-yield-card__slider-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b45309;
+  min-width: 70px;
+  text-align: right;
+}
+
+/* Summary metrics */
+.stacking-yield-card__summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xs);
+  margin: 0;
+}
+
+.stacking-yield-card__summary-item {
+  background: white;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.stacking-yield-card__summary-item dt {
+  font-size: 0.65rem;
+  color: #a16207;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stacking-yield-card__summary-item dd {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.stacking-yield-card__highlight {
+  color: #d97706 !important;
+  font-size: 1rem !important;
+}
