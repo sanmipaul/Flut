@@ -17,6 +17,8 @@ export interface VaultLockProgressProps {
   unlockHeight: number;
   currentBlockHeight: number;
   isWithdrawn: boolean;
+  /** When true, renders a compact single-line variant for sidebars */
+  compact?: boolean;
 }
 
 const MILESTONES = [25, 50, 75];
@@ -32,11 +34,36 @@ const VaultLockProgress: React.FC<VaultLockProgressProps> = ({
   unlockHeight,
   currentBlockHeight,
   isWithdrawn,
+  compact = false,
 }) => {
   const progress = useLockProgress({ createdAt, unlockHeight, currentBlockHeight, isWithdrawn });
   const { percentComplete, blocksRemaining, totalLockBlocks, timeRemaining, status } = progress;
 
   const isNearlyUnlocked = status === 'locked' && percentComplete >= 90;
+
+  if (compact) {
+    return (
+      <div className={`vault-lock-progress vault-lock-progress--compact vault-lock-progress--${status}`}>
+        <div
+          className="vault-lock-progress__track"
+          role="progressbar"
+          aria-valuenow={percentComplete}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Lock progress: ${percentComplete}% complete`}
+          title={`${timeRemaining} • ${percentComplete}%`}
+        >
+          <div
+            className={`vault-lock-progress__fill ${isNearlyUnlocked ? 'vault-lock-progress__fill--pulse' : ''}`}
+            style={{ width: `${percentComplete}%` }}
+          />
+        </div>
+        <span className="vault-lock-progress__pct vault-lock-progress__pct--compact">
+          {percentComplete}%
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className={`vault-lock-progress vault-lock-progress--${status}`}>
