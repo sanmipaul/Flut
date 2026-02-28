@@ -30,7 +30,13 @@ Parameters:
 
 Returns:
 - `(ok { user-amount: uint, penalty: uint })` - Withdrawal amounts
-- Error: Unauthorized, already withdrawn, or contract errors
+- Error: Unauthorized, already withdrawn, or contract errors (returns numeric error codes defined
+  in the main error table; see `README.md`).
+  Common codes include:
+  - `u2` (`ERR-UNAUTHORIZED`): Caller not vault owner
+  - `u4` (`ERR-ALREADY-WITHDRAWN`): Vault already emptied
+  - `u24` (`ERR-EMERGENCY-WITHDRAWAL-DISABLED`): Global emergency toggle turned off
+
 
 Behavior:
 1. Verifies caller is vault creator
