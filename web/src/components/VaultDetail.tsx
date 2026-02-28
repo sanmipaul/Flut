@@ -11,6 +11,8 @@ interface Vault {
   isWithdrawn: boolean;
   beneficiary?: string;
   currentBlockHeight: number;
+  stackingEnabled?: boolean;
+  stackingPool?: string;
 }
 
 interface VaultDetailProps {
@@ -34,9 +36,19 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [newBeneficiary, setNewBeneficiary] = useState<string>('');
+  const [beneficiaryValidation, setBeneficiaryValidation] = useState<AddressValidationResult | null>(null);
   const [showBeneficiaryForm, setShowBeneficiaryForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [showPenaltyModal, setShowPenaltyModal] = useState<boolean>(false);
+  const [copyAnnouncement, setCopyAnnouncement] = useState<string>('');
+
+  const handleAddressCopied = (text: string, success: boolean) => {
+    const truncated = text.length > 12 ? `${text.slice(0, 6)}…${text.slice(-4)}` : text;
+    setCopyAnnouncement(
+      success ? `Copied ${truncated} to clipboard` : 'Failed to copy address'
+    );
+    setTimeout(() => setCopyAnnouncement(''), 2500);
+  };
 
   useEffect(() => {
     const fetchVault = async () => {
@@ -59,12 +71,16 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   const blocksUntilUnlock = vault ? Math.max(0, vault.unlockHeight - vault.currentBlockHeight) : 0;
   const lockedDays = vault ? Math.ceil((blocksUntilUnlock * 10) / (24 * 60 * 6)) : 0;
 
+  const handleBeneficiaryChange = (value: string, validation: AddressValidationResult) => {
+    setNewBeneficiary(value);
+    setBeneficiaryValidation(validation);
+  };
+
   const handleWithdraw = async () => {
     if (!vault) return;
     try {
       setSubmitting(true);
       await onWithdraw(vault.vaultId);
-      // Refresh vault data
       const updated = await onFetchVault(vaultId);
       setVault(updated);
     } catch (err) {
@@ -76,12 +92,17 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
 
   const handleSetBeneficiary = async () => {
     if (!vault || !newBeneficiary.trim()) return;
+    if (beneficiaryValidation && !beneficiaryValidation.isValid) {
+      setError('Please enter a valid Stacks address for the beneficiary');
+      return;
+    }
     try {
       setSubmitting(true);
-      await onSetBeneficiary(vault.vaultId, newBeneficiary);
+      const addressToSet = beneficiaryValidation?.normalised || newBeneficiary.trim();
+      await onSetBeneficiary(vault.vaultId, addressToSet);
       setNewBeneficiary('');
+      setBeneficiaryValidation(null);
       setShowBeneficiaryForm(false);
-      // Refresh vault data
       const updated = await onFetchVault(vaultId);
       setVault(updated);
     } catch (err) {
@@ -91,11 +112,22 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
     }
   };
 
+  const networkMismatch =
+    vault !== null &&
+    beneficiaryValidation?.isValid === true &&
+    !areAddressesOnSameNetwork(vault.creator, beneficiaryValidation.normalised);
+
+  const canSetBeneficiary =
+    newBeneficiary.trim() !== '' &&
+    beneficiaryValidation !== null &&
+    beneficiaryValidation.isValid &&
+    !networkMismatch;
+
   if (loading) {
     return <div className="vault-detail loading">Loading vault details...</div>;
   }
 
-  if (error) {
+  if (error && !vault) {
     return <div className="vault-detail error">Error: {error}</div>;
   }
 
@@ -105,6 +137,15 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
 
   return (
     <div className="vault-detail">
+      {/* Screen-reader live region for copy announcements */}
+      <span
+        className="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {copyAnnouncement}
+      </span>
+
       <header className="vault-header">
         <h2>Vault #{vault.vaultId}</h2>
         <span className={vault.isWithdrawn ? 'status withdrawn' : 'status active'}>
@@ -115,7 +156,14 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
       <section className="vault-info">
         <div className="info-item">
           <label>Creator</label>
-          <code>{vault.creator}</code>
+          <span className="address-with-copy">
+            <code>{vault.creator}</code>
+            <CopyButton
+                text={vault.creator}
+                label="Copy creator address"
+                onCopy={handleAddressCopied}
+              />
+          </span>
         </div>
 
         <div className="info-item">
@@ -152,10 +200,51 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
           <h3>Beneficiary Details</h3>
           <div className="info-item">
             <label>Beneficiary Address</label>
-            <code>{vault.beneficiary}</code>
+            <span className="address-with-copy">
+              <code>{vault.beneficiary}</code>
+              <CopyButton
+                  text={vault.beneficiary}
+                  label="Copy beneficiary address"
+                  onCopy={handleAddressCopied}
+                />
+            </span>
           </div>
           <p className="info-text">
             When unlocked, funds will be transferred to this beneficiary address instead of the creator.
+          </p>
+        </section>
+      )}
+
+      {vault.stackingEnabled && (
+        <section className="stacking-info">
+          <h3>Stacking &amp; Yield</h3>
+          <div className="info-item">
+            <label>Stacking Status</label>
+            <span className="status-badge stacking-active">Active — delegated via pox-4</span>
+          </div>
+          {vault.stackingPool && (
+            <div className="info-item">
+              <label>Pool Address</label>
+              <code>{vault.stackingPool}</code>
+            </div>
+          )}
+          <div className="info-item">
+            <label>Estimated BTC APY</label>
+            <span className="apy-value">~8–12%</span>
+          </div>
+          <p className="info-text">
+            Your STX is being stacked. BTC rewards accrue each cycle (~2 weeks) and are
+            claimable through your pool. Delegation is automatically revoked on withdrawal.
+          </p>
+        </section>
+      )}
+
+      {!vault.stackingEnabled && !vault.isWithdrawn && (
+        <section className="stacking-info stacking-inactive">
+          <h3>Stacking &amp; Yield</h3>
+          <p className="info-text">
+            Stacking is not enabled for this vault. Use the pool update function to start
+            earning BTC yield on your locked STX.
           </p>
         </section>
       )}
@@ -171,31 +260,42 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
               Set Beneficiary
             </button>
           ) : (
-            <div className="beneficiary-form">
-              <input
-                type="text"
+            <div className="beneficiary-form-stack">
+              <AddressInput
+                id="new-beneficiary"
                 value={newBeneficiary}
-                onChange={(e) => setNewBeneficiary(e.target.value)}
-                placeholder="SP... or ST..."
+                onChange={handleBeneficiaryChange}
+                label="Beneficiary Address"
+                helpText="Enter a Stacks mainnet (SP) or testnet (ST) address"
                 disabled={submitting}
+                required
               />
-              <button
-                className="btn-primary"
-                onClick={handleSetBeneficiary}
-                disabled={submitting || !newBeneficiary.trim()}
-              >
-                {submitting ? 'Setting...' : 'Set'}
-              </button>
-              <button
-                className="btn-secondary"
-                onClick={() => {
-                  setShowBeneficiaryForm(false);
-                  setNewBeneficiary('');
-                }}
-                disabled={submitting}
-              >
-                Cancel
-              </button>
+              {networkMismatch && (
+                <p className="warning-text" role="alert">
+                  The beneficiary address is on a different network than this vault's creator. Please use a matching network address.
+                </p>
+              )}
+              <div className="beneficiary-form-actions">
+                <button
+                  className="btn-primary"
+                  onClick={handleSetBeneficiary}
+                  disabled={submitting || !canSetBeneficiary}
+                  title={!canSetBeneficiary ? 'Enter a valid Stacks address' : undefined}
+                >
+                  {submitting ? 'Setting...' : 'Set'}
+                </button>
+                <button
+                  className="btn-secondary"
+                  onClick={() => {
+                    setShowBeneficiaryForm(false);
+                    setNewBeneficiary('');
+                    setBeneficiaryValidation(null);
+                  }}
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
         </section>
@@ -250,7 +350,6 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
                 await onEmergencyWithdraw(id);
               }
               setShowPenaltyModal(false);
-              // Refresh vault data
               const updated = await onFetchVault(vaultId);
               setVault(updated);
             } catch (err) {

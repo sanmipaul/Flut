@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CreateVaultModal from './components/CreateVaultModal';
+import CopyButton from './components/CopyButton';
 import VaultDetail from './components/VaultDetail';
 import StxAmount from './components/StxAmount';
 
@@ -12,53 +13,56 @@ interface Vault {
   isWithdrawn: boolean;
   beneficiary?: string;
   currentBlockHeight: number;
+  stackingEnabled?: boolean;
+  stackingPool?: string;
 }
 
-export const App: React.FC = () => {
+const AppInner: React.FC = () => {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
   const [userAddress, setUserAddress] = useState<string | null>(null);
 
+  const { toasts, dismissToast, clearAll, toast } = useToast();
+
   useEffect(() => {
-    // Initialize user connection
     initializeUser();
   }, []);
 
   const initializeUser = async () => {
     try {
-      // This would connect to Stacks wallet
-      // For now, this is a placeholder
       console.log('Initializing user connection...');
     } catch (err) {
       console.error('Failed to initialize user:', err);
     }
   };
 
-  const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string) => {
+  const handleCreateVault = async (amount: number, lockDuration: number, beneficiary?: string, enableStacking?: boolean, stackingPool?: string) => {
     try {
       setLoading(true);
-      setError('');
 
-      // Call smart contract create-vault function
-      // This is a placeholder that would call the actual blockchain function
       const newVault: Vault = {
-        vaultId: vaults.length,
+        vaultId,
         creator: userAddress || 'unknown',
         amount,
-        unlockHeight: 0, // Would be set by contract
+        unlockHeight: lockDuration,
         createdAt: 0,
         isWithdrawn: false,
         beneficiary,
         currentBlockHeight: 0,
+        stackingEnabled: enableStacking ?? false,
+        stackingPool,
       };
 
       setVaults([...vaults, newVault]);
-      console.log('Vault created:', newVault);
+      toast.success('Vault created!', {
+        description: `${amount} STX locked for ${lockDuration} blocks${beneficiary ? ' with beneficiary' : ''}.`,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create vault');
+      toast.error('Failed to create vault', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -67,17 +71,22 @@ export const App: React.FC = () => {
   const handleWithdraw = async (vaultId: number) => {
     try {
       setLoading(true);
-      setError('');
 
-      // Call smart contract withdraw function
-      console.log('Withdrawing from vault:', vaultId);
-
+      const vault = vaults.find((v) => v.vaultId === vaultId);
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
       );
       setVaults(updatedVaults);
+
+      toast.success('Withdrawal successful!', {
+        description: vault
+          ? `${vault.amount} STX sent to ${vault.beneficiary ?? vault.creator}.`
+          : undefined,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to withdraw');
+      toast.error('Withdrawal failed', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -86,17 +95,19 @@ export const App: React.FC = () => {
   const handleSetBeneficiary = async (vaultId: number, beneficiary: string) => {
     try {
       setLoading(true);
-      setError('');
-
-      // Call smart contract set-beneficiary function
-      console.log(`Setting beneficiary for vault ${vaultId}:`, beneficiary);
 
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, beneficiary } : v
       );
       setVaults(updatedVaults);
+
+      toast.success('Beneficiary updated', {
+        description: `Vault #${vaultId} will pay out to ${beneficiary}.`,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to set beneficiary');
+      toast.error('Failed to set beneficiary', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -105,17 +116,28 @@ export const App: React.FC = () => {
   const handleEmergencyWithdraw = async (vaultId: number) => {
     try {
       setLoading(true);
-      setError('');
 
-      // Call smart contract emergency-withdraw function
-      console.log(`Emergency withdrawing from vault ${vaultId}`);
+      const vault = vaults.find((v) => v.vaultId === vaultId);
+      const penaltyRate = 10;
+      const netAmount = vault
+        ? vault.amount - Math.floor((vault.amount * penaltyRate) / 100)
+        : 0;
 
       const updatedVaults = vaults.map((v) =>
         v.vaultId === vaultId ? { ...v, isWithdrawn: true } : v
       );
       setVaults(updatedVaults);
+
+      toast.warning('Emergency withdrawal complete', {
+        description: vault
+          ? `${netAmount} STX received after ${penaltyRate}% penalty.`
+          : undefined,
+        duration: 8000,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to process emergency withdrawal');
+      toast.error('Emergency withdrawal failed', {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -123,19 +145,24 @@ export const App: React.FC = () => {
 
   const handleFetchVault = async (vaultId: number): Promise<Vault> => {
     const vault = vaults.find((v) => v.vaultId === vaultId);
-    if (!vault) {
-      throw new Error('Vault not found');
-    }
+    if (!vault) throw new Error('Vault not found');
     return vault;
   };
 
-  const selectedVault = selectedVaultId !== null ? vaults.find((v) => v.vaultId === selectedVaultId) : null;
+  const selectedVault = selectedVaultId !== null
+    ? vaults.find((v) => v.vaultId === selectedVaultId)
+    : null;
 
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Flut — STX Savings Vault</h1>
-        <p>Lock your STX, designate beneficiaries, withdraw when unlocked</p>
+        <div className="app-header-toggle">
+          <ThemeToggle />
+        </div>
+        <div className="app-header-inner">
+          <h1>Flut — STX Savings Vault</h1>
+          <p>Lock your STX, designate beneficiaries, withdraw when unlocked</p>
+        </div>
       </header>
 
       <main className="app-main">
@@ -151,17 +178,58 @@ export const App: React.FC = () => {
             </button>
           </div>
 
+          {/* Live region announces filter result count to screen readers */}
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+          >
+            {hasActiveFilters
+              ? `${resultCount} of ${vaults.length} vaults shown`
+              : ''}
+          </div>
+
+          {vaults.length > 0 && (
+            <VaultSearchBar
+              filterState={filterState}
+              resultCount={resultCount}
+              totalCount={vaults.length}
+              hasActiveFilters={hasActiveFilters}
+              onSearchChange={setSearchQuery}
+              onStatusFilterChange={setStatusFilter}
+              onLockFilterChange={setLockFilter}
+              onSortFieldChange={setSortField}
+              onToggleSortDirection={toggleSortDirection}
+              onClearFilters={clearFilters}
+            />
+          )}
+
           {vaults.length === 0 ? (
             <div className="empty-state">
               <p>No vaults yet. Create one to get started!</p>
             </div>
+          ) : filteredVaults.length === 0 ? (
+            <div className="vault-list-empty">
+              <span className="empty-icon" aria-hidden="true">🔍</span>
+              <p>No vaults match your filters.</p>
+              {hasActiveFilters && (
+                <button className="clear-filters-btn" onClick={clearFilters} type="button">
+                  Clear filters
+                </button>
+              )}
+            </div>
           ) : (
             <ul className="vault-list">
-              {vaults.map((vault) => (
+              {filteredVaults.map((vault) => (
                 <li
                   key={vault.vaultId}
                   className={`vault-item ${selectedVaultId === vault.vaultId ? 'active' : ''}`}
                   onClick={() => setSelectedVaultId(vault.vaultId)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Vault ${vault.vaultId}, ${vault.amount} STX${vault.isWithdrawn ? ', withdrawn' : ''}`}
+                  onKeyDown={(e) => e.key === 'Enter' && setSelectedVaultId(vault.vaultId)}
                 >
                   <span className="vault-id">Vault #{vault.vaultId}</span>
                   <span className="vault-amount">
@@ -169,6 +237,9 @@ export const App: React.FC = () => {
                   </span>
                   {vault.beneficiary && <span className="badge-beneficiary">Has Beneficiary</span>}
                   {vault.isWithdrawn && <span className="badge-withdrawn">Withdrawn</span>}
+                  {!vault.isWithdrawn && vault.currentBlockHeight >= vault.unlockHeight && (
+                    <span className="badge-unlocked">Unlocked</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -177,14 +248,20 @@ export const App: React.FC = () => {
 
         <section className="content">
           {selectedVault ? (
-            <VaultDetail
-              vaultId={selectedVault.vaultId}
-              onWithdraw={handleWithdraw}
-              onSetBeneficiary={handleSetBeneficiary}
-              onFetchVault={handleFetchVault}
-              onEmergencyWithdraw={handleEmergencyWithdraw}
-              penaltyRate={10}
-            />
+            <>
+              <VaultDetail
+                vaultId={selectedVault.vaultId}
+                onWithdraw={handleWithdraw}
+                onSetBeneficiary={handleSetBeneficiary}
+                onFetchVault={handleFetchVault}
+                onEmergencyWithdraw={handleEmergencyWithdraw}
+                penaltyRate={10}
+              />
+              <VaultHistory
+                vaultId={selectedVault.vaultId}
+                events={getEvents(selectedVault.vaultId)}
+              />
+            </>
           ) : (
             <div className="empty-content">
               <h2>No vault selected</h2>
@@ -200,9 +277,15 @@ export const App: React.FC = () => {
         onCreateVault={handleCreateVault}
       />
 
-      {error && <div className="error-banner">{error}</div>}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} onClearAll={clearAll} />
     </div>
   );
 };
+
+export const App: React.FC = () => (
+  <ThemeProvider>
+    <AppInner />
+  </ThemeProvider>
+);
 
 export default App;

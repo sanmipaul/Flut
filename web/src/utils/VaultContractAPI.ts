@@ -10,6 +10,52 @@ export interface VaultData {
   createdAt: bigint;
   isWithdrawn: boolean;
   beneficiary?: string;
+  stackingEnabled: boolean;
+  stackingPool?: string;
+}
+
+export interface StackingInfo {
+  enabled: boolean;
+  pool?: string;
+  amount: bigint;
+  unlockHeight: bigint;
+  estimatedApyPercent: number;
+}
+
+// ------------------------------------------------------------------
+// Error code mapping utilities (mirrors contract constants)
+// ------------------------------------------------------------------
+export type ErrorCode = keyof typeof ERROR_MESSAGES;
+
+export const ERROR_MESSAGES: Record<number, string> = {
+  1: "Vault not found",
+  2: "Unauthorized: not vault owner",
+  3: "Vault still locked",
+  4: "Already withdrawn",
+  5: "Invalid amount",
+  6: "Invalid unlock height",
+  7: "Invalid penalty rate",
+  8: "Caller is not penalty owner",
+  9: "Stacking pool missing",
+  10: "Stacking not enabled",
+  11: "Invalid beneficiary shares",
+  12: "Too many beneficiaries",
+  13: "Beneficiary already exists",
+  14: "Invalid beneficiary address",
+  15: "Beneficiary cannot be creator",
+  16: "Too many vaults for user",
+  17: "Deposit cooldown active",
+  18: "Deposit amount exceeded",
+  19: "Vault total amount exceeded",
+  20: "Insufficient balance",
+  21: "Invalid withdrawal amount",
+  22: "Recipient cannot withdraw yet",
+  23: "Withdrawal not allowed",
+  24: "Emergency withdrawals disabled",
+};
+
+export function formatError(code: number): string {
+  return ERROR_MESSAGES[code] || `Unknown error code ${code}`;
 }
 
 /**
@@ -29,25 +75,46 @@ export class VaultContractAPI {
    * @param lockDuration - Duration in blocks
    * @param initialAmount - Initial deposit in microSTX
    * @param beneficiary - Optional beneficiary principal
+   * @param enableStacking - Opt-in to PoX stacking while locked
+   * @param stackingPool - Pool principal (required when enableStacking is true)
    */
+  // helper to check response object from contract calls and throw humanized error
+  static checkResult(result: any): void {
+    // contract calls return { ok: value } or { err: uint }
+    if (result && result.err != null) {
+      const code = parseInt(String(result.err).replace(/^u/, ''), 10);
+      const msg = formatError(code);
+      throw new Error(msg);
+    }
+  }
+
   async createVault(
     lockDuration: number,
     initialAmount: bigint,
-    beneficiary?: string
+    beneficiary?: string,
+    enableStacking: boolean = false,
+    stackingPool?: string
   ): Promise<string> {
     const functionName = 'create-vault';
     const args = [
       `u${lockDuration}`,
       `u${initialAmount}`,
+      enableStacking ? 'true' : 'false',
+      stackingPool ? `(some '${stackingPool})` : 'none',
     ];
 
     if (beneficiary) {
       args.push(`'${beneficiary}`);
     }
 
-    // This would be replaced with actual contract call
+    // TODO: replace with actual contract call (eg. stacks.js transaction)
     console.log(`Calling ${functionName} with args:`, args);
-    return 'vault-id-0'; // Placeholder
+    // Simulated response object from Clarinet / contract
+    const simulatedResponse = { err: 'u5' };
+    // use helper to throw formatted error if needed
+    VaultContractAPI.checkResult(simulatedResponse);
+    // if we reach here, return success value (vault id) for placeholder
+    return 'vault-id-0';
   }
 
   /**
@@ -59,7 +126,14 @@ export class VaultContractAPI {
     const args = [`u${vaultId}`];
 
     console.log(`Calling ${functionName} with args:`, args);
-    return true; // Placeholder
+    // simulate response error code and convert to message
+    const simulatedCode = 3; // vault still locked
+    const message = formatError(simulatedCode);
+    if (simulatedCode !== 0) {
+      console.error(`Withdraw failed: ${message}`);
+      throw new Error(message);
+    }
+    return true; // Placeholder for success
   }
 
   /**
@@ -195,6 +269,55 @@ export class VaultContractAPI {
 
     console.log(`Calling ${functionName} with args:`, args);
     return BigInt(0); // Placeholder
+  }
+
+  /**
+   * Delegate STX to a stacking pool via pox-4
+   * @param amount - Amount in microSTX to delegate
+   * @param pool - Pool principal to delegate to
+   */
+  async delegateStx(amount: bigint, pool: string): Promise<boolean> {
+    const functionName = 'delegate-stx';
+    const args = [`u${amount}`, `'${pool}`, 'none', 'none'];
+
+    console.log(`Calling pox-4 ${functionName} with args:`, args);
+    return true; // Placeholder
+  }
+
+  /**
+   * Revoke STX stacking delegation via pox-4
+   */
+  async revokeDelegateStx(): Promise<boolean> {
+    const functionName = 'revoke-delegate-stx';
+
+    console.log(`Calling pox-4 ${functionName}`);
+    return true; // Placeholder
+  }
+
+  /**
+   * Get stacking configuration and status for a vault
+   * @param vaultId - The vault ID
+   */
+  async getStackingInfo(vaultId: number): Promise<StackingInfo | null> {
+    const functionName = 'get-stacking-info';
+    const args = [`u${vaultId}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    // Placeholder — real implementation would parse the contract response
+    return null;
+  }
+
+  /**
+   * Update the stacking pool for an existing vault (owner only)
+   * @param vaultId - The vault ID
+   * @param newPool - New pool principal
+   */
+  async updateStackingPool(vaultId: number, newPool: string): Promise<boolean> {
+    const functionName = 'update-stacking-pool';
+    const args = [`u${vaultId}`, `'${newPool}`];
+
+    console.log(`Calling ${functionName} with args:`, args);
+    return true; // Placeholder
   }
 
   /**
