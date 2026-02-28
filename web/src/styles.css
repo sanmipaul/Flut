@@ -698,3 +698,211 @@ button:disabled {
     width: 100%;
   }
 }
+
+/* ============================================================
+   Vault Settings Panel
+   ============================================================ */
+
+.vault-settings-panel {
+  margin-top: var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.vault-settings-panel__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--secondary-color);
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  text-align: left;
+}
+
+.vault-settings-panel__toggle:hover {
+  background: #e4e4e4;
+}
+
+.vault-settings-panel__toggle-label {
+  flex: 1;
+}
+
+.vault-settings-panel__caret {
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.vault-settings-panel__caret--open {
+  transform: rotate(180deg);
+}
+
+.vault-settings-panel__body {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+  background: #fff;
+}
+
+/* Fieldsets */
+.settings-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.settings-fieldset:last-of-type {
+  margin-bottom: 0;
+}
+
+.settings-fieldset__legend {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-light);
+  margin-bottom: var(--spacing-sm);
+  padding: 0;
+}
+
+/* Individual setting rows */
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+}
+
+.settings-row--inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-label {
+  font-size: 0.875rem;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+.settings-input {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: var(--text-dark);
+  background: #fff;
+  width: 100%;
+}
+
+.settings-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(85, 70, 255, 0.15);
+}
+
+.settings-checkbox {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+.settings-textarea {
+  width: 100%;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: var(--text-dark);
+  background: #fff;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.settings-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(85, 70, 255, 0.15);
+}
+
+.settings-char-count {
+  display: block;
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.settings-actions {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Ghost button variant */
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-light);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-ghost:hover {
+  border-color: var(--error-color);
+  color: var(--error-color);
+}
+
+/* Vault note display */
+.vault-note {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: flex-start;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.vault-note__icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.vault-note__text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+/* Vault header sub-ID */
+.vault-header__title-group {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+}
+
+.vault-header__id {
+  font-size: 0.875rem;
+  color: var(--text-light);
+}
+
+/* Pin icon in sidebar */
+.pin-icon {
+  margin-right: 4px;
+  font-size: 0.75rem;
+}
