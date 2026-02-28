@@ -5,9 +5,9 @@
  * (vault count, settings included) and provides a "Download Backup"
  * button to trigger the JSON download.
  */
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useVaultExport } from '../hooks/useVaultExport';
-import { VaultSnapshot } from '../utils/vaultExport';
+import { VaultSnapshot, serializeVaultExport, serializeToJson } from '../utils/vaultExport';
 
 export interface VaultExportModalProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ export interface VaultExportModalProps {
 
 const VaultExportModal: React.FC<VaultExportModalProps> = ({ isOpen, vaults, onClose }) => {
   const { exportVaults, isExporting, exportError } = useVaultExport(vaults);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Close on Escape key
   useEffect(() => {
@@ -84,6 +85,24 @@ const VaultExportModal: React.FC<VaultExportModalProps> = ({ isOpen, vaults, onC
             <strong>Note:</strong> This backup does not include your private keys or
             wallet credentials. On-chain funds remain in your Stacks wallet.
           </div>
+
+          <div className="export-modal__preview-toggle">
+            <button
+              type="button"
+              className="btn-ghost btn-small"
+              onClick={() => setShowPreview((p) => !p)}
+              aria-expanded={showPreview}
+            >
+              {showPreview ? 'Hide' : 'Preview'} JSON
+            </button>
+          </div>
+
+          {showPreview && (
+            <pre className="export-modal__json-preview" aria-label="JSON preview">
+              {serializeToJson(serializeVaultExport(vaults)).slice(0, 400)}
+              {vaults.length > 0 ? '\n…' : ''}
+            </pre>
+          )}
 
           {exportError && (
             <div className="export-modal__error" role="alert">
