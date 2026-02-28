@@ -990,3 +990,15 @@ button:disabled {
     transition: none;
   }
 }
+
+/* =========================================================================
+   Focus-visible keyboard accessibility for VaultSearchBar controls
+   ========================================================================= */
+
+.vault-search-bar__chip:focus-visible,
+.vault-search-bar__direction-btn:focus-visible,
+.vault-search-bar__clear-btn:focus-visible,
+.vault-search-bar__sort-select:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
