@@ -141,3 +141,40 @@ describe('buildAriaLabel', () => {
     expect(label).toContain('2 hours');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Additional edge cases
+// ---------------------------------------------------------------------------
+
+describe('blocksToSeconds — large block counts', () => {
+  it('handles 1000 blocks (over 6 days) without overflow', () => {
+    expect(blocksToSeconds(1_000)).toBe(600_000);
+  });
+
+  it('is always an integer (uses Math.floor)', () => {
+    const result = blocksToSeconds(7);
+    expect(Number.isInteger(result)).toBe(true);
+  });
+});
+
+describe('secondsToUnits — rounding', () => {
+  it('does not include fractional seconds', () => {
+    const result = secondsToUnits(90);
+    expect(result.minutes).toBe(1);
+    expect(result.seconds).toBe(30);
+  });
+
+  it('exactly one day is 86400 seconds', () => {
+    const result = secondsToUnits(86_400);
+    expect(result.days).toBe(1);
+    expect(result.hours).toBe(0);
+    expect(result.minutes).toBe(0);
+    expect(result.seconds).toBe(0);
+  });
+
+  it('23 hours and 59 minutes and 59 seconds is not yet a full day', () => {
+    const result = secondsToUnits(86_399);
+    expect(result.days).toBe(0);
+    expect(result.hours).toBe(23);
+  });
+});
