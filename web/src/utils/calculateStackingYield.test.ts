@@ -178,3 +178,48 @@ describe('calculateStackingYield — large inputs', () => {
     expect(Number.isFinite(result.totalBtc)).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Boundary: exactly BLOCKS_PER_CYCLE
+// ---------------------------------------------------------------------------
+
+describe('calculateStackingYield — boundary at exactly one cycle', () => {
+  it('exactly BLOCKS_PER_CYCLE blocks yields exactly 1 cycle', () => {
+    const result = calculateStackingYield({ ...BASE_INPUT, totalLockBlocks: BLOCKS_PER_CYCLE });
+    expect(result.fullCycleCount).toBe(1);
+    expect(result.hasYield).toBe(true);
+  });
+
+  it('BLOCKS_PER_CYCLE - 1 blocks yields 0 cycles', () => {
+    const result = calculateStackingYield({ ...BASE_INPUT, totalLockBlocks: BLOCKS_PER_CYCLE - 1 });
+    expect(result.fullCycleCount).toBe(0);
+    expect(result.hasYield).toBe(false);
+  });
+
+  it('BLOCKS_PER_CYCLE + 1 blocks yields exactly 1 cycle (ignores partial)', () => {
+    const result = calculateStackingYield({ ...BASE_INPUT, totalLockBlocks: BLOCKS_PER_CYCLE + 1 });
+    expect(result.fullCycleCount).toBe(1);
+    expect(result.cycles).toHaveLength(1);
+  });
+
+  it('MIN_APY_PCT (1%) with 1 cycle returns a positive totalBtc', () => {
+    const result = calculateStackingYield({
+      stxAmount: 10_000,
+      totalLockBlocks: BLOCKS_PER_CYCLE,
+      annualisedYieldPct: 1,
+    });
+    expect(result.totalBtc).toBeGreaterThan(0);
+  });
+
+  it('MAX_APY_PCT (25%) with 1 cycle returns more than MIN_APY_PCT', () => {
+    const min = calculateStackingYield({ stxAmount: 10_000, totalLockBlocks: BLOCKS_PER_CYCLE, annualisedYieldPct: 1 });
+    const max = calculateStackingYield({ stxAmount: 10_000, totalLockBlocks: BLOCKS_PER_CYCLE, annualisedYieldPct: 25 });
+    expect(max.totalBtc).toBeGreaterThan(min.totalBtc);
+  });
+
+  it('reward scales linearly with APY at fixed stxAmount', () => {
+    const at10 = calculateStackingYield({ stxAmount: 1_000, totalLockBlocks: BLOCKS_PER_CYCLE, annualisedYieldPct: 10 });
+    const at20 = calculateStackingYield({ stxAmount: 1_000, totalLockBlocks: BLOCKS_PER_CYCLE, annualisedYieldPct: 20 });
+    expect(at20.totalBtc).toBeCloseTo(at10.totalBtc * 2, 8);
+  });
+});
