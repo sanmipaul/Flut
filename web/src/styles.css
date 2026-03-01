@@ -2451,3 +2451,82 @@ button:disabled {
   border-bottom: none;
   font-weight: 600;
 }
+
+/* =========================================================================
+   Dark mode overrides for StackingYieldCard
+   ========================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  .stacking-yield-card {
+    background: linear-gradient(135deg, #1c1400, #231800);
+    border-color: #78350f;
+  }
+
+  .stacking-yield-card__title {
+    color: #fcd34d;
+  }
+
+  .stacking-yield-card__reset-btn {
+    background: #1c1400;
+    border-color: #78350f;
+    color: #fcd34d;
+  }
+
+  .stacking-yield-card__reset-btn:hover {
+    background: #291e00;
+  }
+
+  .stacking-yield-card__summary-item {
+    background: #1c1400;
+    border-color: #78350f;
+  }
+
+  .stacking-yield-card__summary-item dt {
+    color: #d97706;
+  }
+
+  .stacking-yield-card__summary-item dd,
+  .stacking-yield-card__title,
+  .stacking-yield-card__table td {
+    color: #fcd34d;
+  }
+
+  .stacking-yield-card__table th {
+    color: #d97706;
+    border-bottom-color: #78350f;
+  }
+
+  .stacking-yield-card__table td {
+    border-bottom-color: #291e00;
+  }
+
+  .stacking-yield-card__disclaimer,
+  .stacking-yield-card__no-yield {
+    color: #d97706;
+  }
+
+  .stacking-yield-card__slider-label {
+    color: #fcd34d;
+  }
+
+  .stacking-yield-card__slider-value {
+    color: #fbbf24;
+  }
+}
+
+/* =========================================================================
+   Responsive and reduced-motion
+   ========================================================================= */
+
+@media (max-width: 480px) {
+  .stacking-yield-card__summary {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stacking-yield-card__reset-btn,
+  .stacking-yield-card__breakdown-toggle {
+    transition: none;
+  }
+}
