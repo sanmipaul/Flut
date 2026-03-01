@@ -10,7 +10,7 @@
  *
  * All data comes from useStackingYield; this component is purely presentational.
  */
-import React, { useState, useId } from 'react';
+import React, { useState, useId, useCallback } from 'react';
 import { useStackingYield } from '../hooks/useStackingYield';
 import { formatBtcAmount, formatYieldPct, formatCycleCount, formatStxShort } from '../utils/formatYield';
 
@@ -30,6 +30,12 @@ const StackingYieldCard: React.FC<StackingYieldCardProps> = ({ stxAmount, totalL
 
   const sliderId = useId();
   const breakdownId = useId();
+  const disclaimerId = useId();
+
+  const handleSliderChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setApyPct(Number(e.target.value)),
+    [setApyPct],
+  );
 
   const { totalBtc, fullCycleCount, hasYield, cycles } = yieldResult;
 
@@ -64,12 +70,13 @@ const StackingYieldCard: React.FC<StackingYieldCardProps> = ({ stxAmount, totalL
           max={maxApy}
           step={1}
           value={apyPct}
-          onChange={(e) => setApyPct(Number(e.target.value))}
+          onChange={handleSliderChange}
           aria-label={`APY rate: ${formatYieldPct(apyPct)}`}
           aria-valuemin={minApy}
           aria-valuemax={maxApy}
           aria-valuenow={apyPct}
           aria-valuetext={formatYieldPct(apyPct)}
+          aria-describedby={disclaimerId}
         />
         <span className="stacking-yield-card__slider-value" aria-live="polite" aria-atomic="true">
           {formatYieldPct(apyPct)}
@@ -78,7 +85,7 @@ const StackingYieldCard: React.FC<StackingYieldCardProps> = ({ stxAmount, totalL
 
       {/* Summary metrics */}
       {!hasYield ? (
-        <p className="stacking-yield-card__no-yield">
+        <p className="stacking-yield-card__no-yield" role="status" aria-live="polite">
           Lock period is shorter than one stacking cycle (~14 days). No full cycles completed.
         </p>
       ) : (
@@ -132,7 +139,7 @@ const StackingYieldCard: React.FC<StackingYieldCardProps> = ({ stxAmount, totalL
         </>
       )}
 
-      <p className="stacking-yield-card__disclaimer" role="note">
+      <p id={disclaimerId} className="stacking-yield-card__disclaimer" role="note">
         Estimates only. Actual rewards depend on miner fees, total STX stacked network-wide,
         and BTC/STX price at the time of each cycle.
       </p>
