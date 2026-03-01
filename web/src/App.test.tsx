@@ -27,4 +27,14 @@ describe('App — smoke test', () => {
     render(<App />);
     expect(screen.queryByRole('timer')).toBeNull();
   });
+
+  it('does not render StackingYieldCard when no vault is selected', () => {
+    render(<App />);
+    expect(screen.queryByText('Stacking Yield Estimate')).toBeNull();
+  });
+
+  it('does not render APY slider when no vault is selected', () => {
+    render(<App />);
+    expect(screen.queryByRole('slider')).toBeNull();
+  });
 });
