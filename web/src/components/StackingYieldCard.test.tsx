@@ -153,6 +153,60 @@ describe('StackingYieldCard — slider interactions', () => {
 // Cycle breakdown toggle
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Accessibility attributes
+// ---------------------------------------------------------------------------
+
+describe('StackingYieldCard — accessibility', () => {
+  it('no-yield message has role="status" for screen reader announcement', () => {
+    render(<StackingYieldCard {...SHORT_PROPS} />);
+    expect(screen.getByRole('status')).toBeDefined();
+  });
+
+  it('no-yield message has aria-live="polite"', () => {
+    render(<StackingYieldCard {...SHORT_PROPS} />);
+    const msg = screen.getByRole('status');
+    expect(msg.getAttribute('aria-live')).toBe('polite');
+  });
+
+  it('slider has aria-describedby pointing to the disclaimer', () => {
+    render(<StackingYieldCard {...VALID_PROPS} />);
+    const slider = screen.getByRole('slider');
+    const describedBy = slider.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    const disclaimer = document.getElementById(describedBy as string);
+    expect(disclaimer).not.toBeNull();
+    expect(disclaimer?.getAttribute('role')).toBe('note');
+  });
+
+  it('disclaimer paragraph has an id attribute', () => {
+    render(<StackingYieldCard {...VALID_PROPS} />);
+    const disclaimer = screen.getByRole('note');
+    expect(disclaimer.id).toBeTruthy();
+  });
+
+  it('slider aria-label includes "APY rate"', () => {
+    render(<StackingYieldCard {...VALID_PROPS} />);
+    const slider = screen.getByRole('slider');
+    expect(slider.getAttribute('aria-label')).toContain('APY rate');
+  });
+
+  it('breakdown toggle aria-expanded starts as false', () => {
+    render(<StackingYieldCard {...VALID_PROPS} />);
+    const toggle = screen.getByText(/cycle breakdown/i);
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('breakdown toggle aria-controls points to the breakdown container', () => {
+    render(<StackingYieldCard {...VALID_PROPS} />);
+    const toggle = screen.getByText(/cycle breakdown/i);
+    const controlsId = toggle.getAttribute('aria-controls');
+    expect(controlsId).toBeTruthy();
+    const container = document.getElementById(controlsId as string);
+    expect(container).not.toBeNull();
+  });
+});
+
 describe('StackingYieldCard — cycle breakdown', () => {
   it('breakdown toggle button is shown for valid yield', () => {
     render(<StackingYieldCard {...VALID_PROPS} />);
