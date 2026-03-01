@@ -19,6 +19,18 @@ const unlockedFetchVault = jest.fn().mockResolvedValue({
   currentBlockHeight: 350,
 });
 
+const stackingFetchVault = jest.fn().mockResolvedValue({
+  ...mockVault,
+  stackingEnabled: true,
+  stackingPool: 'ST2PABZQ0CRXXXXXX',
+  unlockHeight: 100 + 2_100 * 6, // 6 full stacking cycles from createdAt=100
+});
+
+const stackingInactiveFetchVault = jest.fn().mockResolvedValue({
+  ...mockVault,
+  stackingEnabled: false,
+});
+
 describe('VaultDetail — VaultCountdown integration', () => {
   it('renders a timer when vault is locked', async () => {
     render(
@@ -60,5 +72,67 @@ describe('VaultDetail — VaultCountdown integration', () => {
       />,
     );
     await waitFor(() => expect(screen.getByText(/ready to withdraw/i)).toBeDefined());
+  });
+});
+
+describe('VaultDetail — StackingYieldCard integration', () => {
+  it('renders "Stacking Yield Estimate" when stackingEnabled=true', async () => {
+    render(
+      <VaultDetail
+        vaultId={1}
+        onWithdraw={jest.fn()}
+        onSetBeneficiary={jest.fn()}
+        onFetchVault={stackingFetchVault}
+        onEmergencyWithdraw={jest.fn()}
+        penaltyRate={10}
+      />,
+    );
+    await waitFor(() =>
+      expect(screen.getByText('Stacking Yield Estimate')).toBeDefined(),
+    );
+  });
+
+  it('renders APY slider when stackingEnabled=true', async () => {
+    render(
+      <VaultDetail
+        vaultId={1}
+        onWithdraw={jest.fn()}
+        onSetBeneficiary={jest.fn()}
+        onFetchVault={stackingFetchVault}
+        onEmergencyWithdraw={jest.fn()}
+        penaltyRate={10}
+      />,
+    );
+    await waitFor(() => expect(screen.getByRole('slider')).toBeDefined());
+  });
+
+  it('does not render "Stacking Yield Estimate" when stackingEnabled=false', async () => {
+    render(
+      <VaultDetail
+        vaultId={1}
+        onWithdraw={jest.fn()}
+        onSetBeneficiary={jest.fn()}
+        onFetchVault={stackingInactiveFetchVault}
+        onEmergencyWithdraw={jest.fn()}
+        penaltyRate={10}
+      />,
+    );
+    await waitFor(() => expect(screen.queryByText('Stacking Yield Estimate')).toBeNull());
+  });
+
+  it('renders "Stacking is not enabled" message when stackingEnabled=false', async () => {
+    render(
+      <VaultDetail
+        vaultId={1}
+        onWithdraw={jest.fn()}
+        onSetBeneficiary={jest.fn()}
+        onFetchVault={stackingInactiveFetchVault}
+        onEmergencyWithdraw={jest.fn()}
+        penaltyRate={10}
+      />,
+    );
+    await waitFor(() =>
+      expect(screen.getByText(/stacking is not enabled/i)).toBeDefined(),
+    );
   });
 });
