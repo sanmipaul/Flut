@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ThemeToggle } from './ThemeToggle';
+import { WalletConnect } from '@/components/wallet/WalletConnect';
 
 export function Header() {
   return (
@@ -24,8 +25,7 @@ export function Header() {
         {/* Right side — wallet button added in feat/wallet-connect */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          {/* WalletConnect placeholder */}
-          <div id="wallet-connect-slot" />
+          <WalletConnect />
         </div>
       </div>
     </header>
