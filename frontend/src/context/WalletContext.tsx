@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { AppConfig, UserSession, showConnect } from '@stacks/connect';
-import { NETWORK, STACKS_API, truncateAddress } from '@/lib/stacks';
+import { NETWORK_NAME, STACKS_API, truncateAddress } from '@/lib/stacks';
 import type { WalletState } from '@/types/wallet';
 
 interface WalletContextValue extends WalletState {
@@ -46,7 +46,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     if (userSession.isUserSignedIn()) {
       const userData = userSession.loadUserData();
       const address =
-        NETWORK.constructor.name === 'StacksMainnet'
+        NETWORK_NAME === 'mainnet'
           ? userData.profile.stxAddress.mainnet
           : userData.profile.stxAddress.testnet;
       setState((s) => ({ ...s, connected: true, address, loading: true }));
@@ -59,12 +59,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const connect = useCallback(() => {
     showConnect({
       appDetails: { name: 'Flut', icon: '/logo.png' },
-      network: NETWORK,
       userSession,
       onFinish: () => {
         const userData = userSession.loadUserData();
         const address =
-          NETWORK.constructor.name === 'StacksMainnet'
+          NETWORK_NAME === 'mainnet'
             ? userData.profile.stxAddress.mainnet
             : userData.profile.stxAddress.testnet;
         setState((s) => ({ ...s, connected: true, address, loading: true }));
