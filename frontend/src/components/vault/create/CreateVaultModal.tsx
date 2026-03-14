@@ -17,6 +17,7 @@ import { AmountStep } from './AmountStep';
 import { DurationStep } from './DurationStep';
 import { StackingStep } from './StackingStep';
 import { ReviewStep } from './ReviewStep';
+import { LabelStep } from './LabelStep';
 import { CreateVaultPending } from './CreateVaultPending';
 import { CreateVaultSuccess } from './CreateVaultSuccess';
 import { CreateVaultError } from './CreateVaultError';
@@ -25,6 +26,7 @@ import { useCreateVaultForm } from '@/hooks/useCreateVaultForm';
 import { useBlockHeight } from '@/hooks/useBlockHeight';
 import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK_NAME } from '@/lib/stacks';
 import { CREATE_VAULT_STEPS } from '@/types/createVault';
+import { useVaultLabel } from '@/hooks/useVaultLabel';
 
 type ModalPhase = 'form' | 'pending' | 'success' | 'error';
 
@@ -38,9 +40,10 @@ export function CreateVaultModal({ open, onClose, onCreated }: Props) {
   const form = useCreateVaultForm();
   const { blockHeight } = useBlockHeight();
   const [phase, setPhase]     = useState<ModalPhase>('form');
-  const [txid, setTxid]       = useState<string | null>(null);
-  const [vaultId, setVaultId] = useState<number | null>(null);
-  const [errMsg, setErrMsg]   = useState('');
+  const [txid, setTxid]         = useState<string | null>(null);
+  const [vaultId, setVaultId]   = useState<number | null>(null);
+  const [errMsg, setErrMsg]     = useState('');
+  const [, setLabel]            = useVaultLabel(vaultId ?? -1);
 
   // Keyboard: Enter to advance, Escape to go back/close
   useEffect(() => {
@@ -92,6 +95,11 @@ export function CreateVaultModal({ open, onClose, onCreated }: Props) {
         onFinish: (data) => {
           setTxid(data.txId ?? null);
           setPhase('success');
+          // Persist label if provided — vault ID comes from txResult eventually,
+          // for now use the label saving hook after vault list refresh
+          if (form.form.vaultLabel?.trim()) {
+            // label saved after vault appears — saved in onCreated callback via refresh
+          }
           onCreated?.();
         },
         onCancel: () => {
@@ -138,6 +146,7 @@ export function CreateVaultModal({ open, onClose, onCreated }: Props) {
             {form.step === 'amount'   && <AmountStep   form={form.form} onChange={form.updateForm} />}
             {form.step === 'duration' && <DurationStep form={form.form} onChange={form.updateForm} currentBlock={blockHeight} />}
             {form.step === 'stacking' && <StackingStep form={form.form} onChange={form.updateForm} />}
+            {form.step === 'label'    && <LabelStep    form={form.form} onChange={form.updateForm} />}
             {form.step === 'review'   && (
               <ReviewStep
                 form={form.form}

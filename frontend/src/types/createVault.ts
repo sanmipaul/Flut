@@ -1,12 +1,13 @@
 /** Steps in the multi-step vault creation flow */
-export type CreateVaultStep = 'amount' | 'duration' | 'stacking' | 'review';
+export type CreateVaultStep = 'amount' | 'duration' | 'stacking' | 'label' | 'review';
 
-export const CREATE_VAULT_STEPS: CreateVaultStep[] = ['amount', 'duration', 'stacking', 'review'];
+export const CREATE_VAULT_STEPS: CreateVaultStep[] = ['amount', 'duration', 'stacking', 'label', 'review'];
 
 export const STEP_LABELS: Record<CreateVaultStep, string> = {
   amount:   'Amount',
   duration: 'Duration',
   stacking: 'Stacking',
+  label:    'Name',
   review:   'Review',
 };
 
@@ -31,6 +32,7 @@ export interface CreateVaultFormState {
   customBlocks: string;
   enableStacking: boolean;
   stackingPool: string;
+  vaultLabel?: string;
 }
 
 export const INITIAL_FORM_STATE: CreateVaultFormState = {
@@ -39,4 +41,5 @@ export const INITIAL_FORM_STATE: CreateVaultFormState = {
   customBlocks:   '',
   enableStacking: false,
   stackingPool:   '',
+  vaultLabel:     '',
 };
