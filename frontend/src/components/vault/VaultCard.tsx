@@ -11,6 +11,8 @@ interface VaultCardProps {
   currentBlock: number;
   active?: boolean;
   onClick?: () => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
+  'data-navitem'?: boolean;
 }
 
 const statusConfig = {
@@ -19,7 +21,7 @@ const statusConfig = {
   withdrawn: { badge: 'default'   as const, label: 'Withdrawn', dot: 'bg-gray-400' },
 };
 
-export function VaultCard({ vault, currentBlock, active = false, onClick }: VaultCardProps) {
+export function VaultCard({ vault, currentBlock, active = false, onClick, onKeyDown, 'data-navitem': navItem }: VaultCardProps) {
   const status = getVaultStatus(vault, currentBlock);
   const { badge, label, dot } = statusConfig[status];
   const remaining = blocksRemaining(vault, currentBlock);
@@ -35,8 +37,10 @@ export function VaultCard({ vault, currentBlock, active = false, onClick }: Vaul
   return (
     <button
       onClick={onClick}
+      onKeyDown={onKeyDown}
       aria-current={active ? 'page' : undefined}
       aria-label={ariaLabel}
+      data-navitem={navItem ? '' : undefined}
       className={clsx(
         'w-full text-left rounded-xl px-3 py-3 transition-all',
         active

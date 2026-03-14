@@ -1,6 +1,7 @@
 'use client';
 
 import { VaultCard } from './VaultCard';
+import { useKeyboardNav } from '@/hooks/useKeyboardNav';
 import type { Vault } from '@/types/vault';
 
 interface VaultListProps {
@@ -22,6 +23,7 @@ function Skeleton() {
 }
 
 export function VaultList({ vaults, currentBlock, selectedVaultId, loading, onSelect }: VaultListProps) {
+  const handleKeyDown = useKeyboardNav('[aria-label="Your vaults"]');
   if (loading) return (
     <div role="status" aria-label="Loading vaults" aria-busy="true">
       <Skeleton />
@@ -50,6 +52,8 @@ export function VaultList({ vaults, currentBlock, selectedVaultId, loading, onSe
             currentBlock={currentBlock}
             active={selectedVaultId === vault.vaultId}
             onClick={() => onSelect(vault.vaultId)}
+            onKeyDown={handleKeyDown}
+            data-navitem
           />
         </li>
       ))}
