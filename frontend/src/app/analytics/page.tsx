@@ -7,6 +7,7 @@ import { useWallet } from '@/hooks/useWallet';
 import { useState, useCallback } from 'react';
 import { useVaultMetrics } from '@/hooks/useVaultMetrics';
 import { useAnalyticsRefresh } from '@/hooks/useAnalyticsRefresh';
+import { useAnalyticsSnapshot } from '@/hooks/useAnalyticsSnapshot';
 import {
   AnalyticsMetricGrid,
   VaultStatusDistributionBar,
@@ -23,6 +24,8 @@ export default function AnalyticsPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const { vaults, currentBlock, loading, error, refresh } = useVaults();
   const metrics = useVaultMetrics(vaults, currentBlock);
+  const snapshot = useAnalyticsSnapshot(metrics, !loading && vaults.length > 0);
+  const displayMetrics = loading && snapshot ? snapshot : metrics;
 
   const refreshWithTimestamp = useCallback(async () => {
     await refresh();
@@ -119,7 +122,7 @@ export default function AnalyticsPage() {
           <ErrorBoundary>
             <VaultReadinessAlert vaults={vaults} currentBlock={currentBlock} />
 
-            <AnalyticsMetricGrid metrics={metrics} />
+            <AnalyticsMetricGrid metrics={displayMetrics} />
 
             <VaultStatusDistributionBar
               locked={metrics.lockedCount}
