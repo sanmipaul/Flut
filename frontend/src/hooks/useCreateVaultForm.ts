@@ -39,6 +39,9 @@ function validateStep(step: CreateVaultStep, form: CreateVaultFormState): boolea
       if (!form.enableStacking) return true;
       return /^S[PT][A-Z0-9]{39}$/.test(form.stackingPool.trim());
     }
+    case 'label':
+      // label is always optional — always valid
+      return true;
     case 'review':
       return true;
   }
