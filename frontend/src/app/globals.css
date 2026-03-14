@@ -19,6 +19,10 @@
     --card: 18 18 20;
   }
 
+  * {
+    @apply border-border;
+  }
+
   body {
     background-color: rgb(var(--background));
     color: rgb(var(--foreground));
