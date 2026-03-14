@@ -31,7 +31,13 @@ export function BeneficiaryPanel({ vaultId, currentBeneficiary, onSetBeneficiary
       setEditing(false);
       setAddress('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to set beneficiary');
+      const msg = err instanceof Error ? err.message : '';
+      if (msg && !msg.toLowerCase().includes('cancel')) {
+        setError(msg || 'Failed to set beneficiary');
+      } else {
+        setEditing(false);
+        setAddress('');
+      }
     } finally {
       setLoading(false);
     }
