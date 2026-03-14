@@ -11,6 +11,7 @@ import {
   UpcomingUnlocksList,
   VaultBreakdownTable,
   AnalyticsExportButton,
+  VaultAmountRangeBar,
 } from '@/components/analytics';
 
 export default function AnalyticsPage() {
@@ -108,6 +109,8 @@ export default function AnalyticsPage() {
                 <StatRow label="Total active STX" value={`${metrics.totalStxActive.toFixed(2)} STX`} />
               </div>
             </div>
+
+            <VaultAmountRangeBar vaults={vaults} />
 
             <VaultBreakdownTable vaults={vaults} currentBlock={currentBlock} />
           </ErrorBoundary>
