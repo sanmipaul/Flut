@@ -4,6 +4,7 @@ import { VaultDetailHeader } from './VaultDetailHeader';
 import { VaultLockProgress } from './VaultLockProgress';
 import { VaultActionBar } from './VaultActionBar';
 import { BeneficiaryPanel } from './BeneficiaryPanel';
+import { TxPendingBanner } from '@/components/ui/TxPendingBanner';
 import { explorerUrl } from '@/lib/stacks';
 import type { Vault } from '@/types/vault';
 
@@ -14,6 +15,8 @@ interface VaultDetailPanelProps {
   onDeposit: (id: number, amount: number) => Promise<void>;
   onEmergencyWithdraw: (id: number) => Promise<void>;
   onSetBeneficiary: (id: number, address: string) => Promise<void>;
+  pendingTxid?: string | null;
+  onDismissTx?: () => void;
 }
 
 export function VaultDetailPanel({
@@ -23,10 +26,20 @@ export function VaultDetailPanel({
   onDeposit,
   onEmergencyWithdraw,
   onSetBeneficiary,
+  pendingTxid,
+  onDismissTx,
 }: VaultDetailPanelProps) {
   return (
     <div className="space-y-6">
       <VaultDetailHeader vault={vault} currentBlock={currentBlock} />
+
+      {pendingTxid && (
+        <TxPendingBanner
+          txid={pendingTxid}
+          label="Transaction pending — vault will update after 1–2 blocks"
+          onDismiss={onDismissTx}
+        />
+      )}
 
       <VaultLockProgress vault={vault} currentBlock={currentBlock} />
 
