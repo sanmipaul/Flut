@@ -15,6 +15,7 @@ import {
   AnalyticsExportButton,
   VaultAmountRangeBar,
   VaultReadinessAlert,
+  VaultLockDurationBar,
 } from '@/components/analytics';
 
 export default function AnalyticsPage() {
@@ -146,7 +147,10 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <VaultAmountRangeBar vaults={vaults} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <VaultAmountRangeBar vaults={vaults} />
+              <VaultLockDurationBar vaults={vaults} />
+            </div>
 
             <VaultBreakdownTable vaults={vaults} currentBlock={currentBlock} />
           </ErrorBoundary>

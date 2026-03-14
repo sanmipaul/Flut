@@ -5,3 +5,4 @@ export { AnalyticsExportButton } from './AnalyticsExportButton';
 export { AnalyticsMetricGrid } from './AnalyticsMetricGrid';
 export { VaultAmountRangeBar } from './VaultAmountRangeBar';
 export { VaultReadinessAlert } from './VaultReadinessAlert';
+export { VaultLockDurationBar } from './VaultLockDurationBar';
