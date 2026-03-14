@@ -22,7 +22,12 @@ function Skeleton() {
 }
 
 export function VaultList({ vaults, currentBlock, selectedVaultId, loading, onSelect }: VaultListProps) {
-  if (loading) return <Skeleton />;
+  if (loading) return (
+    <div role="status" aria-label="Loading vaults" aria-busy="true">
+      <Skeleton />
+      <span className="sr-only">Loading your vaults…</span>
+    </div>
+  );
 
   if (vaults.length === 0) {
     return (
