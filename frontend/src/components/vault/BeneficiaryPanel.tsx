@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { truncateAddress, explorerUrl } from '@/lib/stacks';
-import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
+import { truncateAddress } from '@/lib/stacks';
 
 interface BeneficiaryPanelProps {
   vaultId: number;
@@ -18,7 +17,6 @@ export function BeneficiaryPanel({ vaultId, currentBeneficiary, onSetBeneficiary
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState<string | null>(null);
-  const [copied, copy]        = useCopyToClipboard();
 
   const isValid = SP_REGEX.test(address.trim());
 
@@ -55,40 +53,9 @@ export function BeneficiaryPanel({ vaultId, currentBeneficiary, onSetBeneficiary
       </div>
 
       {currentBeneficiary && !editing && (
-        <div className="flex items-center gap-2">
-          <p
-            className="text-xs font-mono text-gray-600 dark:text-gray-400 break-all"
-            title={currentBeneficiary}
-          >
-            {truncateAddress(currentBeneficiary, 8)}
-          </p>
-          <button
-            onClick={() => copy(currentBeneficiary)}
-            title="Copy address"
-            className="shrink-0 text-gray-300 dark:text-zinc-600 hover:text-brand-400 transition-colors"
-          >
-            {copied ? (
-              <svg className="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            )}
-          </button>
-          <a
-            href={explorerUrl('address', currentBeneficiary)}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="View on Stacks Explorer"
-            className="shrink-0 text-gray-300 dark:text-zinc-600 hover:text-brand-400 transition-colors"
-          >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </a>
-        </div>
+        <p className="text-xs font-mono text-gray-600 dark:text-gray-400 break-all">
+          {truncateAddress(currentBeneficiary, 8)}
+        </p>
       )}
 
       {!currentBeneficiary && !editing && (
@@ -108,7 +75,7 @@ export function BeneficiaryPanel({ vaultId, currentBeneficiary, onSetBeneficiary
             className="w-full rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-xs font-mono text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-400"
           />
           {address && !isValid && (
-            <p className="text-xs text-red-500">Invalid Stacks address (must start with SP or ST, 41 chars)</p>
+            <p className="text-xs text-red-500">Invalid Stacks address</p>
           )}
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-2">

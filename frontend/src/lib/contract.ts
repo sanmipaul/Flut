@@ -2,13 +2,7 @@ import {
   callReadOnlyFunction,
   cvToJSON,
   uintCV,
-  boolCV,
-  someCV,
-  noneCV,
   principalCV,
-  makeContractCall,
-  broadcastTransaction,
-  type StacksTransaction,
 } from '@stacks/transactions';
 import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK, STACKS_API } from './stacks';
 import type { Vault } from '@/types/vault';

@@ -29,17 +29,15 @@ export default function Home() {
         {/* Sidebar */}
         <div className="w-full lg:w-72 xl:w-80 shrink-0">
           <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 h-full p-4">
-            <ErrorBoundary>
-              <Sidebar
-                selectedVaultId={selectedVaultId}
-                onSelect={setSelectedVaultId}
-                onCreateClick={() => setShowCreate(true)}
-              />
-            </ErrorBoundary>
+            <Sidebar
+              selectedVaultId={selectedVaultId}
+              onSelect={setSelectedVaultId}
+              onCreateClick={() => setShowCreate(true)}
+            />
           </div>
         </div>
 
-        {/* Main content */}
+        {/* Main content area — vault detail rendered in feat/vault-detail */}
         <section className="flex-1 min-w-0">
           <ErrorBoundary>
             {selectedVault ? (
@@ -77,9 +75,13 @@ export default function Home() {
                     Create Vault
                   </button>
                 </div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">No vault selected</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
+                  Select a vault from the sidebar or create a new one to get started.
+                </p>
               </div>
-            )}
-          </ErrorBoundary>
+            </div>
+          )}
         </section>
       </main>
 
