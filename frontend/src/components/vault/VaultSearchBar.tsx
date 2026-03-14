@@ -3,11 +3,17 @@
 interface VaultSearchBarProps {
   query: string;
   onQueryChange: (q: string) => void;
+  resultCount?: number;
 }
 
-export function VaultSearchBar({ query, onQueryChange }: VaultSearchBarProps) {
+export function VaultSearchBar({ query, onQueryChange, resultCount }: VaultSearchBarProps) {
   return (
-    <div className="relative mb-3">
+    <div role="search" aria-label="Vault search" className="relative mb-3">
+      {query && resultCount !== undefined && (
+        <span className="sr-only" aria-live="polite">
+          {resultCount} vault{resultCount !== 1 ? 's' : ''} found
+        </span>
+      )}
       <svg
         className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400"
         fill="none"
@@ -32,7 +38,7 @@ export function VaultSearchBar({ query, onQueryChange }: VaultSearchBarProps) {
           aria-label="Clear search"
           className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
         >
-          ✕
+          <span aria-hidden="true">✕</span>
         </button>
       )}
     </div>
