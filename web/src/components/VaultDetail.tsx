@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
 import VaultCountdown from './VaultCountdown';
+import StackingYieldCard from './StackingYieldCard';
 
 interface Vault {
   vaultId: number;
@@ -246,14 +247,14 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
               <code>{vault.stackingPool}</code>
             </div>
           )}
-          <div className="info-item">
-            <label>Estimated BTC APY</label>
-            <span className="apy-value">~8–12%</span>
-          </div>
           <p className="info-text">
             Your STX is being stacked. BTC rewards accrue each cycle (~2 weeks) and are
             claimable through your pool. Delegation is automatically revoked on withdrawal.
           </p>
+          <StackingYieldCard
+            stxAmount={vault.amount}
+            totalLockBlocks={Math.max(0, vault.unlockHeight - vault.createdAt)}
+          />
         </section>
       )}
 
