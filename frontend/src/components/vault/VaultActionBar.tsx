@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { DepositModal } from './DepositModal';
 import { EmergencyWithdrawModal } from './EmergencyWithdrawModal';
+import { WithdrawConfirmModal } from './WithdrawConfirmModal';
 import { getVaultStatus, type Vault } from '@/types/vault';
 
 interface VaultActionBarProps {
@@ -19,14 +20,9 @@ export function VaultActionBar({
 }: VaultActionBarProps) {
   const [showDeposit, setShowDeposit]     = useState(false);
   const [showEmergency, setShowEmergency] = useState(false);
-  const [withdrawing, setWithdrawing]     = useState(false);
+  const [showWithdraw, setShowWithdraw]   = useState(false);
 
   const status = getVaultStatus(vault, currentBlock);
-
-  async function handleWithdraw() {
-    setWithdrawing(true);
-    try { await onWithdraw(vault.vaultId); } finally { setWithdrawing(false); }
-  }
 
   if (status === 'withdrawn') {
     return (
@@ -44,11 +40,10 @@ export function VaultActionBar({
           Deposit
         </Button>
 
-        {/* Withdraw — only when unlocked */}
+        {/* Withdraw — only when unlocked, opens confirm modal */}
         <Button
           size="sm"
-          onClick={handleWithdraw}
-          loading={withdrawing}
+          onClick={() => setShowWithdraw(true)}
           disabled={status === 'locked'}
           title={status === 'locked' ? 'Vault is still locked' : undefined}
         >
@@ -68,6 +63,14 @@ export function VaultActionBar({
         vaultId={vault.vaultId}
         onClose={() => setShowDeposit(false)}
         onDeposit={onDeposit}
+      />
+
+      <WithdrawConfirmModal
+        open={showWithdraw}
+        vaultId={vault.vaultId}
+        vaultAmount={vault.amount}
+        onClose={() => setShowWithdraw(false)}
+        onConfirm={onWithdraw}
       />
 
       <EmergencyWithdrawModal
