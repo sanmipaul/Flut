@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { openContractCall } from '@stacks/connect';
 import {
   withdrawArgs,
@@ -11,11 +11,13 @@ import {
 import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK_NAME } from '@/lib/stacks';
 import { useToast } from '@/context/ToastContext';
 
-interface UseVaultActionsResult {
+export interface UseVaultActionsResult {
   withdraw:          (vaultId: number) => Promise<void>;
   deposit:           (vaultId: number, amountMicroStx: number) => Promise<void>;
   emergencyWithdraw: (vaultId: number) => Promise<void>;
   setBeneficiary:    (vaultId: number, address: string) => Promise<void>;
+  lastTxid:          string | null;
+  clearTxid:         () => void;
 }
 
 const APP_DETAILS = { name: 'Flut', icon: '/logo.png' };
@@ -23,10 +25,13 @@ const APP_DETAILS = { name: 'Flut', icon: '/logo.png' };
 /**
  * Provides contract-call actions for vault operations.
  * Each action opens the wallet for signing, shows toasts on start/finish/error,
- * and resolves the returned Promise once the wallet flow completes.
+ * and captures the resulting txid for display.
  */
 export function useVaultActions(onSuccess?: () => void): UseVaultActionsResult {
   const { toast } = useToast();
+  const [lastTxid, setLastTxid] = useState<string | null>(null);
+
+  const clearTxid = useCallback(() => setLastTxid(null), []);
 
   const callContract = useCallback(
     (
@@ -44,7 +49,8 @@ export function useVaultActions(onSuccess?: () => void): UseVaultActionsResult {
           functionName,
           functionArgs,
           appDetails: APP_DETAILS,
-          onFinish: () => {
+          onFinish: (data) => {
+            if (data.txId) setLastTxid(data.txId);
             toast.success(messages.success, {
               description: 'Transaction submitted — changes appear after 1–2 blocks.',
             });
@@ -53,7 +59,7 @@ export function useVaultActions(onSuccess?: () => void): UseVaultActionsResult {
           },
           onCancel: () => {
             toast.warning('Transaction cancelled');
-            resolve(); // not an error — user cancelled
+            resolve();
           },
         }).catch((err: unknown) => {
           const msg = err instanceof Error ? err.message : 'Unexpected error';
@@ -105,5 +111,5 @@ export function useVaultActions(onSuccess?: () => void): UseVaultActionsResult {
     [callContract],
   );
 
-  return { withdraw, deposit, emergencyWithdraw, setBeneficiary };
+  return { withdraw, deposit, emergencyWithdraw, setBeneficiary, lastTxid, clearTxid };
 }
