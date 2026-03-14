@@ -7,11 +7,13 @@ import { VaultDetailPanel } from '@/components/vault/VaultDetailPanel';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { CreateVaultModal } from '@/components/vault/create/CreateVaultModal';
 import { useVaults } from '@/hooks/useVaults';
+import { useVaultActions } from '@/hooks/useVaultActions';
 
 export default function Home() {
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const { vaults, currentBlock, refresh } = useVaults();
+  const actions = useVaultActions(refresh);
 
   const selectedVault = selectedVaultId !== null
     ? vaults.find((v) => v.vaultId === selectedVaultId) ?? null
@@ -43,10 +45,10 @@ export default function Home() {
                 <VaultDetailPanel
                   vault={selectedVault}
                   currentBlock={currentBlock}
-                  onWithdraw={async () => { await refresh(); }}
-                  onDeposit={async () => { await refresh(); }}
-                  onEmergencyWithdraw={async () => { await refresh(); }}
-                  onSetBeneficiary={async () => { await refresh(); }}
+                  onWithdraw={actions.withdraw}
+                  onDeposit={actions.deposit}
+                  onEmergencyWithdraw={actions.emergencyWithdraw}
+                  onSetBeneficiary={actions.setBeneficiary}
                 />
               </div>
             ) : (
@@ -77,7 +79,6 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Vault creation flow */}
       <CreateVaultModal
         open={showCreate}
         onClose={() => setShowCreate(false)}
