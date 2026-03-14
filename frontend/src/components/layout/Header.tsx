@@ -7,17 +7,17 @@ export function Header() {
     <header className="sticky top-0 z-30 border-b border-gray-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-semibold text-gray-900 dark:text-white">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500 text-white text-xs font-bold">F</span>
+        <Link href="/" aria-label="Flut — go to dashboard" className="flex items-center gap-2 font-semibold text-gray-900 dark:text-white">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500 text-white text-xs font-bold" aria-hidden="true">F</span>
           <span className="hidden sm:inline">Flut</span>
         </Link>
 
         {/* Nav */}
-        <nav className="hidden md:flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-          <Link href="/" className="hover:text-gray-900 dark:hover:text-white transition-colors">
+        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
+          <Link href="/" className="hover:text-gray-900 dark:hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded">
             Dashboard
           </Link>
-          <Link href="/analytics" className="hover:text-gray-900 dark:hover:text-white transition-colors">
+          <Link href="/analytics" className="hover:text-gray-900 dark:hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded">
             Analytics
           </Link>
         </nav>
