@@ -1,9 +1,11 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { VaultDetailPanel } from '@/components/vault/VaultDetailPanel';
 import { fetchVault, fetchBlockHeight } from '@/lib/contract';
+import { useVaultActions } from '@/hooks/useVaultActions';
 import type { Vault } from '@/types/vault';
 
 interface Params { id: string }
@@ -17,22 +19,27 @@ export default function VaultPage({ params }: { params: Promise<Params> }) {
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState<string | null>(null);
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      try {
-        const [v, block] = await Promise.all([fetchVault(vaultId), fetchBlockHeight()]);
-        if (!v) { setError('Vault not found'); return; }
-        setVault(v);
-        setCurrentBlock(block);
-      } catch {
-        setError('Failed to load vault');
-      } finally {
-        setLoading(false);
-      }
+  const loadVault = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [v, block] = await Promise.all([fetchVault(vaultId), fetchBlockHeight()]);
+      if (!v) { setError('Vault not found'); return; }
+      setVault(v);
+      setCurrentBlock(block);
+    } catch {
+      setError('Failed to load vault');
+    } finally {
+      setLoading(false);
     }
-    if (!isNaN(vaultId)) load();
   }, [vaultId]);
+
+  useEffect(() => {
+    if (!isNaN(vaultId)) loadVault();
+    else setError('Invalid vault ID');
+  }, [vaultId, loadVault]);
+
+  const actions = useVaultActions(loadVault);
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-zinc-950">
@@ -57,6 +64,23 @@ export default function VaultPage({ params }: { params: Promise<Params> }) {
               onSetBeneficiary={async () => {}}
             />
           </div>
+        )}
+
+        {vault && !loading && (
+          <ErrorBoundary>
+            <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+              <VaultDetailPanel
+                vault={vault}
+                currentBlock={currentBlock}
+                onWithdraw={actions.withdraw}
+                onDeposit={actions.deposit}
+                onEmergencyWithdraw={actions.emergencyWithdraw}
+                onSetBeneficiary={actions.setBeneficiary}
+                pendingTxid={actions.lastTxid}
+                onDismissTx={actions.clearTxid}
+              />
+            </div>
+          </ErrorBoundary>
         )}
       </main>
     </div>

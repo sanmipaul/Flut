@@ -76,3 +76,72 @@ export async function fetchVaultsForUser(address: string): Promise<Vault[]> {
   );
   return results.filter((v): v is Vault => v !== null && v.creator === address);
 }
+
+/** Build function args for withdraw (full balance) */
+export function withdrawArgs(vaultId: number) {
+  return [uintCV(vaultId)];
+}
+
+/** Build function args for deposit */
+export function depositArgs(vaultId: number, amountMicroStx: number) {
+  return [uintCV(vaultId), uintCV(amountMicroStx)];
+}
+
+/** Build function args for emergency-withdraw */
+export function emergencyWithdrawArgs(vaultId: number) {
+  return [uintCV(vaultId)];
+}
+
+/** Build function args for set-beneficiary */
+export function setBeneficiaryArgs(vaultId: number, beneficiary: string) {
+  return [uintCV(vaultId), principalCV(beneficiary)];
+}
+
+/** Parameters for creating a new vault */
+export interface CreateVaultParams {
+  lockDurationBlocks: number;
+  initialAmountMicroStx: number;
+  enableStacking: boolean;
+  stackingPool: string | null;
+  senderAddress: string;
+}
+
+/**
+ * Build an unsigned create-vault transaction.
+ * The caller must sign and broadcast via Stacks.js / wallet.
+ */
+export async function buildCreateVaultTx(params: CreateVaultParams): Promise<StacksTransaction> {
+  const {
+    lockDurationBlocks,
+    initialAmountMicroStx,
+    enableStacking,
+    stackingPool,
+    senderAddress,
+  } = params;
+
+  const poolArg = enableStacking && stackingPool
+    ? someCV(principalCV(stackingPool))
+    : noneCV();
+
+  return makeContractCall({
+    network: NETWORK,
+    contractAddress: CONTRACT_ADDRESS,
+    contractName: CONTRACT_NAME,
+    functionName: 'create-vault',
+    functionArgs: [
+      uintCV(lockDurationBlocks),
+      uintCV(initialAmountMicroStx),
+      boolCV(enableStacking),
+      poolArg,
+    ],
+    senderKey: '', // populated by wallet
+    validateWithAbi: false,
+  });
+}
+
+/** Broadcast a signed transaction and return the txid */
+export async function broadcastTx(tx: StacksTransaction): Promise<string> {
+  const result = await broadcastTransaction({ transaction: tx, network: NETWORK });
+  if ('error' in result) throw new Error(result.error);
+  return result.txid;
+}

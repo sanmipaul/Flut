@@ -31,6 +31,16 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
     }
   }, [open]);
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
   // Close on backdrop click
   function handleClick(e: React.MouseEvent<HTMLDialogElement>) {
     const rect = dialogRef.current?.getBoundingClientRect();

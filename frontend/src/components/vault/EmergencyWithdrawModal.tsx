@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { microToStx } from '@/lib/stacks';
@@ -22,6 +22,11 @@ export function EmergencyWithdrawModal({
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState<string | null>(null);
 
+  // Reset state when modal re-opens
+  useEffect(() => {
+    if (open) { setConfirmed(false); setError(null); }
+  }, [open]);
+
   const totalStx   = microToStx(vaultAmount);
   const penaltyStx = (totalStx * PENALTY_RATE) / 100;
   const receiveStx = totalStx - penaltyStx;
@@ -31,9 +36,16 @@ export function EmergencyWithdrawModal({
     setError(null);
     try {
       await onConfirm(vaultId);
+      setConfirmed(false);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Emergency withdrawal failed');
+      // only show error if it's not a user cancellation
+      const msg = err instanceof Error ? err.message : '';
+      if (msg && !msg.toLowerCase().includes('cancel')) {
+        setError(msg || 'Emergency withdrawal failed');
+      } else {
+        onClose();
+      }
     } finally {
       setLoading(false);
     }

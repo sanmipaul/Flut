@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 
@@ -18,6 +18,12 @@ export function DepositModal({ open, vaultId, onClose, onDeposit }: DepositModal
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Reset form state whenever modal opens
+  useEffect(() => {
+    if (open) { setAmount(''); setError(null); }
+  }, [open]);
+
+  const walletStx = stxBalance != null ? microToStx(stxBalance) : null;
   const parsed = parseFloat(amount);
   const valid = !isNaN(parsed) && parsed > 0 && parsed <= MAX_DEPOSIT_STX;
 
@@ -31,7 +37,12 @@ export function DepositModal({ open, vaultId, onClose, onDeposit }: DepositModal
       setAmount('');
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Deposit failed');
+      const msg = err instanceof Error ? err.message : '';
+      if (msg && !msg.toLowerCase().includes('cancel')) {
+        setError(msg || 'Deposit failed');
+      } else {
+        onClose();
+      }
     } finally {
       setLoading(false);
     }
