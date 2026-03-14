@@ -51,7 +51,12 @@ export function DepositModal({ open, vaultId, onClose, onDeposit }: DepositModal
       setAmount('');
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Deposit failed');
+      const msg = err instanceof Error ? err.message : '';
+      if (msg && !msg.toLowerCase().includes('cancel')) {
+        setError(msg || 'Deposit failed');
+      } else {
+        onClose();
+      }
     } finally {
       setLoading(false);
     }
