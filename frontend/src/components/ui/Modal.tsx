@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { clsx } from 'clsx';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { useReturnFocus } from '@/hooks/useReturnFocus';
 
 interface ModalProps {
   open: boolean;
@@ -22,6 +23,7 @@ const sizeClasses = {
 export function Modal({ open, onClose, title, description, children, size = 'md' }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const trapRef = useFocusTrap<HTMLDivElement>(open);
+  useReturnFocus(open);
 
   useEffect(() => {
     const el = dialogRef.current;
