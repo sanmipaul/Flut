@@ -17,6 +17,7 @@ import {
   VaultAmountRangeBar,
   VaultReadinessAlert,
   VaultLockDurationBar,
+  AnalyticsEmptyState,
 } from '@/components/analytics';
 
 export default function AnalyticsPage() {
@@ -110,11 +111,7 @@ export default function AnalyticsPage() {
 
         {/* No vaults */}
         {connected && !loading && !error && vaults.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800 py-20 text-center">
-            <p className="text-sm text-gray-400 dark:text-gray-500">
-              No vaults found. Create your first vault to see analytics.
-            </p>
-          </div>
+          <AnalyticsEmptyState />
         )}
 
         {/* Analytics content */}
