@@ -44,7 +44,11 @@ export function Sidebar({ selectedVaultId, onSelect, onCreateClick }: SidebarPro
         <>
           <VaultAnalyticsSummary vaults={vaults} currentBlock={currentBlock} />
           {vaults.length > 3 && (
-            <VaultSearchBar query={query} onQueryChange={setQuery} />
+            <VaultSearchBar
+              query={query}
+              onQueryChange={setQuery}
+              resultCount={filtered.length}
+            />
           )}
           <VaultList
             vaults={filtered}

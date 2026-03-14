@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { clsx } from 'clsx';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { useReturnFocus } from '@/hooks/useReturnFocus';
 
 interface ModalProps {
   open: boolean;
@@ -20,6 +22,8 @@ const sizeClasses = {
 
 export function Modal({ open, onClose, title, description, children, size = 'md' }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const trapRef = useFocusTrap<HTMLDivElement>(open);
+  useReturnFocus(open);
 
   useEffect(() => {
     const el = dialogRef.current;
@@ -56,26 +60,30 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
       ref={dialogRef}
       onClick={handleClick}
       onClose={onClose}
+      aria-modal="true"
+      aria-labelledby="modal-title"
       className={clsx(
         'rounded-2xl bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100',
         'shadow-2xl border border-gray-200 dark:border-zinc-700 p-0 w-full backdrop:bg-black/50 backdrop:backdrop-blur-sm',
         sizeClasses[size],
       )}
     >
-      <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-zinc-800">
-        <div>
-          <h2 className="text-base font-semibold">{title}</h2>
-          {description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>}
+      <div ref={trapRef}>
+        <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-zinc-800">
+          <div>
+            <h2 id="modal-title" className="text-base font-semibold">{title}</h2>
+            {description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>}
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close modal"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors ml-4 mt-0.5"
+          >
+            ✕
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          aria-label="Close modal"
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors ml-4 mt-0.5"
-        >
-          ✕
-        </button>
+        <div className="px-6 py-5">{children}</div>
       </div>
-      <div className="px-6 py-5">{children}</div>
     </dialog>
   );
 }

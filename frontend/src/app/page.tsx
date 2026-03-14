@@ -25,7 +25,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-white dark:bg-zinc-950">
       <Header />
 
-      <main className="flex flex-1 flex-col lg:flex-row max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 gap-6">
+      <main id="main-content" className="flex flex-1 flex-col lg:flex-row max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 gap-6">
         {/* Sidebar */}
         <div className="w-full lg:w-72 xl:w-80 shrink-0">
           <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 h-full p-4">
