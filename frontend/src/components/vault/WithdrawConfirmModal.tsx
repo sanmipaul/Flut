@@ -32,7 +32,12 @@ export function WithdrawConfirmModal({
       await onConfirm(vaultId);
       onClose();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Withdrawal failed');
+      const msg = e instanceof Error ? e.message : '';
+      if (msg && !msg.toLowerCase().includes('cancel')) {
+        setError(msg || 'Withdrawal failed');
+      } else {
+        onClose();
+      }
     } finally {
       setLoading(false);
     }
