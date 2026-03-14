@@ -11,13 +11,20 @@ export function WalletDropdown() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
+  // Close on outside click or Escape key
   useEffect(() => {
-    function handler(e: MouseEvent) {
+    function handleMouse(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', handleMouse);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleMouse);
+      document.removeEventListener('keydown', handleKey);
+    };
   }, []);
 
   if (!address) return null;
@@ -26,17 +33,20 @@ export function WalletDropdown() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-1.5 text-sm font-medium text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label={`Wallet options for ${truncatedAddress}`}
+        className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-1.5 text-sm font-medium text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
       >
-        <span className="h-2 w-2 rounded-full bg-green-400 shrink-0" />
+        <span className="h-2 w-2 rounded-full bg-green-400 shrink-0" aria-hidden="true" />
         {truncatedAddress}
-        <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-64 rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl z-50 p-3 animate-fade-in">
+        <div role="menu" aria-label="Wallet options" className="absolute right-0 top-full mt-2 w-64 rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl z-50 p-3 animate-fade-in">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Connected Wallet</span>
             <NetworkBadge />
