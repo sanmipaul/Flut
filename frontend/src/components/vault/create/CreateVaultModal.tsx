@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { openContractCall } from '@stacks/connect';
 import {
   uintCV,
@@ -41,6 +41,22 @@ export function CreateVaultModal({ open, onClose, onCreated }: Props) {
   const [txid, setTxid]       = useState<string | null>(null);
   const [vaultId, setVaultId] = useState<number | null>(null);
   const [errMsg, setErrMsg]   = useState('');
+
+  // Keyboard: Enter to advance, Escape to go back/close
+  useEffect(() => {
+    if (!open || phase !== 'form') return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Enter' && !(e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        if (form.canProceed) {
+          form.step === 'review' ? handleSubmit() : form.nextStep();
+        }
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, phase, form.canProceed, form.step]);
 
   function handleClose() {
     if (phase === 'pending') return; // block close while signing
