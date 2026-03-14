@@ -3,11 +3,8 @@
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
-import { useWallet } from '@/hooks/useWallet';
-import { microToStx } from '@/lib/stacks';
 
 const MAX_DEPOSIT_STX = 1000;
-const MIN_DEPOSIT_STX = 0.000001;
 
 interface DepositModalProps {
   open: boolean;
@@ -20,26 +17,9 @@ export function DepositModal({ open, vaultId, onClose, onDeposit }: DepositModal
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { stxBalance } = useWallet();
 
-  const walletStx = stxBalance != null ? microToStx(stxBalance) : null;
   const parsed = parseFloat(amount);
-  const valid = !isNaN(parsed) && parsed >= MIN_DEPOSIT_STX && parsed <= MAX_DEPOSIT_STX;
-
-  const validationMessage = (() => {
-    if (!amount) return null;
-    if (isNaN(parsed) || parsed <= 0) return 'Enter a positive amount';
-    if (parsed < MIN_DEPOSIT_STX) return `Minimum deposit is ${MIN_DEPOSIT_STX} STX`;
-    if (parsed > MAX_DEPOSIT_STX) return `Maximum deposit is ${MAX_DEPOSIT_STX} STX per transaction`;
-    if (walletStx != null && parsed > walletStx) return `Insufficient balance (${walletStx.toFixed(2)} STX available)`;
-    return null;
-  })();
-
-  function handleMaxClick() {
-    if (walletStx != null) {
-      setAmount(Math.min(walletStx, MAX_DEPOSIT_STX).toFixed(6));
-    }
-  }
+  const valid = !isNaN(parsed) && parsed > 0 && parsed <= MAX_DEPOSIT_STX;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,46 +41,24 @@ export function DepositModal({ open, vaultId, onClose, onDeposit }: DepositModal
     <Modal open={open} onClose={onClose} title="Deposit STX" description={`Add funds to Vault #${vaultId}`} size="sm">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label htmlFor="deposit-amount" className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-              Amount (STX)
-            </label>
-            {walletStx != null && (
-              <span className="text-xs text-gray-400 dark:text-gray-500">
-                Balance: {walletStx.toFixed(2)} STX
-              </span>
-            )}
-          </div>
-          <div className="relative">
-            <input
-              id="deposit-amount"
-              type="number"
-              min={MIN_DEPOSIT_STX}
-              max={MAX_DEPOSIT_STX}
-              step="0.000001"
-              value={amount}
-              onChange={(e) => { setAmount(e.target.value); setError(null); }}
-              placeholder="0.00"
-              required
-              className="w-full rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 pr-14 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-400"
-            />
-            {walletStx != null && (
-              <button
-                type="button"
-                onClick={handleMaxClick}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-brand-500 hover:text-brand-700 font-medium"
-              >
-                MAX
-              </button>
-            )}
-          </div>
-          {validationMessage ? (
-            <p className="mt-1 text-xs text-red-500">{validationMessage}</p>
-          ) : (
-            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-              Max {MAX_DEPOSIT_STX} STX per transaction
-            </p>
-          )}
+          <label htmlFor="deposit-amount" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            Amount (STX)
+          </label>
+          <input
+            id="deposit-amount"
+            type="number"
+            min="0.000001"
+            max={MAX_DEPOSIT_STX}
+            step="0.000001"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
+            required
+            className="w-full rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-400"
+          />
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+            Max {MAX_DEPOSIT_STX} STX per transaction
+          </p>
         </div>
 
         {error && (

@@ -1,10 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { clsx } from 'clsx';
 import { Badge } from '@/components/ui/Badge';
-import { microToStx, formatBlockDuration } from '@/lib/stacks';
+import { microToStx } from '@/lib/stacks';
 import { getVaultStatus, blocksRemaining, type Vault } from '@/types/vault';
-import { useVaultLabel } from '@/hooks/useVaultLabel';
 
 interface VaultCardProps {
   vault: Vault;
@@ -21,12 +21,9 @@ const statusConfig = {
 
 export function VaultCard({ vault, currentBlock, active = false, onClick }: VaultCardProps) {
   const status = getVaultStatus(vault, currentBlock);
-  const { badge, label } = statusConfig[status];
+  const { badge, label, dot } = statusConfig[status];
   const remaining = blocksRemaining(vault, currentBlock);
   const stx = microToStx(vault.amount).toFixed(2);
-  const [vaultLabel] = useVaultLabel(vault.vaultId);
-
-  const displayName = vaultLabel || vault.label || `Vault #${vault.vaultId}`;
 
   return (
     <button
@@ -41,7 +38,7 @@ export function VaultCard({ vault, currentBlock, active = false, onClick }: Vaul
     >
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-          {displayName}
+          {vault.label ?? `Vault #${vault.vaultId}`}
         </span>
         <Badge variant={badge}>{label}</Badge>
       </div>
@@ -49,7 +46,7 @@ export function VaultCard({ vault, currentBlock, active = false, onClick }: Vaul
       <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
         <span className="font-mono">{stx} STX</span>
         {status === 'locked' && remaining > 0 && (
-          <span title={`${remaining.toLocaleString()} blocks`}>{formatBlockDuration(remaining)} left</span>
+          <span>{remaining.toLocaleString()} blocks left</span>
         )}
         {status === 'unlocked' && <span className="text-green-600 dark:text-green-400">Ready to withdraw</span>}
         {status === 'withdrawn' && <span>Completed</span>}
