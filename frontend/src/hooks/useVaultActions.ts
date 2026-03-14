@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { openContractCall } from '@stacks/connect';
 import {
   withdrawArgs,
@@ -30,6 +30,7 @@ const APP_DETAILS = { name: 'Flut', icon: '/logo.png' };
 export function useVaultActions(onSuccess?: () => void): UseVaultActionsResult {
   const { toast } = useToast();
   const [lastTxid, setLastTxid] = useState<string | null>(null);
+  const pendingRef = useRef(false);
 
   const clearTxid = useCallback(() => setLastTxid(null), []);
 
@@ -39,6 +40,11 @@ export function useVaultActions(onSuccess?: () => void): UseVaultActionsResult {
       functionArgs: ReturnType<typeof withdrawArgs>,
       messages: { pending: string; success: string; error: string },
     ): Promise<void> => {
+      if (pendingRef.current) {
+        toast.warning('A transaction is already pending — please wait');
+        return Promise.resolve();
+      }
+      pendingRef.current = true;
       return new Promise((resolve, reject) => {
         toast.info(messages.pending, { duration: 10_000 });
 
@@ -50,6 +56,7 @@ export function useVaultActions(onSuccess?: () => void): UseVaultActionsResult {
           functionArgs,
           appDetails: APP_DETAILS,
           onFinish: (data) => {
+            pendingRef.current = false;
             if (data.txId) setLastTxid(data.txId);
             toast.success(messages.success, {
               description: 'Transaction submitted — changes appear after 1–2 blocks.',
@@ -58,10 +65,12 @@ export function useVaultActions(onSuccess?: () => void): UseVaultActionsResult {
             resolve();
           },
           onCancel: () => {
+            pendingRef.current = false;
             toast.warning('Transaction cancelled');
             resolve();
           },
         }).catch((err: unknown) => {
+          pendingRef.current = false;
           const msg = err instanceof Error ? err.message : 'Unexpected error';
           toast.error(messages.error, { description: msg });
           reject(err);
