@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { useWallet } from '@/hooks/useWallet';
@@ -21,6 +21,11 @@ export function DepositModal({ open, vaultId, onClose, onDeposit }: DepositModal
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { stxBalance } = useWallet();
+
+  // Reset form state whenever modal opens
+  useEffect(() => {
+    if (open) { setAmount(''); setError(null); }
+  }, [open]);
 
   const walletStx = stxBalance != null ? microToStx(stxBalance) : null;
   const parsed = parseFloat(amount);
