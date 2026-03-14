@@ -1,10 +1,12 @@
+import { StacksMainnet, StacksTestnet } from '@stacks/network';
+
 export type NetworkName = 'mainnet' | 'testnet';
 
 export const NETWORK_NAME: NetworkName =
   (process.env.NEXT_PUBLIC_NETWORK as NetworkName) ?? 'mainnet';
 
-/** Pass this string directly to @stacks/transactions callReadOnlyFunction */
-export const NETWORK = NETWORK_NAME;
+export const NETWORK =
+  NETWORK_NAME === 'mainnet' ? new StacksMainnet() : new StacksTestnet();
 
 export const CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? '';

@@ -3,17 +3,10 @@
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { VaultDetailPanel } from '@/components/vault/VaultDetailPanel';
-import { useVaults } from '@/hooks/useVaults';
 
 export default function Home() {
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const { vaults, currentBlock, refresh } = useVaults();
-
-  const selectedVault = selectedVaultId !== null
-    ? vaults.find((v) => v.vaultId === selectedVaultId) ?? null
-    : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-zinc-950">
@@ -31,18 +24,13 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Main content */}
+        {/* Main content area — vault detail rendered in feat/vault-detail */}
         <section className="flex-1 min-w-0">
-          {selectedVault ? (
-            <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
-              <VaultDetailPanel
-                vault={selectedVault}
-                currentBlock={currentBlock}
-                onWithdraw={async () => { await refresh(); }}
-                onDeposit={async () => { await refresh(); }}
-                onEmergencyWithdraw={async () => { await refresh(); }}
-                onSetBeneficiary={async () => { await refresh(); }}
-              />
+          {selectedVaultId !== null ? (
+            <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 h-full">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Vault #{selectedVaultId} — detail panel coming in next branch.
+              </p>
             </div>
           ) : (
             <div className="flex h-full min-h-64 items-center justify-center rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800">
