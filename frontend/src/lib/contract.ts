@@ -83,6 +83,26 @@ export async function fetchVaultsForUser(address: string): Promise<Vault[]> {
   return results.filter((v): v is Vault => v !== null && v.creator === address);
 }
 
+/** Build function args for withdraw (full balance) */
+export function withdrawArgs(vaultId: number) {
+  return [uintCV(vaultId)];
+}
+
+/** Build function args for deposit */
+export function depositArgs(vaultId: number, amountMicroStx: number) {
+  return [uintCV(vaultId), uintCV(amountMicroStx)];
+}
+
+/** Build function args for emergency-withdraw */
+export function emergencyWithdrawArgs(vaultId: number) {
+  return [uintCV(vaultId)];
+}
+
+/** Build function args for set-beneficiary */
+export function setBeneficiaryArgs(vaultId: number, beneficiary: string) {
+  return [uintCV(vaultId), principalCV(beneficiary)];
+}
+
 /** Parameters for creating a new vault */
 export interface CreateVaultParams {
   lockDurationBlocks: number;
