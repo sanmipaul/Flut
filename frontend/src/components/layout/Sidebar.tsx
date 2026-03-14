@@ -9,6 +9,7 @@ import { VaultSearchBar } from '@/components/vault/VaultSearchBar';
 import { VaultSortBar } from '@/components/vault/VaultSortBar';
 import { VaultAnalyticsSummary } from '@/components/vault/VaultAnalyticsSummary';
 import { Button } from '@/components/ui/Button';
+import { BlockHeightIndicator } from '@/components/ui/BlockHeightIndicator';
 
 interface SidebarProps {
   selectedVaultId: number | null;
@@ -127,6 +128,12 @@ export function Sidebar({ selectedVaultId, onSelect, onCreateClick }: SidebarPro
             onSelect={onSelect}
           />
         </>
+      )}
+      {/* Footer: live block height */}
+      {connected && (
+        <div className="mt-4 pt-3 border-t border-gray-100 dark:border-zinc-800">
+          <BlockHeightIndicator />
+        </div>
       )}
     </aside>
   );
