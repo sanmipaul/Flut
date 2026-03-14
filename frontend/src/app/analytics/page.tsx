@@ -14,6 +14,7 @@ import {
   VaultBreakdownTable,
   AnalyticsExportButton,
   VaultAmountRangeBar,
+  VaultReadinessAlert,
 } from '@/components/analytics';
 
 export default function AnalyticsPage() {
@@ -115,6 +116,8 @@ export default function AnalyticsPage() {
         {/* Analytics content */}
         {connected && !loading && !error && vaults.length > 0 && (
           <ErrorBoundary>
+            <VaultReadinessAlert vaults={vaults} currentBlock={currentBlock} />
+
             <AnalyticsMetricGrid metrics={metrics} />
 
             <VaultStatusDistributionBar
