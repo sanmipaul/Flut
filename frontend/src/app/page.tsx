@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { VaultDetailPanel } from '@/components/vault/VaultDetailPanel';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { CreateVaultModal } from '@/components/vault/create/CreateVaultModal';
 import { useVaults } from '@/hooks/useVaults';
 
 export default function Home() {
@@ -60,6 +61,15 @@ export default function Home() {
                   <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
                     Select a vault from the sidebar or create a new one to get started.
                   </p>
+                  <button
+                    onClick={() => setShowCreate(true)}
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold px-4 py-2 transition-colors"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Create Vault
+                  </button>
                 </div>
               </div>
             )}
@@ -67,27 +77,15 @@ export default function Home() {
         </section>
       </main>
 
-      {/* showCreate modal placeholder — wired to state */}
-      {showCreate && (
-        <div
-          className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center"
-          onClick={() => setShowCreate(false)}
-        >
-          <div
-            className="bg-white dark:bg-zinc-900 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="font-semibold text-gray-900 dark:text-white mb-2">Create Vault</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Vault creation flow coming soon.</p>
-            <button
-              onClick={() => setShowCreate(false)}
-              className="w-full rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium py-2 transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Vault creation flow */}
+      <CreateVaultModal
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onCreated={async () => {
+          await refresh();
+          setShowCreate(false);
+        }}
+      />
     </div>
   );
 }
