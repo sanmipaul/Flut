@@ -2,7 +2,13 @@ import {
   callReadOnlyFunction,
   cvToJSON,
   uintCV,
+  boolCV,
+  someCV,
+  noneCV,
   principalCV,
+  makeContractCall,
+  broadcastTransaction,
+  type StacksTransaction,
 } from '@stacks/transactions';
 import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK, STACKS_API } from './stacks';
 import type { Vault } from '@/types/vault';
@@ -75,4 +81,53 @@ export async function fetchVaultsForUser(address: string): Promise<Vault[]> {
     Array.from({ length: count }, (_, i) => fetchVault(i)),
   );
   return results.filter((v): v is Vault => v !== null && v.creator === address);
+}
+
+/** Parameters for creating a new vault */
+export interface CreateVaultParams {
+  lockDurationBlocks: number;
+  initialAmountMicroStx: number;
+  enableStacking: boolean;
+  stackingPool: string | null;
+  senderAddress: string;
+}
+
+/**
+ * Build an unsigned create-vault transaction.
+ * The caller must sign and broadcast via Stacks.js / wallet.
+ */
+export async function buildCreateVaultTx(params: CreateVaultParams): Promise<StacksTransaction> {
+  const {
+    lockDurationBlocks,
+    initialAmountMicroStx,
+    enableStacking,
+    stackingPool,
+    senderAddress,
+  } = params;
+
+  const poolArg = enableStacking && stackingPool
+    ? someCV(principalCV(stackingPool))
+    : noneCV();
+
+  return makeContractCall({
+    network: NETWORK,
+    contractAddress: CONTRACT_ADDRESS,
+    contractName: CONTRACT_NAME,
+    functionName: 'create-vault',
+    functionArgs: [
+      uintCV(lockDurationBlocks),
+      uintCV(initialAmountMicroStx),
+      boolCV(enableStacking),
+      poolArg,
+    ],
+    senderKey: '', // populated by wallet
+    validateWithAbi: false,
+  });
+}
+
+/** Broadcast a signed transaction and return the txid */
+export async function broadcastTx(tx: StacksTransaction): Promise<string> {
+  const result = await broadcastTransaction({ transaction: tx, network: NETWORK });
+  if ('error' in result) throw new Error(result.error);
+  return result.txid;
 }

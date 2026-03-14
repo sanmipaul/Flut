@@ -126,6 +126,7 @@ export function Sidebar({ selectedVaultId, onSelect, onCreateClick }: SidebarPro
             selectedVaultId={selectedVaultId}
             loading={loading}
             onSelect={onSelect}
+            onCreateClick={onCreateClick}
           />
         </>
       )}
