@@ -31,9 +31,16 @@ export function EmergencyWithdrawModal({
     setError(null);
     try {
       await onConfirm(vaultId);
+      setConfirmed(false);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Emergency withdrawal failed');
+      // only show error if it's not a user cancellation
+      const msg = err instanceof Error ? err.message : '';
+      if (msg && !msg.toLowerCase().includes('cancel')) {
+        setError(msg || 'Emergency withdrawal failed');
+      } else {
+        onClose();
+      }
     } finally {
       setLoading(false);
     }
