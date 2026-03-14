@@ -2,6 +2,7 @@
 
 import { clsx } from 'clsx';
 import { blocksRemaining, type Vault } from '@/types/vault';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface VaultLockProgressProps {
   vault: Vault;
@@ -9,6 +10,7 @@ interface VaultLockProgressProps {
 }
 
 export function VaultLockProgress({ vault, currentBlock }: VaultLockProgressProps) {
+  const reducedMotion = useReducedMotion();
   const totalBlocks = vault.unlockHeight - vault.createdAt;
   const elapsed = Math.max(0, currentBlock - vault.createdAt);
   const pct = totalBlocks > 0 ? Math.min(100, (elapsed / totalBlocks) * 100) : 100;
@@ -33,7 +35,8 @@ export function VaultLockProgress({ vault, currentBlock }: VaultLockProgressProp
       <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-zinc-800 overflow-hidden">
         <div
           className={clsx(
-            'h-full rounded-full transition-all duration-500',
+            'h-full rounded-full',
+            !reducedMotion && 'transition-all duration-500',
             isComplete ? 'bg-green-500' : 'bg-brand-500',
           )}
           style={{ width: `${pct}%` }}
