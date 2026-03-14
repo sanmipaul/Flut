@@ -3,6 +3,7 @@ export { CreateVaultStepIndicator } from './CreateVaultStepIndicator';
 export { AmountStep } from './AmountStep';
 export { DurationStep } from './DurationStep';
 export { StackingStep } from './StackingStep';
+export { LabelStep } from './LabelStep';
 export { ReviewStep } from './ReviewStep';
 export { CreateVaultPending } from './CreateVaultPending';
 export { CreateVaultSuccess } from './CreateVaultSuccess';
