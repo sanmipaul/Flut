@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useVaults } from '@/hooks/useVaults';
 import { useWallet } from '@/hooks/useWallet';
+import { useState, useCallback } from 'react';
 import { useVaultMetrics } from '@/hooks/useVaultMetrics';
 import { useAnalyticsRefresh } from '@/hooks/useAnalyticsRefresh';
 import {
@@ -17,9 +18,16 @@ import {
 
 export default function AnalyticsPage() {
   const { connected } = useWallet();
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const { vaults, currentBlock, loading, error, refresh } = useVaults();
   const metrics = useVaultMetrics(vaults, currentBlock);
-  useAnalyticsRefresh(refresh);
+
+  const refreshWithTimestamp = useCallback(async () => {
+    await refresh();
+    setLastUpdated(new Date());
+  }, [refresh]);
+
+  useAnalyticsRefresh(refreshWithTimestamp);
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-zinc-950">
@@ -32,6 +40,11 @@ export default function AnalyticsPage() {
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">Analytics</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
               Overview of your Flut vault portfolio.
+              {lastUpdated && (
+                <span className="ml-2 text-xs text-gray-400 dark:text-zinc-500">
+                  Updated {lastUpdated.toLocaleTimeString()}
+                </span>
+              )}
             </p>
           </div>
           {connected && !loading && (
