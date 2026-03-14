@@ -25,10 +25,18 @@ export function VaultCard({ vault, currentBlock, active = false, onClick }: Vaul
   const remaining = blocksRemaining(vault, currentBlock);
   const stx = microToStx(vault.amount).toFixed(2);
 
+  const ariaLabel = [
+    vault.label ?? `Vault ${vault.vaultId}`,
+    `${stx} STX`,
+    label,
+    status === 'locked' && remaining > 0 ? `${remaining.toLocaleString()} blocks remaining` : '',
+  ].filter(Boolean).join(', ');
+
   return (
     <button
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
+      aria-label={ariaLabel}
       className={clsx(
         'w-full text-left rounded-xl px-3 py-3 transition-all',
         active
