@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { microToStx } from '@/lib/stacks';
@@ -21,6 +21,11 @@ export function EmergencyWithdrawModal({
   const [confirmed, setConfirmed] = useState(false);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState<string | null>(null);
+
+  // Reset state when modal re-opens
+  useEffect(() => {
+    if (open) { setConfirmed(false); setError(null); }
+  }, [open]);
 
   const totalStx   = microToStx(vaultAmount);
   const penaltyStx = (totalStx * PENALTY_RATE) / 100;

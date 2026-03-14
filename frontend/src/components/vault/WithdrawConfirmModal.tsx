@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { microToStx } from '@/lib/stacks';
@@ -22,6 +22,11 @@ export function WithdrawConfirmModal({
 }: WithdrawConfirmModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState<string | null>(null);
+
+  // Reset error when modal re-opens
+  useEffect(() => {
+    if (open) setError(null);
+  }, [open]);
 
   const stx = microToStx(vaultAmount).toFixed(6);
 
