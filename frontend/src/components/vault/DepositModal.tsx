@@ -54,15 +54,17 @@ export function DepositModal({ open, vaultId, onClose, onDeposit }: DepositModal
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
             required
+            aria-describedby={error ? 'deposit-error' : 'deposit-hint'}
+            aria-invalid={!!error}
             className="w-full rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-400"
           />
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+          <p id="deposit-hint" className="mt-1 text-xs text-gray-400 dark:text-gray-500">
             Max {MAX_DEPOSIT_STX} STX per transaction
           </p>
         </div>
 
         {error && (
-          <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
+          <p id="deposit-error" role="alert" className="text-xs text-red-600 dark:text-red-400">{error}</p>
         )}
 
         <div className="flex gap-2 pt-1">
