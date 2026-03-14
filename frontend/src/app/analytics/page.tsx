@@ -1,69 +1,115 @@
 'use client';
 
 import { Header } from '@/components/layout/Header';
-import { VaultAnalyticsSummary } from '@/components/vault/VaultAnalyticsSummary';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useVaults } from '@/hooks/useVaults';
 import { useWallet } from '@/hooks/useWallet';
-import { microToStx, formatBlockDuration } from '@/lib/stacks';
-import { getVaultStatus, blocksRemaining } from '@/types/vault';
+import { useVaultMetrics } from '@/hooks/useVaultMetrics';
+import {
+  AnalyticsMetricGrid,
+  VaultStatusDistributionBar,
+  UpcomingUnlocksList,
+  VaultBreakdownTable,
+  AnalyticsExportButton,
+} from '@/components/analytics';
 
 export default function AnalyticsPage() {
   const { connected } = useWallet();
-  const { vaults, currentBlock, loading } = useVaults();
-
-  const active   = vaults.filter((v) => !v.isWithdrawn);
-  const locked   = vaults.filter((v) => getVaultStatus(v, currentBlock) === 'locked');
-  const unlocked = vaults.filter((v) => getVaultStatus(v, currentBlock) === 'unlocked');
-  const totalStx = microToStx(active.reduce((s, v) => s + v.amount, 0));
-  const stackingVaults = vaults.filter((v) => v.stackingEnabled);
-
-  const nextUnlock = locked.length > 0
-    ? locked.reduce((min, v) => blocksRemaining(v, currentBlock) < blocksRemaining(min, currentBlock) ? v : min)
-    : null;
+  const { vaults, currentBlock, loading, error, refresh } = useVaults();
+  const metrics = useVaultMetrics(vaults, currentBlock);
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-zinc-950">
       <Header />
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 space-y-8">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Analytics</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of your Flut vault activity.</p>
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-8 space-y-6">
+
+        {/* Page header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Analytics</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              Overview of your Flut vault portfolio.
+            </p>
+          </div>
+          {connected && !loading && (
+            <AnalyticsExportButton vaults={vaults} currentBlock={currentBlock} />
+          )}
         </div>
 
-        {!connected ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800 py-16 text-center">
-            <p className="text-sm text-gray-400">Connect your wallet to view analytics.</p>
+        {/* Not connected */}
+        {!connected && (
+          <div className="rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800 py-20 text-center">
+            <p className="text-sm text-gray-400 dark:text-gray-500">Connect your wallet to view analytics.</p>
           </div>
-        ) : loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-20 rounded-2xl bg-gray-100 dark:bg-zinc-800 animate-pulse" />
-            ))}
-          </div>
-        ) : (
-          <ErrorBoundary>
-            <VaultAnalyticsSummary vaults={vaults} currentBlock={currentBlock} />
+        )}
 
-            {/* Extended stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <StatCard label="Total STX (active)" value={`${totalStx.toFixed(2)} STX`} />
-              <StatCard label="Stacking vaults" value={stackingVaults.length} />
-              <StatCard label="Ready to withdraw" value={unlocked.length} highlight={unlocked.length > 0} />
+        {/* Loading skeleton */}
+        {connected && loading && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="h-20 rounded-2xl bg-gray-100 dark:bg-zinc-800 animate-pulse" />
+              ))}
+            </div>
+            <div className="h-16 rounded-2xl bg-gray-100 dark:bg-zinc-800 animate-pulse" />
+            <div className="h-48 rounded-2xl bg-gray-100 dark:bg-zinc-800 animate-pulse" />
+          </div>
+        )}
+
+        {/* Error state */}
+        {connected && !loading && error && (
+          <div className="rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 px-6 py-8 text-center">
+            <p className="text-sm font-semibold text-red-700 dark:text-red-400">{error}</p>
+            <button
+              onClick={() => refresh()}
+              className="mt-3 text-xs text-brand-500 underline"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* No vaults */}
+        {connected && !loading && !error && vaults.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800 py-20 text-center">
+            <p className="text-sm text-gray-400 dark:text-gray-500">
+              No vaults found. Create your first vault to see analytics.
+            </p>
+          </div>
+        )}
+
+        {/* Analytics content */}
+        {connected && !loading && !error && vaults.length > 0 && (
+          <ErrorBoundary>
+            <AnalyticsMetricGrid metrics={metrics} />
+
+            <VaultStatusDistributionBar
+              locked={metrics.lockedCount}
+              unlocked={metrics.unlockedCount}
+              withdrawn={metrics.withdrawnCount}
+            />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <UpcomingUnlocksList vaults={vaults} currentBlock={currentBlock} limit={5} />
+
+              {/* Stacking summary panel */}
+              <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-5 py-4 space-y-1">
+                <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Stacking Activity</p>
+                <StatRow label="Stacking vaults"     value={metrics.stackingCount} />
+                <StatRow label="Non-stacking vaults" value={metrics.activeVaults - metrics.stackingCount} />
+                <StatRow
+                  label="Stacking %"
+                  value={
+                    metrics.activeVaults > 0
+                      ? `${Math.round((metrics.stackingCount / metrics.activeVaults) * 100)}%`
+                      : '—'
+                  }
+                />
+                <StatRow label="Total active STX" value={`${metrics.totalStxActive.toFixed(2)} STX`} />
+              </div>
             </div>
 
-            {nextUnlock && (
-              <div className="rounded-2xl border border-brand-100 dark:border-brand-800 bg-brand-50 dark:bg-brand-900/10 px-5 py-4">
-                <p className="text-xs font-semibold text-brand-700 dark:text-brand-300 mb-1">Next Unlock</p>
-                <p className="text-sm text-brand-600 dark:text-brand-400">
-                  Vault #{nextUnlock.vaultId} unlocks in{' '}
-                  <span className="font-semibold">
-                    {formatBlockDuration(blocksRemaining(nextUnlock, currentBlock))}
-                  </span>{' '}
-                  ({blocksRemaining(nextUnlock, currentBlock).toLocaleString()} blocks)
-                </p>
-              </div>
-            )}
+            <VaultBreakdownTable vaults={vaults} currentBlock={currentBlock} />
           </ErrorBoundary>
         )}
       </main>
@@ -71,21 +117,11 @@ export default function AnalyticsPage() {
   );
 }
 
-function StatCard({
-  label,
-  value,
-  highlight,
-}: {
-  label: string;
-  value: string | number;
-  highlight?: boolean;
-}) {
+function StatRow({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-5 py-4">
-      <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
-      <p className={`text-2xl font-bold mt-1 ${highlight ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
-        {value}
-      </p>
+    <div className="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-800 last:border-0">
+      <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
+      <span className="text-xs font-semibold font-mono text-gray-900 dark:text-white">{value}</span>
     </div>
   );
 }
