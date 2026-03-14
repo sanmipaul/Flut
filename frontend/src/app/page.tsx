@@ -8,12 +8,14 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { CreateVaultModal } from '@/components/vault/create/CreateVaultModal';
 import { useVaults } from '@/hooks/useVaults';
 import { useVaultActions } from '@/hooks/useVaultActions';
+import { useDelayedRefresh } from '@/hooks/useDelayedRefresh';
 
 export default function Home() {
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const { vaults, currentBlock, refresh } = useVaults();
-  const actions = useVaultActions(refresh);
+  const delayedRefresh = useDelayedRefresh(refresh);
+  const actions = useVaultActions(delayedRefresh);
 
   const selectedVault = selectedVaultId !== null
     ? vaults.find((v) => v.vaultId === selectedVaultId) ?? null
