@@ -43,6 +43,10 @@ export function ReviewStep({ form, resolvedBlocks, currentBlock }: Props) {
         {form.enableStacking && form.stackingPool && (
           <Row label="Pool address" value={truncateAddress(form.stackingPool, 8)} mono />
         )}
+        <Row
+          label="Vault name"
+          value={form.vaultLabel?.trim() || '(default)'}
+        />
       </div>
 
       {/* Warnings */}
