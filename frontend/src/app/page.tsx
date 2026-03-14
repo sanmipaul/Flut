@@ -49,6 +49,8 @@ export default function Home() {
                   onDeposit={actions.deposit}
                   onEmergencyWithdraw={actions.emergencyWithdraw}
                   onSetBeneficiary={actions.setBeneficiary}
+                  pendingTxid={actions.lastTxid}
+                  onDismissTx={actions.clearTxid}
                 />
               </div>
             ) : (
