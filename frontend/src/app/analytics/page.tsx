@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useVaults } from '@/hooks/useVaults';
 import { useWallet } from '@/hooks/useWallet';
 import { useVaultMetrics } from '@/hooks/useVaultMetrics';
+import { useAnalyticsRefresh } from '@/hooks/useAnalyticsRefresh';
 import {
   AnalyticsMetricGrid,
   VaultStatusDistributionBar,
@@ -18,6 +19,7 @@ export default function AnalyticsPage() {
   const { connected } = useWallet();
   const { vaults, currentBlock, loading, error, refresh } = useVaults();
   const metrics = useVaultMetrics(vaults, currentBlock);
+  useAnalyticsRefresh(refresh);
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-zinc-950">
