@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import { AppConfig, UserSession, showConnect } from '@stacks/connect';
@@ -42,6 +43,8 @@ async function fetchStxBalance(address: string): Promise<BalanceResult> {
   }
 }
 
+const BALANCE_POLL_MS = 30_000;
+
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<WalletState>({
     connected: false,
@@ -50,6 +53,23 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     loading: false,
     balanceFetchError: false,
   });
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  function startPolling(address: string) {
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(() => {
+      fetchStxBalance(address).then(({ balance, error }) =>
+        setState((s) => ({ ...s, stxBalance: balance, balanceFetchError: error })),
+      );
+    }, BALANCE_POLL_MS);
+  }
+
+  function stopPolling() {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }
 
   // Rehydrate session on mount
   useEffect(() => {
@@ -60,10 +80,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           ? userData.profile.stxAddress.mainnet
           : userData.profile.stxAddress.testnet;
       setState((s) => ({ ...s, connected: true, address, loading: true }));
-      fetchStxBalance(address).then(({ balance, error }) =>
-        setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error })),
-      );
+      fetchStxBalance(address).then(({ balance, error }) => {
+        setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error }));
+        startPolling(address);
+      });
     }
+    return () => stopPolling();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const connect = useCallback(() => {
@@ -78,17 +101,20 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
             ? userData.profile.stxAddress.mainnet
             : userData.profile.stxAddress.testnet;
         setState((s) => ({ ...s, connected: true, address, loading: true }));
-        fetchStxBalance(address).then(({ balance, error }) =>
-          setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error })),
-        );
+        fetchStxBalance(address).then(({ balance, error }) => {
+          setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error }));
+          startPolling(address);
+        });
       },
       onCancel: () => {},
     });
   }, []);
 
   const disconnect = useCallback(() => {
+    stopPolling();
     userSession.signUserOut();
     setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const truncatedAddress = state.address ? truncateAddress(state.address) : null;
