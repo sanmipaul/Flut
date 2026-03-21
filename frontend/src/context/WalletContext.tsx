@@ -22,14 +22,23 @@ const WalletContext = createContext<WalletContextValue | null>(null);
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 const userSession = new UserSession({ appConfig });
 
-async function fetchStxBalance(address: string): Promise<number> {
+interface BalanceResult {
+  balance: number;
+  error: boolean;
+}
+
+async function fetchStxBalance(address: string): Promise<BalanceResult> {
   try {
     const res = await fetch(`${STACKS_API}/v2/accounts/${address}?proof=0`);
-    if (!res.ok) return 0;
+    if (!res.ok) {
+      console.error(`[WalletContext] Balance fetch failed: HTTP ${res.status}`);
+      return { balance: 0, error: true };
+    }
     const data = await res.json();
-    return Number(data.balance ?? 0);
-  } catch {
-    return 0;
+    return { balance: Number(data.balance ?? 0), error: false };
+  } catch (err) {
+    console.error('[WalletContext] Balance fetch error:', err);
+    return { balance: 0, error: true };
   }
 }
 
@@ -39,6 +48,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     address: null,
     stxBalance: null,
     loading: false,
+    balanceFetchError: false,
   });
 
   // Rehydrate session on mount
@@ -50,8 +60,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           ? userData.profile.stxAddress.mainnet
           : userData.profile.stxAddress.testnet;
       setState((s) => ({ ...s, connected: true, address, loading: true }));
-      fetchStxBalance(address).then((stxBalance) =>
-        setState((s) => ({ ...s, stxBalance, loading: false })),
+      fetchStxBalance(address).then(({ balance, error }) =>
+        setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error })),
       );
     }
   }, []);
@@ -68,8 +78,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
             ? userData.profile.stxAddress.mainnet
             : userData.profile.stxAddress.testnet;
         setState((s) => ({ ...s, connected: true, address, loading: true }));
-        fetchStxBalance(address).then((stxBalance) =>
-          setState((s) => ({ ...s, stxBalance, loading: false })),
+        fetchStxBalance(address).then(({ balance, error }) =>
+          setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error })),
         );
       },
       onCancel: () => {},
@@ -78,7 +88,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   const disconnect = useCallback(() => {
     userSession.signUserOut();
-    setState({ connected: false, address: null, stxBalance: null, loading: false });
+    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false });
   }, []);
 
   const truncatedAddress = state.address ? truncateAddress(state.address) : null;
