@@ -70,13 +70,23 @@ export function CreateVaultModal({ open, onClose, onCreated }: Props) {
     onClose();
   }
 
+  const SP_REGEX = /^S[PT][A-Z0-9]{39}$/;
+
   const handleSubmit = useCallback(async () => {
     setPhase('pending');
     setErrMsg('');
 
     const amountMicro = Math.round(parseFloat(form.form.amountStx) * 1_000_000);
-    const poolArg = form.form.enableStacking && form.form.stackingPool
-      ? someCV(principalCV(form.form.stackingPool.trim()))
+
+    const poolAddress = form.form.stackingPool.trim();
+    if (form.form.enableStacking && poolAddress && !SP_REGEX.test(poolAddress)) {
+      setErrMsg('Invalid stacking pool address. Must be a valid Stacks principal (SP… or ST…, 41 characters).');
+      setPhase('error');
+      return;
+    }
+
+    const poolArg = form.form.enableStacking && poolAddress
+      ? someCV(principalCV(poolAddress))
       : noneCV();
 
     try {
