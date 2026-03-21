@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useVaults } from '@/hooks/useVaults';
 import { useWallet } from '@/hooks/useWallet';
+import { useToast } from '@/context/ToastContext';
 import { VaultList } from '@/components/vault/VaultList';
 import { VaultSearchBar } from '@/components/vault/VaultSearchBar';
 import { VaultAnalyticsSummary } from '@/components/vault/VaultAnalyticsSummary';
@@ -16,8 +17,16 @@ interface SidebarProps {
 
 export function Sidebar({ selectedVaultId, onSelect, onCreateClick }: SidebarProps) {
   const { connected } = useWallet();
-  const { vaults, currentBlock, loading } = useVaults();
+  const { vaults, currentBlock, loading, error, refresh } = useVaults();
+  const { toast } = useToast();
   const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    if (error) {
+      toast.error('Failed to load vaults', { description: error });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 
   const filtered = query.trim()
     ? vaults.filter((v) =>
@@ -43,6 +52,18 @@ export function Sidebar({ selectedVaultId, onSelect, onCreateClick }: SidebarPro
       ) : (
         <>
           <VaultAnalyticsSummary vaults={vaults} currentBlock={currentBlock} />
+          {error && !loading && (
+            <div role="alert" className="mb-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 px-3 py-2 text-xs text-red-600 dark:text-red-400 flex items-center justify-between gap-2">
+              <span>Could not load vaults.</span>
+              <button
+                type="button"
+                onClick={refresh}
+                className="underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+              >
+                Retry
+              </button>
+            </div>
+          )}
           {vaults.length > 3 && (
             <VaultSearchBar
               query={query}
