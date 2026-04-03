@@ -2,7 +2,7 @@ name: SDK Integration & Demo
 
 on:
   schedule:
-    - cron: '0 0,3,6,9,12,15,18,21 * * *'
+    - cron: '0 */4 * * *'
   push:
     branches: [main, develop]
     paths:
@@ -152,3 +152,37 @@ jobs:
         continue-on-error: true
         run: |
           node -e "const sdk = require('flut-sdk'); console.log('SDK works on ${{ matrix.os }}');"
+
+  sdk-stress-test:
+    name: SDK Stress Test (Installation ${{ matrix.installation }})
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        installation: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install flut-sdk (Run #${{ matrix.installation }})
+        run: npm install flut-sdk
+
+      - name: Verify SDK installation
+        continue-on-error: true
+        run: |
+          node -e "
+            const sdk = require('flut-sdk');
+            console.log('Installation #${{ matrix.installation }} successful');
+            console.log('Exports:', Object.keys(sdk).join(', '));
+          "
+
+      - name: Check SDK version
+        continue-on-error: true
+        run: npm list flut-sdk
