@@ -78,9 +78,9 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
           <button
             onClick={onClose}
             aria-label="Close modal"
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors ml-4 mt-0.5"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors ml-4 mt-0.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
           >
-            ✕
+            <span aria-hidden="true">✕</span>
           </button>
         </div>
         <div className="px-6 py-5">{children}</div>
