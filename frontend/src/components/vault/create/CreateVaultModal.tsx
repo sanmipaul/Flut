@@ -27,6 +27,7 @@ import { useBlockHeight } from '@/hooks/useBlockHeight';
 import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK_NAME } from '@/lib/stacks';
 import { CREATE_VAULT_STEPS } from '@/types/createVault';
 import { useVaultLabel } from '@/hooks/useVaultLabel';
+import { isValidStacksPrincipal } from '@/lib/contract';
 
 type ModalPhase = 'form' | 'pending' | 'success' | 'error';
 
@@ -70,8 +71,6 @@ export function CreateVaultModal({ open, onClose, onCreated }: Props) {
     onClose();
   }
 
-  const SP_REGEX = /^S[PT][A-Z0-9]{39}$/;
-
   const handleSubmit = useCallback(async () => {
     setPhase('pending');
     setErrMsg('');
@@ -79,7 +78,7 @@ export function CreateVaultModal({ open, onClose, onCreated }: Props) {
     const amountMicro = Math.round(parseFloat(form.form.amountStx) * 1_000_000);
 
     const poolAddress = form.form.stackingPool.trim();
-    if (form.form.enableStacking && poolAddress && !SP_REGEX.test(poolAddress)) {
+    if (form.form.enableStacking && poolAddress && !isValidStacksPrincipal(poolAddress)) {
       setErrMsg('Invalid stacking pool address. Must be a valid Stacks principal (SP… or ST…, 41 characters).');
       setPhase('error');
       return;
