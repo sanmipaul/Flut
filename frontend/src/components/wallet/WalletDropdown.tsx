@@ -11,13 +11,26 @@ export function WalletDropdown() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Close on outside click or Escape key
+  // Close on outside click or Escape key; arrow-key nav within menu
   useEffect(() => {
     function handleMouse(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
     function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') { setOpen(false); return; }
+      if (!open) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const menu = ref.current?.querySelector('[role="menu"]');
+        if (!menu) return;
+        const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+        if (items.length === 0) return;
+        const idx = items.indexOf(document.activeElement as HTMLElement);
+        const next = e.key === 'ArrowDown'
+          ? items[(idx + 1) % items.length]
+          : items[(idx - 1 + items.length) % items.length];
+        next?.focus();
+      }
     }
     document.addEventListener('mousedown', handleMouse);
     document.addEventListener('keydown', handleKey);
@@ -25,7 +38,7 @@ export function WalletDropdown() {
       document.removeEventListener('mousedown', handleMouse);
       document.removeEventListener('keydown', handleKey);
     };
-  }, []);
+  }, [open]);
 
   if (!address) return null;
 
@@ -82,8 +95,10 @@ export function WalletDropdown() {
           </div>
 
           <button
+            role="menuitem"
             onClick={() => { disconnect(); setOpen(false); }}
-            className="w-full rounded-xl border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 px-3 py-2 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            aria-label="Disconnect wallet"
+            className="w-full rounded-xl border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 px-3 py-2 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
           >
             Disconnect
           </button>

@@ -24,9 +24,16 @@ export function useFocusTrap<T extends HTMLElement>(active: boolean) {
     const container = containerRef.current;
     if (!container) return;
 
-    // Move focus into the container on open
+    // Move focus into the container on open; fall back to the container itself
     const firstFocusable = container.querySelector<HTMLElement>(FOCUSABLE_SELECTORS);
-    firstFocusable?.focus();
+    if (firstFocusable) {
+      firstFocusable.focus();
+    } else {
+      // No focusable children — make container itself focusable as a fallback
+      // so keyboard users are not stranded outside the trap.
+      if (!container.hasAttribute('tabindex')) container.setAttribute('tabindex', '-1');
+      container.focus();
+    }
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key !== 'Tab') return;
