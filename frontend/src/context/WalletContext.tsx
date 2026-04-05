@@ -15,6 +15,7 @@ import type { WalletState } from '@/types/wallet';
 interface WalletContextValue extends WalletState {
   connect: () => void;
   disconnect: () => void;
+  refreshBalance: () => void;
   truncatedAddress: string | null;
 }
 
@@ -117,10 +118,18 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const refreshBalance = useCallback(() => {
+    if (!state.address) return;
+    setState((s) => ({ ...s, loading: true }));
+    fetchStxBalance(state.address).then(({ balance, error }) =>
+      setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error })),
+    );
+  }, [state.address]);
+
   const truncatedAddress = state.address ? truncateAddress(state.address) : null;
 
   return (
-    <WalletContext.Provider value={{ ...state, connect, disconnect, truncatedAddress }}>
+    <WalletContext.Provider value={{ ...state, connect, disconnect, refreshBalance, truncatedAddress }}>
       {children}
     </WalletContext.Provider>
   );
