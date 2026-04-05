@@ -75,11 +75,20 @@ export function isValidStacksPrincipal(address: string): boolean {
   return STACKS_PRINCIPAL_REGEX.test(address.trim());
 }
 
+/** Maximum number of vault IDs to scan in a single fetchVaultsForUser call */
+const MAX_VAULT_SCAN = 500;
+
 /** Fetch all vaults for a given principal by scanning vault IDs */
 export async function fetchVaultsForUser(address: string): Promise<Vault[]> {
   const count = await fetchVaultCount();
+  const safeCount = Math.min(count, MAX_VAULT_SCAN);
+  if (count > MAX_VAULT_SCAN) {
+    console.warn(
+      `[contract] fetchVaultsForUser: vault count (${count}) exceeds MAX_VAULT_SCAN (${MAX_VAULT_SCAN}). Only scanning first ${MAX_VAULT_SCAN} vaults.`,
+    );
+  }
   const results = await Promise.all(
-    Array.from({ length: count }, (_, i) => fetchVault(i)),
+    Array.from({ length: safeCount }, (_, i) => fetchVault(i)),
   );
   return results.filter((v): v is Vault => v !== null && v.creator === address);
 }
