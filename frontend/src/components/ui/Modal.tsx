@@ -62,6 +62,7 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
       onClose={onClose}
       aria-modal="true"
       aria-labelledby="modal-title"
+      aria-describedby={description ? 'modal-description' : undefined}
       className={clsx(
         'rounded-2xl bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100',
         'shadow-2xl border border-gray-200 dark:border-zinc-700 p-0 w-full backdrop:bg-black/50 backdrop:backdrop-blur-sm',
@@ -72,7 +73,7 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
         <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-zinc-800">
           <div>
             <h2 id="modal-title" className="text-base font-semibold">{title}</h2>
-            {description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>}
+            {description && <p id="modal-description" className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>}
           </div>
           <button
             onClick={onClose}
