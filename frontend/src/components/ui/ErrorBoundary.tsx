@@ -52,7 +52,8 @@ export class ErrorBoundary extends Component<Props, State> {
           </div>
           <button
             onClick={this.handleReset}
-            className="text-xs text-brand-500 hover:text-brand-700 font-medium underline underline-offset-2"
+            aria-label="Dismiss this error and try rendering again"
+            className="text-xs text-brand-500 hover:text-brand-700 font-medium underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded"
           >
             Try again
           </button>
