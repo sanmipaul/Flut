@@ -37,7 +37,7 @@ export function ToastContainer() {
           )}
           role="alert"
         >
-          <span className="text-lg font-bold leading-none mt-0.5">{icons[t.variant]}</span>
+          <span className="text-lg font-bold leading-none mt-0.5" aria-hidden="true">{icons[t.variant]}</span>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm leading-snug">{t.title}</p>
             {t.description && (
@@ -47,9 +47,9 @@ export function ToastContainer() {
           <button
             onClick={() => dismiss(t.id)}
             aria-label="Dismiss notification"
-            className="text-white/70 hover:text-white text-sm leading-none mt-0.5 shrink-0"
+            className="text-white/70 hover:text-white text-sm leading-none mt-0.5 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded"
           >
-            ✕
+            <span aria-hidden="true">✕</span>
           </button>
         </div>
       ))}
