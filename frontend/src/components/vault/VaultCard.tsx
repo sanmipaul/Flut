@@ -38,7 +38,7 @@ export function VaultCard({ vault, currentBlock, active = false, onClick, onKeyD
     <button
       onClick={onClick}
       onKeyDown={onKeyDown}
-      aria-current={active ? 'page' : undefined}
+      aria-pressed={active}
       aria-label={ariaLabel}
       data-navitem={navItem ? '' : undefined}
       className={clsx(
