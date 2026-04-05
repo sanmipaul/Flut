@@ -7,7 +7,7 @@ import { NetworkBadge } from './NetworkBadge';
 import { microToStx } from '@/lib/stacks';
 
 export function WalletDropdown() {
-  const { address, truncatedAddress, stxBalance, loading, disconnect } = useWallet();
+  const { address, truncatedAddress, stxBalance, loading, balanceFetchError, disconnect, refreshBalance } = useWallet();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -57,10 +57,28 @@ export function WalletDropdown() {
           )}
 
           <div className="rounded-xl bg-gray-50 dark:bg-zinc-800 px-3 py-2 mb-3">
-            <p className="text-xs text-gray-500 dark:text-gray-400">STX Balance</p>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">
-              {loading ? '…' : stxBalance !== null ? `${microToStx(stxBalance).toFixed(2)} STX` : '—'}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500 dark:text-gray-400">STX Balance</p>
+              {balanceFetchError && !loading && (
+                <button
+                  type="button"
+                  onClick={refreshBalance}
+                  aria-label="Retry balance fetch"
+                  className="text-xs text-red-500 dark:text-red-400 underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded"
+                >
+                  Retry
+                </button>
+              )}
+            </div>
+            {balanceFetchError && !loading ? (
+              <p className="text-xs text-red-500 dark:text-red-400 mt-0.5" role="alert">
+                Could not fetch balance
+              </p>
+            ) : (
+              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">
+                {loading ? '…' : stxBalance !== null ? `${microToStx(stxBalance).toFixed(2)} STX` : '—'}
+              </p>
+            )}
           </div>
 
           <button

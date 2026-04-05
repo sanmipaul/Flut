@@ -13,9 +13,13 @@ export function AddressDisplay({ address, truncated, className }: AddressDisplay
   const [copied, setCopied] = useState(false);
 
   async function copy() {
-    await navigator.clipboard.writeText(address);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('[AddressDisplay] Failed to copy address to clipboard:', err);
+    }
   }
 
   return (

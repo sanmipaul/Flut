@@ -8,6 +8,7 @@ const POLL_INTERVAL_MS = 60_000; // re-fetch every ~1 min
 interface UseBlockHeightResult {
   blockHeight: number;
   lastUpdated: Date | null;
+  error: boolean;
   refresh: () => Promise<void>;
 }
 
@@ -17,6 +18,7 @@ interface UseBlockHeightResult {
 export function useBlockHeight(): UseBlockHeightResult {
   const [blockHeight, setBlockHeight] = useState(0);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [error, setError] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const refresh = useCallback(async () => {
@@ -24,6 +26,10 @@ export function useBlockHeight(): UseBlockHeightResult {
     if (h > 0) {
       setBlockHeight(h);
       setLastUpdated(new Date());
+      setError(false);
+    } else {
+      setError(true);
+      console.error('[useBlockHeight] Failed to fetch block height or received 0');
     }
   }, []);
 
@@ -35,5 +41,5 @@ export function useBlockHeight(): UseBlockHeightResult {
     };
   }, [refresh]);
 
-  return { blockHeight, lastUpdated, refresh };
+  return { blockHeight, lastUpdated, error, refresh };
 }

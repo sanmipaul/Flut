@@ -15,6 +15,7 @@ import type { WalletState } from '@/types/wallet';
 interface WalletContextValue extends WalletState {
   connect: () => void;
   disconnect: () => void;
+  refreshBalance: () => void;
   truncatedAddress: string | null;
 }
 
@@ -28,9 +29,15 @@ interface BalanceResult {
   error: boolean;
 }
 
+const BALANCE_FETCH_TIMEOUT_MS = 10_000;
+
 async function fetchStxBalance(address: string): Promise<BalanceResult> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), BALANCE_FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(`${STACKS_API}/v2/accounts/${address}?proof=0`);
+    const res = await fetch(`${STACKS_API}/v2/accounts/${address}?proof=0`, {
+      signal: controller.signal,
+    });
     if (!res.ok) {
       console.error(`[WalletContext] Balance fetch failed: HTTP ${res.status}`);
       return { balance: 0, error: true };
@@ -38,8 +45,14 @@ async function fetchStxBalance(address: string): Promise<BalanceResult> {
     const data = await res.json();
     return { balance: Number(data.balance ?? 0), error: false };
   } catch (err) {
-    console.error('[WalletContext] Balance fetch error:', err);
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      console.error('[WalletContext] Balance fetch timed out after 10s');
+    } else {
+      console.error('[WalletContext] Balance fetch error:', err);
+    }
     return { balance: 0, error: true };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -117,10 +130,18 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const refreshBalance = useCallback(() => {
+    if (!state.address) return;
+    setState((s) => ({ ...s, loading: true }));
+    fetchStxBalance(state.address).then(({ balance, error }) =>
+      setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error })),
+    );
+  }, [state.address]);
+
   const truncatedAddress = state.address ? truncateAddress(state.address) : null;
 
   return (
-    <WalletContext.Provider value={{ ...state, connect, disconnect, truncatedAddress }}>
+    <WalletContext.Provider value={{ ...state, connect, disconnect, refreshBalance, truncatedAddress }}>
       {children}
     </WalletContext.Provider>
   );
