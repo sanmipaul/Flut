@@ -68,6 +68,13 @@ export async function fetchBlockHeight(): Promise<number> {
   }
 }
 
+const STACKS_PRINCIPAL_REGEX = /^S[PT][A-Z0-9]{39}$/;
+
+/** Returns true if the given string is a valid Stacks principal address */
+export function isValidStacksPrincipal(address: string): boolean {
+  return STACKS_PRINCIPAL_REGEX.test(address.trim());
+}
+
 /** Fetch all vaults for a given principal by scanning vault IDs */
 export async function fetchVaultsForUser(address: string): Promise<Vault[]> {
   const count = await fetchVaultCount();
