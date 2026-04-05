@@ -10,7 +10,6 @@ export function ThemeToggle() {
       onClick={() => setTheme(resolved === 'dark' ? 'light' : 'dark')}
       aria-label={`Switch to ${resolved === 'dark' ? 'light' : 'dark'} mode`}
       aria-pressed={resolved === 'dark'}
-      title={`Current: ${resolved} mode`}
       className="rounded-lg p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
     >
       {resolved === 'dark' ? (
