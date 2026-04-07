@@ -5,11 +5,27 @@ description = "A non-custodial, time-locked savings protocol on Stacks"
 requirements = []
 telemetry = true
 
-[console]
-port = 8000
+[contracts.flut]
+path = "contracts/flut.clar"
+clarity_version = 2
+epoch = "3.0"
 
-[[deployments.default.plan.transactions]]
-anchor-block-only = true
+[contracts.flut-nft]
+path = "contracts/flut-nft.clar"
+clarity_version = 2
+epoch = "3.0"
 
-[[deployments.default.plan.transactions]]
-anchor-block-only = true
+[contracts.flut-goals]
+path = "contracts/flut-goals.clar"
+clarity_version = 2
+epoch = "3.0"
+
+[contracts.flut-streaks]
+path = "contracts/flut-streaks.clar"
+clarity_version = 2
+epoch = "3.0"
+
+[contracts.flut-split]
+path = "contracts/flut-split.clar"
+clarity_version = 2
+epoch = "3.0"
