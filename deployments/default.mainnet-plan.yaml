@@ -1,0 +1,46 @@
+---
+id: 0
+name: Mainnet deployment
+network: mainnet
+stacks-node: "https://api.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoin.blockstack.com:8332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: flut
+            expected-sender: SP3C3JK8XDZHEFN3RS71MY18E46XQFZYD514ZRM60
+            cost: 18750
+            path: contracts/flut.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: flut-goals
+            expected-sender: SP3C3JK8XDZHEFN3RS71MY18E46XQFZYD514ZRM60
+            cost: 17190
+            path: contracts/flut-goals.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: flut-nft
+            expected-sender: SP3C3JK8XDZHEFN3RS71MY18E46XQFZYD514ZRM60
+            cost: 14660
+            path: contracts/flut-nft.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: flut-split
+            expected-sender: SP3C3JK8XDZHEFN3RS71MY18E46XQFZYD514ZRM60
+            cost: 26940
+            path: contracts/flut-split.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: flut-streaks
+            expected-sender: SP3C3JK8XDZHEFN3RS71MY18E46XQFZYD514ZRM60
+            cost: 15960
+            path: contracts/flut-streaks.clar
+            anchor-block-only: true
+            clarity-version: 2
+      epoch: "3.0"
