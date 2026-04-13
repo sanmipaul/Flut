@@ -9,6 +9,7 @@ import { BarChart } from './BarChart';
 import { PieChart } from './PieChart';
 import { ActivityHeatmap } from './ActivityHeatmap';
 import { TransactionDetailModal } from './TransactionDetailModal';
+import { ErrorBoundary } from './ErrorBoundary';
 import { useIsMobile, useIsSmallMobile, useIsPortrait } from '../context/ResponsiveContext';
 import { VaultTransaction, TransactionType } from '../types/TransactionHistory';
 import {
@@ -68,7 +69,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   // Mobile layout with optimizations
   if (isMobile) {
     return (
-      <div className="space-y-4 p-4 pb-8">
+      <ErrorBoundary maxRetries={3}>
+        <div className="space-y-4 p-4 pb-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
         </div>
@@ -167,12 +169,14 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
         <TransactionDetailModal transaction={selectedTransaction} isOpen={showDetailModal} onClose={() => setShowDetailModal(false)} />
       </div>
+      </ErrorBoundary>
     );
   }
 
   // Desktop layout
   return (
-    <div className="space-y-6 p-6">
+    <ErrorBoundary maxRetries={3}>
+      <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -299,6 +303,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       {/* Transaction Detail Modal */}
       <TransactionDetailModal transaction={selectedTransaction} isOpen={showDetailModal} onClose={() => setShowDetailModal(false)} />
     </div>
+    </ErrorBoundary>
   );
 };
 
