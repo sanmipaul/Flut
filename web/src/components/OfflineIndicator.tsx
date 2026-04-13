@@ -29,7 +29,7 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({ isOnline, on
   }, [isOnline]);
 
   useEffect(() => {
-    const updateCacheAge = () => {
+    const updateCacheAge = (): void => {
       const age = getCacheAge();
       if (age !== null) {
         const minutes = Math.floor(age / 1000 / 60);
@@ -44,6 +44,8 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({ isOnline, on
         } else {
           setCacheAge('just now');
         }
+      } else {
+        setCacheAge('');
       }
     };
     updateCacheAge();

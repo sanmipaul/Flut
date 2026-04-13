@@ -4,6 +4,8 @@
  */
 
 import { VaultTransaction, ChartDataPoint, TransactionType } from '../types/TransactionHistory';
+import { HeatmapData } from '../components/ActivityHeatmap';
+
 
 /**
  * Transform transactions into time series data
@@ -155,7 +157,7 @@ export const generateStatusDistribution = (
  */
 export const generateActivityHeatmap = (
   transactions: VaultTransaction[]
-): Map<string, number> => {
+): HeatmapData[] => {
   const heatmap = new Map<string, number>();
 
   transactions.forEach((tx) => {
@@ -167,7 +169,16 @@ export const generateActivityHeatmap = (
     heatmap.set(key, (heatmap.get(key) || 0) + 1);
   });
 
-  return heatmap;
+  // Convert Map to HeatmapData array
+  return Array.from(heatmap.entries()).map(([key, value]) => {
+    const [dayStr, hourStr] = key.split('-');
+    return {
+      label: key,
+      value,
+      row: parseInt(dayStr, 10),
+      col: parseInt(hourStr, 10),
+    };
+  });
 };
 
 /**

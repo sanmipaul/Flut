@@ -10,6 +10,7 @@ import {
   VaultPerformanceMetrics,
   TransactionFilter,
   ANALYTICS_PERIODS,
+  AnalyticsPeriod,
 } from '../types/TransactionHistory';
 import {
   calculateTransactionStats,
@@ -22,7 +23,16 @@ export const useAnalytics = (
   vaultId: string,
   createdAt: number,
   currentBalance: number
-) => {
+): {
+  stats: TransactionStats | null;
+  performance: VaultPerformanceMetrics | null;
+  filteredTransactions: VaultTransaction[];
+  currentFilter: TransactionFilter;
+  selectedPeriod: typeof ANALYTICS_PERIODS[number];
+  applyPeriodFilter: (period: typeof ANALYTICS_PERIODS[number]) => void;
+  updateFilter: (newFilter: TransactionFilter) => void;
+  clearFilters: () => void;
+} => {
   const [stats, setStats] = useState<TransactionStats | null>(null);
   const [performance, setPerformance] = useState<VaultPerformanceMetrics | null>(null);
   const [filteredTransactions, setFilteredTransactions] = useState<VaultTransaction[]>(transactions);
@@ -52,10 +62,7 @@ export const useAnalytics = (
   }, [transactions, currentFilter]);
 
   // Filter by selected period
-  const applyPeriodFilter = useCallback((periodValue: string) => {
-    const period = ANALYTICS_PERIODS.find((p) => p.value === periodValue);
-    if (!period) return;
-
+  const applyPeriodFilter = useCallback((period: typeof ANALYTICS_PERIODS[number]) => {
     setSelectedPeriod(period);
 
     if (period.value === 'all') {
