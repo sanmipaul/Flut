@@ -58,7 +58,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   };
 
   const handleExportMetricsCSV = () => {
-    exportMetricsWithDownload(vaultId, performance, 'csv');
+    if (performance) {
+      exportMetricsWithDownload(vaultId, performance, 'csv');
+    }
   };
 
   // Mobile layout
@@ -69,7 +71,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
         </div>
 
-        <PeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={applyPeriodFilter} />
+        <PeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={(period) => applyPeriodFilter(period)} />
 
         {/* Tabs */}
         <div className="flex gap-2 bg-white rounded-lg p-2 border border-gray-200">
@@ -89,7 +91,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="space-y-4">
-            <PerformanceMetrics metrics={performance} />
+            {performance && <PerformanceMetrics metrics={performance} />}
             {timeSeriesData.length > 0 && (
               <LineChart data={timeSeriesData} title="Transaction Volume" yAxisLabel="STX" height={250} />
             )}
@@ -163,7 +165,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       </div>
 
       {/* Controls */}
-      <PeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={applyPeriodFilter} />
+      <PeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={(period) => applyPeriodFilter(period)} />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left Sidebar - Filters */}
@@ -174,7 +176,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         {/* Main Content */}
         <div className="lg:col-span-3 space-y-6">
           {/* Performance Metrics Cards */}
-          <PerformanceMetrics metrics={performance} />
+          {performance && <PerformanceMetrics metrics={performance} />}
 
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

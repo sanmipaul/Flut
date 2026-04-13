@@ -91,11 +91,11 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
         <div className="space-y-2">
           <div className="flex justify-between">
             <span className="text-gray-700">Gas Used:</span>
-            <span className="font-semibold text-gray-900">{transaction.gasUsed}</span>
+            <span className="font-semibold text-gray-900">{transaction.gasUsed ?? 'N/A'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-700">Fee:</span>
-            <span className="font-semibold text-gray-900">{formatCurrency(transaction.fee)} STX</span>
+            <span className="font-semibold text-gray-900">{transaction.fee !== undefined ? formatCurrency(transaction.fee) : 'N/A'} STX</span>
           </div>
         </div>
       </div>

@@ -93,4 +93,14 @@ export interface VaultPerformanceMetrics {
   avgLockPeriod: number;
   transactionCount: number;
   lastActivityTime: number;
+  // Aliases for backward compatibility with PerformanceMetrics component
+  totalDeposited?: number;
+  totalWithdrawn?: number;
+  totalPenalties?: number;
+  yield?: number;
+  totalLockDays?: number;
+  averageLockPeriod?: number;
+  successRate?: number;
+  averageTransactionSize?: number;
+  penaltyCount?: number;
 }

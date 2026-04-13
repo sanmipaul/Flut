@@ -48,7 +48,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
   const applyFilter = (types: TransactionType[], statuses: string[], start: string, end: string, min: string, max: string) => {
     const filter: TransactionFilter = {
       types: types.length > 0 ? types : undefined,
-      statuses: statuses.length > 0 ? statuses : undefined,
+      status: statuses.length > 0 ? statuses as ('pending' | 'confirmed' | 'failed')[] : undefined,
       startDate: start ? new Date(start).getTime() : undefined,
       endDate: end ? new Date(end).getTime() : undefined,
       minAmount: min ? parseFloat(min) : undefined,

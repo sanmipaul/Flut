@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface HeatmapData {
+export interface HeatmapData {
   label: string;
   value: number;
   row: number;
