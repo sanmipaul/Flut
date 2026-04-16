@@ -103,3 +103,13 @@
                  u0
                  (- (get target goal) (get saved goal))))
     ERR-NOT-FOUND))
+
+(define-read-only (get-goal-saved (goal-id uint))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (ok (get saved goal))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-goal-target (goal-id uint))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (ok (get target goal))
+    ERR-NOT-FOUND))
