@@ -51,3 +51,8 @@
 
 (define-read-only (vault-exists (vault-id uint))
   (is-some (map-get? vaults {vault-id: vault-id})))
+
+(define-read-only (is-vault-unlocked (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (>= block-height (get unlock-height vault)))
+    ERR-NOT-FOUND))
