@@ -7,10 +7,17 @@
 (define-constant ERR-LOCKED (err u3))
 (define-constant ERR-WITHDRAWN (err u4))
 (define-constant ERR-INVALID-HEIGHT (err u5))
+(define-constant ERR-ZERO-AMOUNT (err u6))
+(define-constant ERR-EMPTY-VAULT (err u7))
+(define-constant ERR-HEIGHT-TOO-FAR (err u8))
+(define-constant ERR-VAULT-CLOSED (err u9))
+(define-constant MAX-LOCK-BLOCKS u52560)
 
 (define-public (create-vault (amount uint) (unlock-height uint))
   (let ((id (var-get vault-counter)))
+    (asserts! (> amount u0) ERR-ZERO-AMOUNT)
     (asserts! (> unlock-height block-height) ERR-INVALID-HEIGHT)
+    (asserts! (<= (- unlock-height block-height) MAX-LOCK-BLOCKS) ERR-HEIGHT-TOO-FAR)
     (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
     (map-set vaults {vault-id: id} {owner: tx-sender, amount: amount, unlock-height: unlock-height, withdrawn: false})
     (var-set vault-counter (+ id u1))
@@ -19,8 +26,9 @@
 (define-public (deposit (vault-id uint) (amount uint))
   (match (map-get? vaults {vault-id: vault-id})
     vault (begin
+      (asserts! (> amount u0) ERR-ZERO-AMOUNT)
       (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
-      (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
+      (asserts! (not (get withdrawn vault)) ERR-VAULT-CLOSED)
       (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
       (map-set vaults {vault-id: vault-id} (merge vault {amount: (+ (get amount vault) amount)}))
       (ok true))
@@ -32,6 +40,7 @@
       (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
       (asserts! (>= block-height (get unlock-height vault)) ERR-LOCKED)
       (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
+      (asserts! (> (get amount vault) u0) ERR-EMPTY-VAULT)
       (let ((caller tx-sender))
         (try! (as-contract (stx-transfer? (get amount vault) tx-sender caller))))
       (map-set vaults {vault-id: vault-id} (merge vault {withdrawn: true}))
@@ -40,3 +49,67 @@
 
 (define-read-only (get-vault (vault-id uint))
   (map-get? vaults {vault-id: vault-id}))
+
+(define-read-only (get-vault-count)
+  (ok (var-get vault-counter)))
+
+(define-read-only (vault-exists (vault-id uint))
+  (is-some (map-get? vaults {vault-id: vault-id})))
+
+(define-read-only (is-vault-unlocked (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (>= block-height (get unlock-height vault)))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-vault-balance (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (get amount vault))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-vault-owner (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (get owner vault))
+    ERR-NOT-FOUND))
+
+(define-read-only (is-vault-withdrawn (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (get withdrawn vault))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-blocks-until-unlock (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (if (>= block-height (get unlock-height vault))
+                  u0
+                  (- (get unlock-height vault) block-height)))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-max-lock-blocks)
+  (ok MAX-LOCK-BLOCKS))
+
+(define-read-only (can-deposit (vault-id uint) (caller principal))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (and (is-eq (get owner vault) caller)
+                   (not (get withdrawn vault))))
+    ERR-NOT-FOUND))
+
+(define-read-only (can-withdraw (vault-id uint) (caller principal))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (and (is-eq (get owner vault) caller)
+                   (>= block-height (get unlock-height vault))
+                   (not (get withdrawn vault))
+                   (> (get amount vault) u0)))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-vault-summary (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok {
+      owner: (get owner vault),
+      amount: (get amount vault),
+      unlock-height: (get unlock-height vault),
+      withdrawn: (get withdrawn vault),
+      unlocked: (>= block-height (get unlock-height vault)),
+      blocks-remaining: (if (>= block-height (get unlock-height vault))
+                            u0
+                            (- (get unlock-height vault) block-height))
+    })
+    ERR-NOT-FOUND))
