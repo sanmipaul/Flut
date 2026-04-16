@@ -99,3 +99,17 @@
                    (not (get withdrawn vault))
                    (> (get amount vault) u0)))
     ERR-NOT-FOUND))
+
+(define-read-only (get-vault-summary (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok {
+      owner: (get owner vault),
+      amount: (get amount vault),
+      unlock-height: (get unlock-height vault),
+      withdrawn: (get withdrawn vault),
+      unlocked: (>= block-height (get unlock-height vault)),
+      blocks-remaining: (if (>= block-height (get unlock-height vault))
+                            u0
+                            (- (get unlock-height vault) block-height))
+    })
+    ERR-NOT-FOUND))
