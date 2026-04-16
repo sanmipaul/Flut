@@ -75,3 +75,10 @@
   (match (map-get? goals {goal-id: goal-id})
     goal (ok (and (not (get reached goal)) (not (get finalized goal))))
     ERR-NOT-FOUND))
+
+(define-read-only (can-withdraw-goal (goal-id uint) (caller principal))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (ok (and (is-eq (get owner goal) caller)
+                   (get reached goal)
+                   (not (get finalized goal))))
+    ERR-NOT-FOUND))
