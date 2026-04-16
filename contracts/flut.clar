@@ -10,6 +10,7 @@
 (define-constant ERR-ZERO-AMOUNT (err u6))
 (define-constant ERR-EMPTY-VAULT (err u7))
 (define-constant ERR-HEIGHT-TOO-FAR (err u8))
+(define-constant ERR-VAULT-CLOSED (err u9))
 (define-constant MAX-LOCK-BLOCKS u52560)
 
 (define-public (create-vault (amount uint) (unlock-height uint))
@@ -27,7 +28,7 @@
     vault (begin
       (asserts! (> amount u0) ERR-ZERO-AMOUNT)
       (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
-      (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
+      (asserts! (not (get withdrawn vault)) ERR-VAULT-CLOSED)
       (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
       (map-set vaults {vault-id: vault-id} (merge vault {amount: (+ (get amount vault) amount)}))
       (ok true))
