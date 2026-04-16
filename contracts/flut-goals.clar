@@ -92,3 +92,6 @@
   (match (map-get? goals {goal-id: goal-id})
     goal (ok (get owner goal))
     ERR-NOT-FOUND))
+
+(define-read-only (goal-exists (goal-id uint))
+  (is-some (map-get? goals {goal-id: goal-id})))
