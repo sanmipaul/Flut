@@ -52,3 +52,8 @@
   (match (map-get? goals {goal-id: goal-id})
     goal (ok (get reached goal))
     ERR-NOT-FOUND))
+
+(define-read-only (is-goal-finalized (goal-id uint))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (ok (get finalized goal))
+    ERR-NOT-FOUND))
