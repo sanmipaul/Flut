@@ -81,3 +81,6 @@
                   u0
                   (- (get unlock-height vault) block-height)))
     ERR-NOT-FOUND))
+
+(define-read-only (get-max-lock-blocks)
+  (ok MAX-LOCK-BLOCKS))
