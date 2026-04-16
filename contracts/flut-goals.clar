@@ -95,3 +95,10 @@
 
 (define-read-only (goal-exists (goal-id uint))
   (is-some (map-get? goals {goal-id: goal-id})))
+
+(define-read-only (get-contribution-headroom (goal-id uint))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (ok (if (>= (get saved goal) (get target goal))
+                 u0
+                 (- (get target goal) (get saved goal))))
+    ERR-NOT-FOUND))
