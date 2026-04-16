@@ -70,3 +70,8 @@
       finalized: (get finalized goal)
     })
     ERR-NOT-FOUND))
+
+(define-read-only (can-contribute (goal-id uint))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (ok (and (not (get reached goal)) (not (get finalized goal))))
+    ERR-NOT-FOUND))
