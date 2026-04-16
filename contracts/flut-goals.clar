@@ -87,3 +87,8 @@
   (match (map-get? goals {goal-id: goal-id})
     goal (ok (get label goal))
     ERR-NOT-FOUND))
+
+(define-read-only (get-goal-owner (goal-id uint))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (ok (get owner goal))
+    ERR-NOT-FOUND))
