@@ -61,3 +61,8 @@
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok (get amount vault))
     ERR-NOT-FOUND))
+
+(define-read-only (get-vault-owner (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (get owner vault))
+    ERR-NOT-FOUND))
