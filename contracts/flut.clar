@@ -8,6 +8,7 @@
 (define-constant ERR-WITHDRAWN (err u4))
 (define-constant ERR-INVALID-HEIGHT (err u5))
 (define-constant ERR-ZERO-AMOUNT (err u6))
+(define-constant ERR-EMPTY-VAULT (err u7))
 
 (define-public (create-vault (amount uint) (unlock-height uint))
   (let ((id (var-get vault-counter)))
@@ -35,6 +36,7 @@
       (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
       (asserts! (>= block-height (get unlock-height vault)) ERR-LOCKED)
       (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
+      (asserts! (> (get amount vault) u0) ERR-EMPTY-VAULT)
       (let ((caller tx-sender))
         (try! (as-contract (stx-transfer? (get amount vault) tx-sender caller))))
       (map-set vaults {vault-id: vault-id} (merge vault {withdrawn: true}))
