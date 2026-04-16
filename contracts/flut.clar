@@ -56,3 +56,8 @@
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok (>= block-height (get unlock-height vault)))
     ERR-NOT-FOUND))
+
+(define-read-only (get-vault-balance (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (get amount vault))
+    ERR-NOT-FOUND))
