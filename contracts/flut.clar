@@ -91,3 +91,11 @@
     vault (ok (and (is-eq (get owner vault) caller)
                    (not (get withdrawn vault))))
     ERR-NOT-FOUND))
+
+(define-read-only (can-withdraw (vault-id uint) (caller principal))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (and (is-eq (get owner vault) caller)
+                   (>= block-height (get unlock-height vault))
+                   (not (get withdrawn vault))
+                   (> (get amount vault) u0)))
+    ERR-NOT-FOUND))
