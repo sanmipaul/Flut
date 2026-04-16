@@ -48,3 +48,6 @@
 
 (define-read-only (get-vault-count)
   (ok (var-get vault-counter)))
+
+(define-read-only (vault-exists (vault-id uint))
+  (is-some (map-get? vaults {vault-id: vault-id})))
