@@ -44,3 +44,6 @@
 
 (define-read-only (get-goal (goal-id uint))
   (map-get? goals {goal-id: goal-id}))
+
+(define-read-only (get-goal-count)
+  (ok (var-get goal-counter)))
