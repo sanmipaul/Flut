@@ -47,3 +47,8 @@
 
 (define-read-only (get-goal-count)
   (ok (var-get goal-counter)))
+
+(define-read-only (is-goal-reached (goal-id uint))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (ok (get reached goal))
+    ERR-NOT-FOUND))
