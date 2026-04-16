@@ -11,6 +11,7 @@
 
 (define-public (create-vault (amount uint) (unlock-height uint))
   (let ((id (var-get vault-counter)))
+    (asserts! (> amount u0) ERR-ZERO-AMOUNT)
     (asserts! (> unlock-height block-height) ERR-INVALID-HEIGHT)
     (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
     (map-set vaults {vault-id: id} {owner: tx-sender, amount: amount, unlock-height: unlock-height, withdrawn: false})
