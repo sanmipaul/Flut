@@ -9,6 +9,7 @@
 (define-constant ERR-NOT-REACHED (err u4))
 (define-constant ERR-ZERO-AMOUNT (err u5))
 (define-constant ERR-ZERO-TARGET (err u6))
+(define-constant ERR-GOAL-CLOSED (err u7))
 
 (define-public (create-goal (label (string-ascii 60)) (target uint))
   (let ((id (var-get goal-counter)))
@@ -21,8 +22,8 @@
   (match (map-get? goals {goal-id: goal-id})
     goal (begin
       (asserts! (> amount u0) ERR-ZERO-AMOUNT)
+      (asserts! (not (get finalized goal)) ERR-GOAL-CLOSED)
       (asserts! (not (get reached goal)) ERR-ALREADY-REACHED)
-      (asserts! (not (get finalized goal)) ERR-ALREADY-REACHED)
       (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
       (let ((new-saved (+ (get saved goal) amount))
             (reached (>= (+ (get saved goal) amount) (get target goal))))
@@ -35,7 +36,7 @@
     goal (begin
       (asserts! (is-eq (get owner goal) tx-sender) ERR-UNAUTHORIZED)
       (asserts! (get reached goal) ERR-NOT-REACHED)
-      (asserts! (not (get finalized goal)) ERR-ALREADY-REACHED)
+      (asserts! (not (get finalized goal)) ERR-GOAL-CLOSED)
       (let ((caller tx-sender))
         (try! (as-contract (stx-transfer? (get saved goal) tx-sender caller))))
       (map-set goals {goal-id: goal-id} (merge goal {saved: u0, finalized: true}))
