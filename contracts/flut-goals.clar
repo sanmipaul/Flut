@@ -82,3 +82,8 @@
                    (get reached goal)
                    (not (get finalized goal))))
     ERR-NOT-FOUND))
+
+(define-read-only (get-goal-label (goal-id uint))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (ok (get label goal))
+    ERR-NOT-FOUND))
