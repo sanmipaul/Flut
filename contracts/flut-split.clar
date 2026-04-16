@@ -29,6 +29,7 @@
 (define-public (contribute (split-id uint) (amount uint))
   (match (map-get? splits {split-id: split-id})
     split (begin
+      (asserts! (> amount u0) ERR-ZERO-AMOUNT)
       (asserts! (is-member tx-sender (get members split)) ERR-NOT-MEMBER)
       (asserts! (not (get paid-out split)) ERR-PAID-OUT)
       (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
