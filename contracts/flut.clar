@@ -71,3 +71,10 @@
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok (get withdrawn vault))
     ERR-NOT-FOUND))
+
+(define-read-only (get-blocks-until-unlock (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (if (>= block-height (get unlock-height vault))
+                  u0
+                  (- (get unlock-height vault) block-height)))
+    ERR-NOT-FOUND))
