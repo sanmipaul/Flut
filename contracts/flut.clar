@@ -21,6 +21,7 @@
 (define-public (deposit (vault-id uint) (amount uint))
   (match (map-get? vaults {vault-id: vault-id})
     vault (begin
+      (asserts! (> amount u0) ERR-ZERO-AMOUNT)
       (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
       (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
       (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
