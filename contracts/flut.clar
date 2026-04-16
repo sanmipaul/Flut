@@ -66,3 +66,8 @@
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok (get owner vault))
     ERR-NOT-FOUND))
+
+(define-read-only (is-vault-withdrawn (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (get withdrawn vault))
+    ERR-NOT-FOUND))
