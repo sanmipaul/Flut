@@ -7,6 +7,7 @@
 (define-constant ERR-LOCKED (err u3))
 (define-constant ERR-WITHDRAWN (err u4))
 (define-constant ERR-INVALID-HEIGHT (err u5))
+(define-constant ERR-ZERO-AMOUNT (err u6))
 
 (define-public (create-vault (amount uint) (unlock-height uint))
   (let ((id (var-get vault-counter)))
