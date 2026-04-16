@@ -1,5 +1,5 @@
 ;; Flut Split - Shared Vault for Group Savings
-;; A group of up to 5 members each contribute; any member can trigger payout once target is hit.
+;; A group of up to 5 members each contribute; payout is distributed proportionally.
 (define-map splits {split-id: uint} {creator: principal, target: uint, saved: uint, paid-out: bool, members: (list 5 principal)})
 (define-map contributions {split-id: uint, member: principal} {amount: uint})
 (define-data-var split-counter uint u0)
@@ -9,6 +9,8 @@
 (define-constant ERR-PAID-OUT (err u3))
 (define-constant ERR-TARGET-NOT-MET (err u4))
 (define-constant ERR-UNAUTHORIZED (err u5))
+(define-constant ERR-ZERO-AMOUNT (err u6))
+(define-constant ERR-ZERO-TARGET (err u7))
 
 (define-private (is-member (user principal) (members (list 5 principal)))
   (or (is-eq user (unwrap-panic (element-at members u0)))
