@@ -81,3 +81,6 @@
               u0
               (- expiry block-height))))
     ERR-NO-STREAK))
+
+(define-read-only (has-streak (user principal))
+  (is-some (map-get? streaks {user: user})))
