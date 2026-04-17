@@ -75,6 +75,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     balanceFetchError: false,
   });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mountedRef = useRef(true);
   const sessionCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   function stopPolling() {
