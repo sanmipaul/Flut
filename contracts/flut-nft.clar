@@ -2,6 +2,8 @@
 (define-non-fungible-token vault-receipt uint)
 (define-map receipt-meta {token-id: uint} {vault-id: uint, amount: uint, unlock-height: uint})
 (define-data-var token-counter uint u0)
+(define-data-var contract-owner principal tx-sender)
+(define-data-var base-uri (string-ascii 60) "https://flut.app/nft/")
 
 (define-constant ERR-UNAUTHORIZED (err u1))
 (define-constant ERR-NOT-FOUND (err u2))
