@@ -82,6 +82,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     );
   }
 
+
+  if (isFilteredEmpty) {
+    return (
+      <FilteredEmptyState onClear={clearFilters} />
+    );
+  }
+
   // Mobile layout with optimizations
   if (isMobile) {
     return (
