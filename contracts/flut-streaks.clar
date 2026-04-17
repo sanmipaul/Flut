@@ -84,3 +84,8 @@
 
 (define-read-only (has-streak (user principal))
   (is-some (map-get? streaks {user: user})))
+
+(define-read-only (can-deposit-streak (user principal))
+  (match (map-get? streaks {user: user})
+    streak (ok (>= block-height (+ (get last-deposit streak) (get interval streak))))
+    ERR-NO-STREAK))
