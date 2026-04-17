@@ -10,6 +10,7 @@ import { PieChart } from './PieChart';
 import { ActivityHeatmap } from './ActivityHeatmap';
 import { TransactionDetailModal } from './TransactionDetailModal';
 import { ErrorBoundary } from './ErrorBoundary';
+import { EmptyState } from './EmptyState';
 import { useIsMobile, useIsSmallMobile, useIsPortrait } from '../context/ResponsiveContext';
 import { VaultTransaction, TransactionType } from '../types/TransactionHistory';
 import {
