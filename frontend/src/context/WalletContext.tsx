@@ -101,7 +101,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     stopPolling();
     stopSessionCheck();
     userSession.signUserOut();
-    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false, sessionExpired: true });
+    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false, sessionExpired: true, lastConnectedAt: null });
   }
 
   function startPolling(address: string) {
@@ -172,7 +172,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     stopPolling();
     stopSessionCheck();
     userSession.signUserOut();
-    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false, sessionExpired: true });
+    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false, sessionExpired: true, lastConnectedAt: null });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
