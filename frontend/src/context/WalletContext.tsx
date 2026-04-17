@@ -106,6 +106,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   function startPolling(address: string) {
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(() => {
+      if (!isSessionValid()) return;
       fetchStxBalance(address).then(({ balance, error }) =>
         setState((s) => ({ ...s, stxBalance: balance, balanceFetchError: error })),
       );
