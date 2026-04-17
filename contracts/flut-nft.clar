@@ -7,12 +7,14 @@
 
 (define-constant ERR-UNAUTHORIZED (err u1))
 (define-constant ERR-NOT-FOUND (err u2))
+(define-constant ERR-ZERO-AMOUNT (err u3))
 
 (define-private (build-token-uri (token-id uint))
   (unwrap-panic (as-max-len? (concat (var-get base-uri) (int-to-ascii token-id)) u80)))
 
 (define-public (mint (owner principal) (vault-id uint) (amount uint) (unlock-height uint))
   (let ((id (var-get token-counter)))
+    (asserts! (> amount u0) ERR-ZERO-AMOUNT)
     (try! (nft-mint? vault-receipt id owner))
     (map-set receipt-meta {token-id: id} {vault-id: vault-id, amount: amount, unlock-height: unlock-height, uri: (build-token-uri id)})
     (var-set token-counter (+ id u1))
