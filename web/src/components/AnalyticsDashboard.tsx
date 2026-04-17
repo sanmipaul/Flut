@@ -41,6 +41,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'patterns'>('overview');
 
+  const hasTransactions = transactions.length > 0;
+
   // Generate chart data
   const timeSeriesData = useMemo(() => generateTimeSeriesData(filteredTransactions, 'daily'), [filteredTransactions]);
   const cumulativeData = useMemo(() => generateCumulativeVolumeData(filteredTransactions), [filteredTransactions]);
