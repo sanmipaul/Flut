@@ -27,6 +27,12 @@
     (asserts! (is-eq tx-sender sender) ERR-UNAUTHORIZED)
     (nft-transfer? vault-receipt token-id sender recipient)))
 
+(define-public (set-base-uri (new-uri (string-ascii 60)))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR-UNAUTHORIZED)
+    (var-set base-uri new-uri)
+    (ok true)))
+
 (define-read-only (get-owner (token-id uint))
   (ok (nft-get-owner? vault-receipt token-id)))
 
@@ -38,3 +44,6 @@
 
 (define-read-only (get-last-token-id)
   (ok (var-get token-counter)))
+
+(define-read-only (get-base-uri)
+  (ok (var-get base-uri)))
