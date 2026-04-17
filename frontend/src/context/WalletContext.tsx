@@ -17,6 +17,7 @@ interface WalletContextValue extends WalletState {
   disconnect: () => void;
   refreshBalance: () => void;
   truncatedAddress: string | null;
+  isReconnecting: boolean;
 }
 
 const WalletContext = createContext<WalletContextValue | null>(null);
@@ -184,7 +185,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const truncatedAddress = state.address ? truncateAddress(state.address) : null;
 
   return (
-    <WalletContext.Provider value={{ ...state, connect, disconnect, refreshBalance, truncatedAddress }}>
+    <WalletContext.Provider value={{ ...state, connect, disconnect, refreshBalance, truncatedAddress, isReconnecting }}>
       {children}
     </WalletContext.Provider>
   );
