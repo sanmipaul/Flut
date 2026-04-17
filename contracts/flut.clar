@@ -9,6 +9,7 @@
 (define-constant ERR-WITHDRAWN (err u4))
 (define-constant ERR-INVALID-HEIGHT (err u5))
 (define-constant ERR-SAME-OWNER (err u8))
+(define-constant ERR-NO-PENDING-TRANSFER (err u9))
 
 (define-public (create-vault (amount uint) (unlock-height uint))
   (let ((id (var-get vault-counter)))
