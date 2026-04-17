@@ -64,3 +64,6 @@
 
 (define-read-only (has-claimed (split-id uint) (member principal))
   (default-to false (get done (map-get? claimed {split-id: split-id, member: member}))))
+
+(define-read-only (get-split-count)
+  (ok (var-get split-counter)))
