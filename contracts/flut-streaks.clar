@@ -73,3 +73,11 @@
               u0
               (- next block-height))))
     ERR-NO-STREAK))
+
+(define-read-only (get-blocks-until-streak-expires (user principal))
+  (match (map-get? streaks {user: user})
+    streak (let ((expiry (+ (get last-deposit streak) (* (get interval streak) u2))))
+      (ok (if (>= block-height expiry)
+              u0
+              (- expiry block-height))))
+    ERR-NO-STREAK))
