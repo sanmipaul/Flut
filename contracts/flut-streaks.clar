@@ -65,3 +65,11 @@
   (match (map-get? streaks {user: user})
     streak (ok (get total streak))
     ERR-NO-STREAK))
+
+(define-read-only (get-blocks-until-next-deposit (user principal))
+  (match (map-get? streaks {user: user})
+    streak (let ((next (+ (get last-deposit streak) (get interval streak))))
+      (ok (if (>= block-height next)
+              u0
+              (- next block-height))))
+    ERR-NO-STREAK))
