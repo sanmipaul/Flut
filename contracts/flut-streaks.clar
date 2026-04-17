@@ -99,3 +99,17 @@
   (match (map-get? streaks {user: user})
     streak (ok (get last-deposit streak))
     ERR-NO-STREAK))
+
+(define-read-only (get-streak-summary (user principal))
+  (match (map-get? streaks {user: user})
+    streak (ok {
+      count: (get count streak),
+      total: (get total streak),
+      interval: (get interval streak),
+      last-deposit: (get last-deposit streak),
+      broken: (get broken streak),
+      break-count: (get break-count streak),
+      can-deposit: (>= block-height (+ (get last-deposit streak) (get interval streak))),
+      next-deposit-block: (+ (get last-deposit streak) (get interval streak))
+    })
+    ERR-NO-STREAK))
