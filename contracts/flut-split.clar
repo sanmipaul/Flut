@@ -106,3 +106,6 @@
   (match (map-get? splits {split-id: split-id})
     split (ok (get creator split))
     ERR-NOT-FOUND))
+
+(define-read-only (get-member-share-amount (split-id uint) (member principal))
+  (ok (default-to u0 (get amount (map-get? contributions {split-id: split-id, member: member})))))
