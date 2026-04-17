@@ -145,6 +145,19 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
+  // Re-validate session when the tab becomes visible again
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible' && !isSessionValid()) {
+        handleSessionExpiry();
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const connect = useCallback(() => {
     showConnect({
       appDetails: { name: 'Flut', icon: '/logo.png' },
