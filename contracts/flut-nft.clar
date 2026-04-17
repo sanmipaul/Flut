@@ -102,3 +102,8 @@
 
 (define-read-only (get-token-count)
   (ok (var-get token-counter)))
+
+(define-read-only (get-token-uri-raw (token-id uint))
+  (match (map-get? receipt-meta {token-id: token-id})
+    meta (ok (get uri meta))
+    ERR-NOT-FOUND))
