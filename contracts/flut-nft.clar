@@ -57,3 +57,8 @@
 
 (define-read-only (token-exists (token-id uint))
   (is-some (map-get? receipt-meta {token-id: token-id})))
+
+(define-read-only (get-token-vault-id (token-id uint))
+  (match (map-get? receipt-meta {token-id: token-id})
+    meta (ok (get vault-id meta))
+    ERR-NOT-FOUND))
