@@ -114,3 +114,8 @@
   (match (map-get? splits {split-id: split-id})
     split (ok (get members split))
     ERR-NOT-FOUND))
+
+(define-read-only (is-split-member (split-id uint) (user principal))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (is-member user (get members split)))
+    ERR-NOT-FOUND))
