@@ -62,3 +62,8 @@
   (match (map-get? receipt-meta {token-id: token-id})
     meta (ok (get vault-id meta))
     ERR-NOT-FOUND))
+
+(define-read-only (get-token-amount (token-id uint))
+  (match (map-get? receipt-meta {token-id: token-id})
+    meta (ok (get amount meta))
+    ERR-NOT-FOUND))
