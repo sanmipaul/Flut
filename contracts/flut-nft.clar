@@ -86,3 +86,15 @@
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR-UNAUTHORIZED)
     (var-set contract-owner new-owner)
     (ok true)))
+
+(define-read-only (get-token-summary (token-id uint))
+  (match (map-get? receipt-meta {token-id: token-id})
+    meta (ok {
+      vault-id: (get vault-id meta),
+      amount: (get amount meta),
+      unlock-height: (get unlock-height meta),
+      uri: (get uri meta),
+      owner: (nft-get-owner? vault-receipt token-id),
+      unlocked: (>= block-height (get unlock-height meta))
+    })
+    ERR-NOT-FOUND))
