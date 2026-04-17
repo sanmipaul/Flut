@@ -70,3 +70,8 @@
 
 (define-read-only (split-exists (split-id uint))
   (is-some (map-get? splits {split-id: split-id})))
+
+(define-read-only (is-target-met (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (>= (get saved split) (get target split)))
+    ERR-NOT-FOUND))
