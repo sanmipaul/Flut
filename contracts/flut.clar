@@ -1,6 +1,7 @@
 ;; Flut - STX Savings Vault
 (define-map vaults {vault-id: uint} {owner: principal, amount: uint, unlock-height: uint, withdrawn: bool})
 (define-data-var vault-counter uint u0)
+(define-map pending-owner {vault-id: uint} {new-owner: principal})
 
 (define-constant ERR-NOT-FOUND (err u1))
 (define-constant ERR-UNAUTHORIZED (err u2))
