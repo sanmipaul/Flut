@@ -72,3 +72,8 @@
   (match (map-get? receipt-meta {token-id: token-id})
     meta (ok (get unlock-height meta))
     ERR-NOT-FOUND))
+
+(define-read-only (is-token-unlocked (token-id uint))
+  (match (map-get? receipt-meta {token-id: token-id})
+    meta (ok (>= block-height (get unlock-height meta)))
+    ERR-NOT-FOUND))
