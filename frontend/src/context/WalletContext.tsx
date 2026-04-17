@@ -73,6 +73,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     stxBalance: null,
     loading: false,
     balanceFetchError: false,
+    sessionExpired: false,
   });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const mountedRef = useRef(true);
@@ -97,7 +98,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     stopPolling();
     stopSessionCheck();
     userSession.signUserOut();
-    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false });
+    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false, sessionExpired: true });
   }
 
   function startPolling(address: string) {
@@ -167,7 +168,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     stopPolling();
     stopSessionCheck();
     userSession.signUserOut();
-    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false });
+    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false, sessionExpired: true });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
