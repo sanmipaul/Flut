@@ -7,6 +7,7 @@
 (define-constant ERR-ZERO-AMOUNT (err u3))
 (define-constant ERR-ZERO-INTERVAL (err u4))
 (define-constant ERR-STREAK-EXISTS (err u5))
+(define-constant ERR-ZERO-BALANCE (err u6))
 
 (define-public (start-streak (amount uint) (interval uint))
   (begin
@@ -39,6 +40,7 @@
 (define-public (withdraw-streak)
   (match (map-get? streaks {user: tx-sender})
     streak (begin
+      (asserts! (> (get total streak) u0) ERR-ZERO-BALANCE)
       (let ((caller tx-sender))
         (try! (as-contract (stx-transfer? (get total streak) tx-sender caller))))
       (map-delete streaks {user: tx-sender})
