@@ -107,3 +107,10 @@
   (match (map-get? receipt-meta {token-id: token-id})
     meta (ok (get uri meta))
     ERR-NOT-FOUND))
+
+(define-read-only (get-nft-blocks-until-unlock (token-id uint))
+  (match (map-get? receipt-meta {token-id: token-id})
+    meta (ok (if (>= block-height (get unlock-height meta))
+                  u0
+                  (- (get unlock-height meta) block-height)))
+    ERR-NOT-FOUND))
