@@ -85,3 +85,10 @@
   (match (map-get? splits {split-id: split-id})
     split (ok (get target split))
     ERR-NOT-FOUND))
+
+(define-read-only (get-split-remaining (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (if (>= (get saved split) (get target split))
+                  u0
+                  (- (get target split) (get saved split))))
+    ERR-NOT-FOUND))
