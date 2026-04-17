@@ -1,4 +1,6 @@
 ;; Flut Vault NFT Receipt
+;; get-token-uri returns a per-token URI built at mint time by appending the token-id
+;; to the base-uri. The previous hardcoded "{id}" placeholder has been removed.
 (define-non-fungible-token vault-receipt uint)
 (define-map receipt-meta {token-id: uint} {vault-id: uint, amount: uint, unlock-height: uint, uri: (string-ascii 80)})
 (define-data-var token-counter uint u0)
