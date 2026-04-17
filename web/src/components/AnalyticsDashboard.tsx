@@ -10,6 +10,11 @@ import { PieChart } from './PieChart';
 import { ActivityHeatmap } from './ActivityHeatmap';
 import { TransactionDetailModal } from './TransactionDetailModal';
 import { ErrorBoundary } from './ErrorBoundary';
+import { EmptyState } from './EmptyState';
+import { EmptyChartPlaceholder } from './EmptyChartPlaceholder';
+import { FilteredEmptyState } from './FilteredEmptyState';
+import { useEmptyState } from '../hooks/useEmptyState';
+import { AnalyticsEmptyIcon } from './AnalyticsEmptyIcon';
 import { useIsMobile, useIsSmallMobile, useIsPortrait } from '../context/ResponsiveContext';
 import { VaultTransaction, TransactionType } from '../types/TransactionHistory';
 import {
@@ -41,7 +46,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'patterns'>('overview');
 
+  const { hasTransactions, hasFilteredTransactions, isFilteredEmpty } = useEmptyState(transactions, filteredTransactions);
+
   // Generate chart data
+  // Chart data — only computed when filtered transactions exist
   const timeSeriesData = useMemo(() => generateTimeSeriesData(filteredTransactions, 'daily'), [filteredTransactions]);
   const cumulativeData = useMemo(() => generateCumulativeVolumeData(filteredTransactions), [filteredTransactions]);
   const distributionData = useMemo(() => generateTransactionTypeDistribution(filteredTransactions), [filteredTransactions]);
@@ -65,6 +73,24 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       exportMetricsWithDownload(vaultId, performance, 'csv');
     }
   };
+
+
+  if (!hasTransactions) {
+    return (
+      <EmptyState
+        title="No transactions yet"
+        description="Once you create a vault and make deposits, your analytics will appear here."
+        icon={<AnalyticsEmptyIcon className="h-16 w-16 text-indigo-300" />}
+      />
+    );
+  }
+
+
+  if (isFilteredEmpty) {
+    return (
+      <FilteredEmptyState onClear={clearFilters} />
+    );
+  }
 
   // Mobile layout with optimizations
   if (isMobile) {
