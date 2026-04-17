@@ -175,7 +175,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const refreshBalance = useCallback(() => {
-    if (!state.address) return;
+    if (!state.address || !state.connected) return;
     setState((s) => ({ ...s, loading: true }));
     fetchStxBalance(state.address).then(({ balance, error }) =>
       setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error })),
