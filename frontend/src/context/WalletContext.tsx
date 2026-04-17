@@ -76,6 +76,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     sessionExpired: false,
   });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isReconnecting, setIsReconnecting] = useState(false);
   const mountedRef = useRef(true);
   const sessionCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
