@@ -12,6 +12,8 @@ import { TransactionDetailModal } from './TransactionDetailModal';
 import { ErrorBoundary } from './ErrorBoundary';
 import { EmptyState } from './EmptyState';
 import { EmptyChartPlaceholder } from './EmptyChartPlaceholder';
+import { FilteredEmptyState } from './FilteredEmptyState';
+import { useEmptyState } from '../hooks/useEmptyState';
 import { useIsMobile, useIsSmallMobile, useIsPortrait } from '../context/ResponsiveContext';
 import { VaultTransaction, TransactionType } from '../types/TransactionHistory';
 import {
@@ -43,8 +45,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'patterns'>('overview');
 
-  const hasTransactions = transactions.length > 0;
-  const hasFilteredTransactions = filteredTransactions.length > 0;
+  const { hasTransactions, hasFilteredTransactions, isFilteredEmpty } = useEmptyState(transactions, filteredTransactions);
 
   // Generate chart data
   const timeSeriesData = useMemo(() => generateTimeSeriesData(filteredTransactions, 'daily'), [filteredTransactions]);
