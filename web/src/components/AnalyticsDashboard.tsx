@@ -48,6 +48,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const { hasTransactions, hasFilteredTransactions, isFilteredEmpty } = useEmptyState(transactions, filteredTransactions);
 
   // Generate chart data
+  // Chart data — only computed when filtered transactions exist
   const timeSeriesData = useMemo(() => generateTimeSeriesData(filteredTransactions, 'daily'), [filteredTransactions]);
   const cumulativeData = useMemo(() => generateCumulativeVolumeData(filteredTransactions), [filteredTransactions]);
   const distributionData = useMemo(() => generateTransactionTypeDistribution(filteredTransactions), [filteredTransactions]);
