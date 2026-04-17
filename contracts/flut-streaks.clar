@@ -50,3 +50,8 @@
   (match (map-get? streaks {user: user})
     streak (ok (get broken streak))
     ERR-NO-STREAK))
+
+(define-read-only (get-streak-break-count (user principal))
+  (match (map-get? streaks {user: user})
+    streak (ok (get break-count streak))
+    ERR-NO-STREAK))
