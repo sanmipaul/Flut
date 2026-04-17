@@ -8,6 +8,7 @@
 (define-constant ERR-UNAUTHORIZED (err u1))
 (define-constant ERR-NOT-FOUND (err u2))
 (define-constant ERR-ZERO-AMOUNT (err u3))
+(define-constant ERR-NOT-OWNER (err u4))
 
 (define-private (build-token-uri (token-id uint))
   (unwrap-panic (as-max-len? (concat (var-get base-uri) (int-to-ascii token-id)) u80)))
@@ -22,7 +23,7 @@
 
 (define-public (burn (token-id uint))
   (begin
-    (asserts! (is-eq (some tx-sender) (nft-get-owner? vault-receipt token-id)) ERR-UNAUTHORIZED)
+    (asserts! (is-eq (some tx-sender) (nft-get-owner? vault-receipt token-id)) ERR-NOT-OWNER)
     (try! (nft-burn? vault-receipt token-id tx-sender))
     (map-delete receipt-meta {token-id: token-id})
     (ok true)))
