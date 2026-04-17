@@ -1,5 +1,7 @@
 ;; Flut Streaks - Recurring Deposit Habit Tracker
 ;; Users commit to depositing once every N blocks; missing breaks the streak.
+;; deposit-streak now returns {count, was-broken} so callers know when a reset occurred.
+;; break-count tracks total lifetime streak breaks per user.
 (define-map streaks {user: principal} {interval: uint, last-deposit: uint, count: uint, total: uint, broken: bool, break-count: uint})
 
 (define-constant ERR-TOO-EARLY (err u1))
