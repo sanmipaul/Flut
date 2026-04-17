@@ -6,11 +6,13 @@
 (define-constant ERR-NO-STREAK (err u2))
 (define-constant ERR-ZERO-AMOUNT (err u3))
 (define-constant ERR-ZERO-INTERVAL (err u4))
+(define-constant ERR-STREAK-EXISTS (err u5))
 
 (define-public (start-streak (amount uint) (interval uint))
   (begin
     (asserts! (> amount u0) ERR-ZERO-AMOUNT)
     (asserts! (> interval u0) ERR-ZERO-INTERVAL)
+    (asserts! (is-none (map-get? streaks {user: tx-sender})) ERR-STREAK-EXISTS)
     (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
     (map-set streaks {user: tx-sender} {interval: interval, last-deposit: block-height, count: u1, total: amount, broken: false, break-count: u0})
     (ok true)))
