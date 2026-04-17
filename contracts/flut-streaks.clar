@@ -117,3 +117,8 @@
       next-deposit-block: (+ (get last-deposit streak) (get interval streak))
     })
     ERR-NO-STREAK))
+
+(define-read-only (get-streak-next-deposit-block (user principal))
+  (match (map-get? streaks {user: user})
+    streak (ok (+ (get last-deposit streak) (get interval streak)))
+    ERR-NO-STREAK))
