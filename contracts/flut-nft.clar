@@ -80,3 +80,9 @@
 
 (define-read-only (get-contract-owner)
   (ok (var-get contract-owner)))
+
+(define-public (transfer-ownership (new-owner principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR-UNAUTHORIZED)
+    (var-set contract-owner new-owner)
+    (ok true)))
