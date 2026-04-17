@@ -1,6 +1,6 @@
 ;; Flut Vault NFT Receipt
 (define-non-fungible-token vault-receipt uint)
-(define-map receipt-meta {token-id: uint} {vault-id: uint, amount: uint, unlock-height: uint})
+(define-map receipt-meta {token-id: uint} {vault-id: uint, amount: uint, unlock-height: uint, uri: (string-ascii 80)})
 (define-data-var token-counter uint u0)
 (define-data-var contract-owner principal tx-sender)
 (define-data-var base-uri (string-ascii 60) "https://flut.app/nft/")
@@ -8,10 +8,13 @@
 (define-constant ERR-UNAUTHORIZED (err u1))
 (define-constant ERR-NOT-FOUND (err u2))
 
+(define-private (build-token-uri (token-id uint))
+  (unwrap-panic (as-max-len? (concat (var-get base-uri) (int-to-ascii token-id)) u80)))
+
 (define-public (mint (owner principal) (vault-id uint) (amount uint) (unlock-height uint))
   (let ((id (var-get token-counter)))
     (try! (nft-mint? vault-receipt id owner))
-    (map-set receipt-meta {token-id: id} {vault-id: vault-id, amount: amount, unlock-height: unlock-height})
+    (map-set receipt-meta {token-id: id} {vault-id: vault-id, amount: amount, unlock-height: unlock-height, uri: (build-token-uri id)})
     (var-set token-counter (+ id u1))
     (ok id)))
 
@@ -37,7 +40,9 @@
   (ok (nft-get-owner? vault-receipt token-id)))
 
 (define-read-only (get-token-uri (token-id uint))
-  (ok (some u"https://flut.app/nft/{id}")))
+  (match (map-get? receipt-meta {token-id: token-id})
+    meta (ok (some (get uri meta)))
+    ERR-NOT-FOUND))
 
 (define-read-only (get-meta (token-id uint))
   (map-get? receipt-meta {token-id: token-id}))
