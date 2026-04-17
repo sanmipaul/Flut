@@ -92,3 +92,12 @@
                   u0
                   (- (get target split) (get saved split))))
     ERR-NOT-FOUND))
+
+(define-read-only (can-claim-share (split-id uint) (caller principal))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (and
+      (is-member caller (get members split))
+      (>= (get saved split) (get target split))
+      (not (default-to false (get done (map-get? claimed {split-id: split-id, member: caller}))))
+      (> (default-to u0 (get amount (map-get? contributions {split-id: split-id, member: caller}))) u0)))
+    ERR-NOT-FOUND))
