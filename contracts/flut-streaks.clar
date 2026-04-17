@@ -94,3 +94,8 @@
   (match (map-get? streaks {user: user})
     streak (ok (get interval streak))
     ERR-NO-STREAK))
+
+(define-read-only (get-streak-last-deposit (user principal))
+  (match (map-get? streaks {user: user})
+    streak (ok (get last-deposit streak))
+    ERR-NO-STREAK))
