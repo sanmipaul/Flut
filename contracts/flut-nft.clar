@@ -99,3 +99,6 @@
       unlocked: (>= block-height (get unlock-height meta))
     })
     ERR-NOT-FOUND))
+
+(define-read-only (get-token-count)
+  (ok (var-get token-counter)))
