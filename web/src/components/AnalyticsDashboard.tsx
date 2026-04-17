@@ -69,6 +69,16 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     }
   };
 
+
+  if (!hasTransactions) {
+    return (
+      <EmptyState
+        title="No transactions yet"
+        description="Once you create a vault and make deposits, your analytics will appear here."
+      />
+    );
+  }
+
   // Mobile layout with optimizations
   if (isMobile) {
     return (
