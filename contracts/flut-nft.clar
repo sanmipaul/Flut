@@ -77,3 +77,6 @@
   (match (map-get? receipt-meta {token-id: token-id})
     meta (ok (>= block-height (get unlock-height meta)))
     ERR-NOT-FOUND))
+
+(define-read-only (get-contract-owner)
+  (ok (var-get contract-owner)))
