@@ -75,6 +75,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     loading: false,
     balanceFetchError: false,
     sessionExpired: false,
+    lastConnectedAt: null,
   });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
@@ -130,7 +131,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         NETWORK.constructor.name === 'StacksMainnet'
           ? userData.profile.stxAddress.mainnet
           : userData.profile.stxAddress.testnet;
-      setState((s) => ({ ...s, connected: true, address, loading: true }));
+      setState((s) => ({ ...s, connected: true, address, loading: true, lastConnectedAt: Date.now() }));
       fetchStxBalance(address).then(({ balance, error }) => {
         setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error }));
         startPolling(address);
@@ -155,7 +156,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           NETWORK.constructor.name === 'StacksMainnet'
             ? userData.profile.stxAddress.mainnet
             : userData.profile.stxAddress.testnet;
-        setState((s) => ({ ...s, connected: true, address, loading: true, sessionExpired: false }));
+        setState((s) => ({ ...s, connected: true, address, loading: true, sessionExpired: false, lastConnectedAt: Date.now() }));
         fetchStxBalance(address).then(({ balance, error }) => {
           setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error }));
           startPolling(address);
