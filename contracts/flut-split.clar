@@ -1,7 +1,8 @@
 ;; Flut Split - Shared Vault for Group Savings
-;; A group of up to 5 members each contribute; payout is distributed proportionally.
+;; Each member claims their own proportional share once target is met.
 (define-map splits {split-id: uint} {creator: principal, target: uint, saved: uint, paid-out: bool, members: (list 5 principal)})
 (define-map contributions {split-id: uint, member: principal} {amount: uint})
+(define-map claimed {split-id: uint, member: principal} {done: bool})
 (define-data-var split-counter uint u0)
 
 (define-constant ERR-NOT-FOUND (err u1))
@@ -11,6 +12,8 @@
 (define-constant ERR-UNAUTHORIZED (err u5))
 (define-constant ERR-ZERO-AMOUNT (err u6))
 (define-constant ERR-ZERO-TARGET (err u7))
+(define-constant ERR-ALREADY-CLAIMED (err u8))
+(define-constant ERR-NOTHING-TO-CLAIM (err u9))
 
 (define-private (is-member (user principal) (members (list 5 principal)))
   (or (is-eq user (unwrap-panic (element-at members u0)))
@@ -39,15 +42,18 @@
       (ok true))
     ERR-NOT-FOUND))
 
-(define-public (payout (split-id uint) (recipient principal))
+(define-public (claim-share (split-id uint))
   (match (map-get? splits {split-id: split-id})
     split (begin
-      (asserts! (is-eq (get creator split) tx-sender) ERR-UNAUTHORIZED)
-      (asserts! (not (get paid-out split)) ERR-PAID-OUT)
+      (asserts! (is-member tx-sender (get members split)) ERR-NOT-MEMBER)
       (asserts! (>= (get saved split) (get target split)) ERR-TARGET-NOT-MET)
-      (try! (as-contract (stx-transfer? (get saved split) tx-sender recipient)))
-      (map-set splits {split-id: split-id} (merge split {paid-out: true}))
-      (ok true))
+      (asserts! (not (default-to false (get done (map-get? claimed {split-id: split-id, member: tx-sender})))) ERR-ALREADY-CLAIMED)
+      (let ((share (default-to u0 (get amount (map-get? contributions {split-id: split-id, member: tx-sender}))))
+            (caller tx-sender))
+        (asserts! (> share u0) ERR-NOTHING-TO-CLAIM)
+        (try! (as-contract (stx-transfer? share tx-sender caller)))
+        (map-set claimed {split-id: split-id, member: tx-sender} {done: true})
+        (ok share)))
     ERR-NOT-FOUND))
 
 (define-read-only (get-split (split-id uint))
@@ -55,3 +61,6 @@
 
 (define-read-only (get-contribution (split-id uint) (member principal))
   (map-get? contributions {split-id: split-id, member: member}))
+
+(define-read-only (has-claimed (split-id uint) (member principal))
+  (default-to false (get done (map-get? claimed {split-id: split-id, member: member}))))
