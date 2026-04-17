@@ -119,3 +119,17 @@
   (match (map-get? splits {split-id: split-id})
     split (ok (is-member user (get members split)))
     ERR-NOT-FOUND))
+
+(define-read-only (get-split-summary (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok {
+      creator: (get creator split),
+      target: (get target split),
+      saved: (get saved split),
+      paid-out: (get paid-out split),
+      target-met: (>= (get saved split) (get target split)),
+      remaining: (if (>= (get saved split) (get target split))
+                     u0
+                     (- (get target split) (get saved split)))
+    })
+    ERR-NOT-FOUND))
