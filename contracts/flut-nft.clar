@@ -54,3 +54,6 @@
 
 (define-read-only (get-base-uri)
   (ok (var-get base-uri)))
+
+(define-read-only (token-exists (token-id uint))
+  (is-some (map-get? receipt-meta {token-id: token-id})))
