@@ -8,6 +8,8 @@ export interface WalletState {
   balanceFetchError: boolean;
   /** true when the session expired and the user was auto-disconnected */
   sessionExpired: boolean;
+  /** Unix timestamp (ms) of last successful connect */
+  lastConnectedAt: number | null;
 }
 
 export interface ConnectOptions {
