@@ -67,3 +67,6 @@
 
 (define-read-only (get-split-count)
   (ok (var-get split-counter)))
+
+(define-read-only (split-exists (split-id uint))
+  (is-some (map-get? splits {split-id: split-id})))
