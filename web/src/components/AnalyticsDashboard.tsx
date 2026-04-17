@@ -14,6 +14,7 @@ import { EmptyState } from './EmptyState';
 import { EmptyChartPlaceholder } from './EmptyChartPlaceholder';
 import { FilteredEmptyState } from './FilteredEmptyState';
 import { useEmptyState } from '../hooks/useEmptyState';
+import { AnalyticsEmptyIcon } from './AnalyticsEmptyIcon';
 import { useIsMobile, useIsSmallMobile, useIsPortrait } from '../context/ResponsiveContext';
 import { VaultTransaction, TransactionType } from '../types/TransactionHistory';
 import {
@@ -79,6 +80,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <EmptyState
         title="No transactions yet"
         description="Once you create a vault and make deposits, your analytics will appear here."
+        icon={<AnalyticsEmptyIcon className="h-16 w-16 text-indigo-300" />}
       />
     );
   }
