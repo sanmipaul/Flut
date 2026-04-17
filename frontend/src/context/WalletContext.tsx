@@ -77,15 +77,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  function startPolling(address: string) {
-    if (pollRef.current) clearInterval(pollRef.current);
-    pollRef.current = setInterval(() => {
-      fetchStxBalance(address).then(({ balance, error }) =>
-        setState((s) => ({ ...s, stxBalance: balance, balanceFetchError: error })),
-      );
-    }, BALANCE_POLL_MS);
-  }
-
   function stopPolling() {
     if (pollRef.current) {
       clearInterval(pollRef.current);
@@ -100,6 +91,32 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  function handleSessionExpiry() {
+    console.warn('[WalletContext] Session expired — disconnecting');
+    stopPolling();
+    stopSessionCheck();
+    userSession.signUserOut();
+    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false });
+  }
+
+  function startPolling(address: string) {
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(() => {
+      fetchStxBalance(address).then(({ balance, error }) =>
+        setState((s) => ({ ...s, stxBalance: balance, balanceFetchError: error })),
+      );
+    }, BALANCE_POLL_MS);
+  }
+
+  function startSessionCheck() {
+    if (sessionCheckRef.current) clearInterval(sessionCheckRef.current);
+    sessionCheckRef.current = setInterval(() => {
+      if (!isSessionValid()) {
+        handleSessionExpiry();
+      }
+    }, SESSION_CHECK_MS);
+  }
+
   // Rehydrate session on mount
   useEffect(() => {
     if (isSessionValid()) {
@@ -112,6 +129,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       fetchStxBalance(address).then(({ balance, error }) => {
         setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error }));
         startPolling(address);
+        startSessionCheck();
       });
     }
     return () => {
@@ -136,10 +154,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         fetchStxBalance(address).then(({ balance, error }) => {
           setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error }));
           startPolling(address);
+          startSessionCheck();
         });
       },
       onCancel: () => {},
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const disconnect = useCallback(() => {
