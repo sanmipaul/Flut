@@ -30,6 +30,16 @@ interface BalanceResult {
 }
 
 const BALANCE_FETCH_TIMEOUT_MS = 10_000;
+const BALANCE_POLL_MS = 30_000;
+const SESSION_CHECK_MS = 60_000;
+
+function isSessionValid(): boolean {
+  try {
+    return userSession.isUserSignedIn();
+  } catch {
+    return false;
+  }
+}
 
 async function fetchStxBalance(address: string): Promise<BalanceResult> {
   const controller = new AbortController();
@@ -56,8 +66,6 @@ async function fetchStxBalance(address: string): Promise<BalanceResult> {
   }
 }
 
-const BALANCE_POLL_MS = 30_000;
-
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<WalletState>({
     connected: false,
@@ -67,6 +75,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     balanceFetchError: false,
   });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sessionCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   function startPolling(address: string) {
     if (pollRef.current) clearInterval(pollRef.current);
@@ -84,9 +93,16 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  function stopSessionCheck() {
+    if (sessionCheckRef.current) {
+      clearInterval(sessionCheckRef.current);
+      sessionCheckRef.current = null;
+    }
+  }
+
   // Rehydrate session on mount
   useEffect(() => {
-    if (userSession.isUserSignedIn()) {
+    if (isSessionValid()) {
       const userData = userSession.loadUserData();
       const address =
         NETWORK.constructor.name === 'StacksMainnet'
@@ -98,7 +114,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         startPolling(address);
       });
     }
-    return () => stopPolling();
+    return () => {
+      stopPolling();
+      stopSessionCheck();
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -125,6 +144,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   const disconnect = useCallback(() => {
     stopPolling();
+    stopSessionCheck();
     userSession.signUserOut();
     setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false });
   // eslint-disable-next-line react-hooks/exhaustive-deps
