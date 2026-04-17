@@ -14,6 +14,7 @@
 (define-constant ERR-ZERO-TARGET (err u7))
 (define-constant ERR-ALREADY-CLAIMED (err u8))
 (define-constant ERR-NOTHING-TO-CLAIM (err u9))
+(define-constant ERR-SPLIT-CLOSED (err u10))
 
 (define-private (is-member (user principal) (members (list 5 principal)))
   (or (is-eq user (unwrap-panic (element-at members u0)))
