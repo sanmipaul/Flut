@@ -33,6 +33,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
       minAmount: minAmount ? parseFloat(minAmount) : undefined,
       maxAmount: maxAmount ? parseFloat(maxAmount) : undefined,
     };
+    // Validate amount range to ensure min <= max when both are set
+    if (filter.minAmount !== undefined && filter.maxAmount !== undefined && filter.minAmount > filter.maxAmount) {
+      return;
+    }
     onFilterChange(filter);
   }, [selectedTypes, selectedStatuses, startDate, endDate, minAmount, maxAmount, onFilterChange]);
 
