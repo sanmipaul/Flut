@@ -11,6 +11,9 @@ import {
   toLocalISODate,
 } from './dateKeyUtils';
 
+// Re-export ChartInterval type so callers don't need to import from dateKeyUtils directly
+export type { ChartInterval } from './dateKeyUtils';
+
 
 /**
  * Transform transactions into time series data.
