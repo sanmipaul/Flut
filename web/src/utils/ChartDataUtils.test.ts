@@ -53,6 +53,49 @@ function localTs(
 }
 
 // ---------------------------------------------------------------------------
+// Parametrised: all intervals return sorted, non-Z labels
+// ---------------------------------------------------------------------------
+
+const ALL_INTERVALS: ChartInterval[] = ['hourly', 'daily', 'weekly', 'monthly'];
+
+describe.each(ALL_INTERVALS)('generateTimeSeriesData interval=%s', (interval) => {
+  it('returns sorted labels', () => {
+    const txs = [
+      makeTx({ timestamp: localTs(2024, 3, 17), amount: 10 }),
+      makeTx({ timestamp: localTs(2024, 3, 14), amount: 20 }),
+      makeTx({ timestamp: localTs(2024, 3, 11), amount: 30 }),
+    ];
+    const result = generateTimeSeriesData(txs, interval);
+    for (let i = 1; i < result.length; i++) {
+      expect(result[i - 1].label.localeCompare(result[i].label)).toBeLessThanOrEqual(0);
+    }
+  });
+
+  it('does not include Z in labels', () => {
+    const ts = localTs(2024, 3, 15, 23);
+    const result = generateTimeSeriesData([makeTx({ timestamp: ts })], interval);
+    result.forEach((point) => expect(point.label).not.toContain('Z'));
+  });
+
+  it('returns empty array for empty input', () => {
+    expect(generateTimeSeriesData([], interval)).toEqual([]);
+  });
+});
+
+describe.each(ALL_INTERVALS)('generateTransactionCountData interval=%s', (interval) => {
+  it('returns sorted labels', () => {
+    const txs = [
+      makeTx({ timestamp: localTs(2024, 3, 17) }),
+      makeTx({ timestamp: localTs(2024, 3, 14) }),
+    ];
+    const result = generateTransactionCountData(txs, interval);
+    for (let i = 1; i < result.length; i++) {
+      expect(result[i - 1].label.localeCompare(result[i].label)).toBeLessThanOrEqual(0);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // generateTimeSeriesData — daily interval
 // ---------------------------------------------------------------------------
 
