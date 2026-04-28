@@ -51,7 +51,11 @@ export function getLocalDayKey(date: Date): string {
  * Returns a local "YYYY-MM-DD" key for the Sunday that starts the week
  * containing `date`, based on local calendar.
  *
- * @example getLocalWeekStartKey(new Date(2024, 2, 15)) → Sunday of that week
+ * Uses `setDate` on a copy so the original `date` is not mutated.
+ * The resulting key uses local date parts, so it is immune to the
+ * UTC day-boundary shift that `toISOString().slice(0,10)` introduces.
+ *
+ * @example getLocalWeekStartKey(new Date(2024, 2, 15)) → "2024-03-10" (Sunday)
  */
 export function getLocalWeekStartKey(date: Date): string {
   const weekStart = new Date(date);
