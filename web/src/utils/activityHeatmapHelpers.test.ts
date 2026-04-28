@@ -10,6 +10,23 @@ import {
 } from './activityHeatmapHelpers';
 
 // ---------------------------------------------------------------------------
+// Total unique slots produced for a full week
+// ---------------------------------------------------------------------------
+
+describe('full week coverage', () => {
+  it('a week of transactions produces at most MAX_HEATMAP_SLOTS distinct keys', () => {
+    const keys = new Set<string>();
+    for (let day = 0; day < 7; day++) {
+      for (let hour = 0; hour < 24; hour++) {
+        const d = new Date(2024, 2, 10 + day, hour);
+        keys.add(heatmapSlotKey(d));
+      }
+    }
+    expect(keys.size).toBe(MAX_HEATMAP_SLOTS);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // heatmapSlotKey
 // ---------------------------------------------------------------------------
 
