@@ -1,6 +1,12 @@
 /**
  * Chart Data Transformation Utilities
- * Converts transaction data into chart-ready formats
+ *
+ * Converts vault transaction data into chart-ready formats.
+ *
+ * All date bucketing uses local calendar time via dateKeyUtils so that
+ * transactions are grouped by the user's clock, not UTC. This prevents
+ * misclassification when the user's timezone offset shifts a transaction
+ * into a different UTC day, week, or month.
  */
 
 import { VaultTransaction, ChartDataPoint, TransactionType } from '../types/TransactionHistory';
