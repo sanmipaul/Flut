@@ -12,6 +12,7 @@ import {
   generateStatusDistribution,
   generatePeriodComparison,
   getTransactionTypeColor,
+  type ChartInterval,
 } from './ChartDataUtils';
 import { VaultTransaction, TransactionType } from '../types/TransactionHistory';
 
