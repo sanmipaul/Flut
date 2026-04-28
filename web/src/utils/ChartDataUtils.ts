@@ -40,9 +40,7 @@ export const generateTimeSeriesData = (
         key = getLocalDayKey(date);
         break;
       case 'weekly':
-        const weekStart = new Date(date);
-        weekStart.setDate(date.getDate() - date.getDay());
-        key = weekStart.toISOString().slice(0, 10);
+        key = getLocalWeekStartKey(date);
         break;
       case 'monthly':
         key = date.toISOString().slice(0, 7);
