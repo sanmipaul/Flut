@@ -86,7 +86,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
     // If input is invalid (negative, non-numeric), ignore it
   };
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setSelectedTypes([]);
     setSelectedStatuses([]);
     setStartDate('');
@@ -94,7 +94,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
     setMinAmount('');
     setMaxAmount('');
     onFilterChange({});
-  };
+  }, [onFilterChange]);
 
   const FilterSection: React.FC<{ title: string; sectionKey: string; children: React.ReactNode }> = ({
     title,
