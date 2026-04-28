@@ -188,6 +188,40 @@ export const generateActivityHeatmap = (
 };
 
 /**
+ * Generate a weighted activity heatmap where each slot value is the total
+ * confirmed transaction volume (sum of amounts) rather than a raw count.
+ *
+ * Useful when transaction frequency is less interesting than dollar volume
+ * and you want to highlight high-value activity windows.
+ *
+ * Only confirmed transactions with a valid, positive timestamp are included.
+ */
+export const generateWeightedActivityHeatmap = (
+  transactions: VaultTransaction[]
+): HeatmapData[] => {
+  const heatmap = new Map<string, number>();
+
+  transactions.forEach((tx) => {
+    if (tx.status !== 'confirmed') return;
+    if (tx.timestamp <= 0 || !Number.isFinite(tx.timestamp)) return;
+
+    const date = new Date(tx.timestamp);
+    const key = `${date.getDay()}-${date.getHours()}`;
+    heatmap.set(key, (heatmap.get(key) || 0) + tx.amount);
+  });
+
+  return Array.from(heatmap.entries()).map(([key, value]) => {
+    const [dayStr, hourStr] = key.split('-');
+    return {
+      label: key,
+      value,
+      row: parseInt(dayStr, 10),
+      col: parseInt(hourStr, 10),
+    };
+  });
+};
+
+/**
  * Generate comparison data for two periods
  */
 export const generatePeriodComparison = (
