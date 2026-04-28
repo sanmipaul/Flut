@@ -68,26 +68,8 @@ export const generateTransactionCountData = (
   const data: Map<string, number> = new Map();
 
   transactions.forEach((tx) => {
-    const date = new Date(tx.timestamp);
-    let key: string;
-
-    switch (interval) {
-      case 'hourly':
-        key = date.toISOString().slice(0, 13);
-        break;
-      case 'daily':
-        key = date.toISOString().slice(0, 10);
-        break;
-      case 'weekly':
-        const weekStart = new Date(date);
-        weekStart.setDate(date.getDate() - date.getDay());
-        key = weekStart.toISOString().slice(0, 10);
-        break;
-      case 'monthly':
-        key = date.toISOString().slice(0, 7);
-        break;
-    }
-
+    if (!isValidTimestamp(tx.timestamp)) return;
+    const key = getIntervalKey(new Date(tx.timestamp), interval);
     data.set(key, (data.get(key) || 0) + 1);
   });
 
