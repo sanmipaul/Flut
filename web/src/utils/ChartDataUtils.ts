@@ -24,10 +24,10 @@ export const generateTimeSeriesData = (
   interval: 'hourly' | 'daily' | 'weekly' | 'monthly'
 ): ChartDataPoint[] => {
   const data: Map<string, number> = new Map();
-  const now = Date.now();
 
   transactions.forEach((tx) => {
     if (tx.status !== 'confirmed') return;
+    if (!isValidTimestamp(tx.timestamp)) return;
 
     const date = new Date(tx.timestamp);
     let key: string;
