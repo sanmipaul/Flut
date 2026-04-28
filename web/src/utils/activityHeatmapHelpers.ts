@@ -42,6 +42,9 @@ export function parseSlotKey(key: string): { row: number; col: number } {
 /**
  * Convert an accumulated slot Map into a HeatmapData array.
  * Pure function with no side effects — safe to call in useMemo.
+ *
+ * The returned array is unordered. Callers that need a specific order
+ * (e.g. by day then hour) should sort the result after calling this function.
  */
 export function slotsToHeatmapData(slots: Map<string, number>): HeatmapData[] {
   return Array.from(slots.entries()).map(([key, value]) => {
