@@ -165,6 +165,7 @@ export const generateActivityHeatmap = (
 
   transactions.forEach((tx) => {
     if (tx.status !== 'confirmed') return;
+    if (tx.timestamp <= 0 || !Number.isFinite(tx.timestamp)) return;
 
     const date = new Date(tx.timestamp);
     const day = date.getDay();
