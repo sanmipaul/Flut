@@ -170,26 +170,13 @@ export const generateActivityHeatmap = (
 
   transactions.forEach((tx) => {
     if (tx.status !== 'confirmed') return;
-    if (tx.timestamp <= 0 || !Number.isFinite(tx.timestamp)) return;
+    if (!isValidHeatmapTimestamp(tx.timestamp)) return;
 
-    const date = new Date(tx.timestamp);
-    const day = date.getDay();
-    const hour = date.getHours();
-    const key = `${day}-${hour}`;
-
+    const key = heatmapSlotKey(new Date(tx.timestamp));
     heatmap.set(key, (heatmap.get(key) || 0) + 1);
   });
 
-  // Convert Map to HeatmapData array
-  return Array.from(heatmap.entries()).map(([key, value]) => {
-    const [dayStr, hourStr] = key.split('-');
-    return {
-      label: key,
-      value,
-      row: parseInt(dayStr, 10),
-      col: parseInt(hourStr, 10),
-    };
-  });
+  return slotsToHeatmapData(heatmap);
 };
 
 /**
