@@ -45,7 +45,17 @@ export function slotsToHeatmapData(slots: Map<string, number>): HeatmapData[] {
 /**
  * Returns true when a transaction timestamp is a plausible epoch value.
  * Guards against zero, NaN, negative, and Infinity.
+ *
+ * Intentionally loose — any positive finite timestamp is accepted.
+ * Callers that need tighter range validation (e.g. year 2000+) should
+ * use `isValidTimestamp` from dateKeyUtils instead.
  */
 export function isValidHeatmapTimestamp(ts: number): boolean {
   return ts > 0 && Number.isFinite(ts);
 }
+
+/**
+ * The maximum number of unique heatmap slots: 7 days × 24 hours = 168.
+ * Useful for pre-allocating Maps or validating result set sizes in tests.
+ */
+export const MAX_HEATMAP_SLOTS = 168;
