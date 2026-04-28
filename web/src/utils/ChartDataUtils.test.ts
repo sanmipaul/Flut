@@ -453,6 +453,24 @@ describe('generateTimeSeriesData — invalid timestamp handling', () => {
 });
 
 // ---------------------------------------------------------------------------
+// generateCumulativeVolumeData — ISO date label format
+// ---------------------------------------------------------------------------
+
+describe('generateCumulativeVolumeData — label format', () => {
+  it('uses YYYY-MM-DD format for labels not locale-dependent strings', () => {
+    const ts = localTs(2024, 3, 15);
+    const result = generateCumulativeVolumeData([makeTx({ timestamp: ts })]);
+    expect(result[0].label).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('label does not contain slashes or locale separators', () => {
+    const ts = localTs(2024, 3, 15);
+    const result = generateCumulativeVolumeData([makeTx({ timestamp: ts })]);
+    expect(result[0].label).not.toContain('/');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // generateCumulativeVolumeData
 // ---------------------------------------------------------------------------
 
