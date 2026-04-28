@@ -43,7 +43,7 @@ export const generateTimeSeriesData = (
         key = getLocalWeekStartKey(date);
         break;
       case 'monthly':
-        key = date.toISOString().slice(0, 7);
+        key = getLocalMonthKey(date);
         break;
     }
 
