@@ -153,7 +153,10 @@ export const generateStatusDistribution = (
 };
 
 /**
- * Generate heatmap data for transaction activity
+ * Generate heatmap data for transaction activity.
+ *
+ * Only confirmed transactions are counted to ensure the heatmap reflects
+ * actual settled activity, not speculative or failed attempts.
  */
 export const generateActivityHeatmap = (
   transactions: VaultTransaction[]
@@ -161,6 +164,8 @@ export const generateActivityHeatmap = (
   const heatmap = new Map<string, number>();
 
   transactions.forEach((tx) => {
+    if (tx.status !== 'confirmed') return;
+
     const date = new Date(tx.timestamp);
     const day = date.getDay();
     const hour = date.getHours();
