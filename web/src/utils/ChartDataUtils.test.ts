@@ -337,6 +337,22 @@ describe('date key helpers', () => {
 });
 
 // ---------------------------------------------------------------------------
+// generateTransactionCountData — invalid timestamp handling
+// ---------------------------------------------------------------------------
+
+describe('generateTransactionCountData — invalid timestamp handling', () => {
+  it('silently skips transactions with timestamp=0', () => {
+    const txs = [makeTx({ timestamp: 0 })];
+    expect(generateTransactionCountData(txs, 'daily')).toEqual([]);
+  });
+
+  it('silently skips NaN timestamps', () => {
+    const txs = [makeTx({ timestamp: NaN })];
+    expect(generateTransactionCountData(txs, 'daily')).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Regression: midnight-crossing transactions
 // ---------------------------------------------------------------------------
 
