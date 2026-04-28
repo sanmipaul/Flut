@@ -29,24 +29,7 @@ export const generateTimeSeriesData = (
     if (tx.status !== 'confirmed') return;
     if (!isValidTimestamp(tx.timestamp)) return;
 
-    const date = new Date(tx.timestamp);
-    let key: string;
-
-    switch (interval) {
-      case 'hourly':
-        key = getLocalHourKey(date);
-        break;
-      case 'daily':
-        key = getLocalDayKey(date);
-        break;
-      case 'weekly':
-        key = getLocalWeekStartKey(date);
-        break;
-      case 'monthly':
-        key = getLocalMonthKey(date);
-        break;
-    }
-
+    const key = getIntervalKey(new Date(tx.timestamp), interval);
     data.set(key, (data.get(key) || 0) + tx.amount);
   });
 
