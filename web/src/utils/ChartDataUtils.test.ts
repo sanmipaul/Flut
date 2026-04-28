@@ -544,6 +544,37 @@ describe('week crossing month boundary', () => {
 });
 
 // ---------------------------------------------------------------------------
+// generateActivityHeatmap
+// ---------------------------------------------------------------------------
+
+describe('generateActivityHeatmap', () => {
+  it('returns heatmap entries with row=day and col=hour', () => {
+    // Monday (day=1) at 14:00
+    const ts = localTs(2024, 3, 11, 14); // March 11 2024 is a Monday
+    const txs = [makeTx({ timestamp: ts }), makeTx({ timestamp: ts })];
+    const result = generateActivityHeatmap(txs);
+    expect(result).toHaveLength(1);
+    const d = new Date(ts);
+    expect(result[0].row).toBe(d.getDay());
+    expect(result[0].col).toBe(d.getHours());
+    expect(result[0].value).toBe(2);
+  });
+
+  it('returns empty array for empty input', () => {
+    expect(generateActivityHeatmap([])).toEqual([]);
+  });
+
+  it('accumulates counts for the same day-hour slot', () => {
+    const ts1 = localTs(2024, 3, 11, 9);
+    const ts2 = localTs(2024, 3, 18, 9); // next week same day+hour
+    const txs = [makeTx({ timestamp: ts1 }), makeTx({ timestamp: ts2 })];
+    const result = generateActivityHeatmap(txs);
+    expect(result).toHaveLength(1);
+    expect(result[0].value).toBe(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // generateMovingAverage
 // ---------------------------------------------------------------------------
 
