@@ -37,7 +37,7 @@ export const generateTimeSeriesData = (
         key = getLocalHourKey(date);
         break;
       case 'daily':
-        key = date.toISOString().slice(0, 10);
+        key = getLocalDayKey(date);
         break;
       case 'weekly':
         const weekStart = new Date(date);
