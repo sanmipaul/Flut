@@ -34,7 +34,7 @@ export const generateTimeSeriesData = (
 
     switch (interval) {
       case 'hourly':
-        key = date.toISOString().slice(0, 13);
+        key = getLocalHourKey(date);
         break;
       case 'daily':
         key = date.toISOString().slice(0, 10);
