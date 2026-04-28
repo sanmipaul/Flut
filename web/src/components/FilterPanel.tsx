@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TransactionType, TransactionFilter } from '../types/TransactionHistory';
 import { getTransactionTypeLabel } from '../utils/AnalyticsUtils';
 
