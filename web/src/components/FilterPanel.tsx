@@ -15,12 +15,12 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
     status: false,
   });
 
+  // State for selected transaction types with type safety
   const [selectedTypes, setSelectedTypes] = useState<TransactionType[]>([]);
+  // State for selected status filters
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  // State for date range filters
   const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
-  const [minAmount, setMinAmount] = useState<string>('');
-  const [maxAmount, setMaxAmount] = useState<string>('');
 
   // Use useEffect to ensure filter is applied after all state updates are complete
   // This prevents race conditions and stale closure issues
