@@ -11,7 +11,10 @@
 // Zero-padding helper
 // ---------------------------------------------------------------------------
 
-/** Zero-pad a number to at least two digits: 5 → "05". */
+/**
+ * Zero-pad a number to at least two digits: 5 → "05", 12 → "12".
+ * Numbers ≥ 100 are returned as-is since they already have sufficient width.
+ */
 export function padDatePart(n: number): string {
   return String(n).padStart(2, '0');
 }
