@@ -22,6 +22,20 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
   const [minAmount, setMinAmount] = useState<string>('');
   const [maxAmount, setMaxAmount] = useState<string>('');
 
+  // Use useEffect to ensure filter is applied after all state updates are complete
+  // This prevents race conditions and stale closure issues
+  useEffect(() => {
+    const filter: TransactionFilter = {
+      types: selectedTypes.length > 0 ? selectedTypes : undefined,
+      status: selectedStatuses.length > 0 ? selectedStatuses as ('pending' | 'confirmed' | 'failed')[] : undefined,
+      startDate: startDate ? new Date(startDate).getTime() : undefined,
+      endDate: endDate ? new Date(endDate).getTime() : undefined,
+      minAmount: minAmount ? parseFloat(minAmount) : undefined,
+      maxAmount: maxAmount ? parseFloat(maxAmount) : undefined,
+    };
+    onFilterChange(filter);
+  }, [selectedTypes, selectedStatuses, startDate, endDate, minAmount, maxAmount, onFilterChange]);
+
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
       ...prev,
@@ -30,51 +44,48 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
   };
 
   const handleTypeToggle = (type: TransactionType) => {
-    const newTypes = selectedTypes.includes(type)
-      ? selectedTypes.filter((t) => t !== type)
-      : [...selectedTypes, type];
-    setSelectedTypes(newTypes);
-    applyFilter(newTypes, selectedStatuses, startDate, endDate, minAmount, maxAmount);
+    setSelectedTypes((prevTypes) =>
+      prevTypes.includes(type)
+        ? prevTypes.filter((t) => t !== type)
+        : [...prevTypes, type]
+    );
   };
 
   const handleStatusToggle = (status: string) => {
-    const newStatuses = selectedStatuses.includes(status)
-      ? selectedStatuses.filter((s) => s !== status)
-      : [...selectedStatuses, status];
-    setSelectedStatuses(newStatuses);
-    applyFilter(selectedTypes, newStatuses, startDate, endDate, minAmount, maxAmount);
-  };
-
-  const applyFilter = (types: TransactionType[], statuses: string[], start: string, end: string, min: string, max: string) => {
-    const filter: TransactionFilter = {
-      types: types.length > 0 ? types : undefined,
-      status: statuses.length > 0 ? statuses as ('pending' | 'confirmed' | 'failed')[] : undefined,
-      startDate: start ? new Date(start).getTime() : undefined,
-      endDate: end ? new Date(end).getTime() : undefined,
-      minAmount: min ? parseFloat(min) : undefined,
-      maxAmount: max ? parseFloat(max) : undefined,
-    };
-    onFilterChange(filter);
+    setSelectedStatuses((prevStatuses) =>
+      prevStatuses.includes(status)
+        ? prevStatuses.filter((s) => s !== status)
+        : [...prevStatuses, status]
+    );
   };
 
   const handleDateChange = (type: 'start' | 'end', value: string) => {
+    const selectedDate = value ? new Date(value).getTime() : 0;
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    
+    // Prevent selecting future dates
+    if (selectedDate > today.getTime()) {
+      return;
+    }
+    
     if (type === 'start') {
       setStartDate(value);
-      applyFilter(selectedTypes, selectedStatuses, value, endDate, minAmount, maxAmount);
     } else {
       setEndDate(value);
-      applyFilter(selectedTypes, selectedStatuses, startDate, value, minAmount, maxAmount);
     }
   };
 
   const handleAmountChange = (type: 'min' | 'max', value: string) => {
-    if (type === 'min') {
-      setMinAmount(value);
-      applyFilter(selectedTypes, selectedStatuses, startDate, endDate, value, maxAmount);
-    } else {
-      setMaxAmount(value);
-      applyFilter(selectedTypes, selectedStatuses, startDate, endDate, minAmount, value);
+    // Validate input: only allow positive numbers or empty string
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      if (type === 'min') {
+        setMinAmount(value);
+      } else {
+        setMaxAmount(value);
+      }
     }
+    // If input is invalid (negative, non-numeric), ignore it
   };
 
   const resetFilters = () => {
@@ -125,6 +136,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
             type="date"
             value={startDate}
             onChange={(e) => handleDateChange('start', e.target.value)}
+            max={new Date().toISOString().split('T')[0]}
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Start date"
           />
@@ -132,6 +144,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
             type="date"
             value={endDate}
             onChange={(e) => handleDateChange('end', e.target.value)}
+            max={new Date().toISOString().split('T')[0]}
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="End date"
           />
@@ -163,6 +176,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
             value={minAmount}
             onChange={(e) => handleAmountChange('min', e.target.value)}
             placeholder="Min amount"
+            inputMode="decimal"
+            min="0"
+            step="any"
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
@@ -170,6 +186,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
             value={maxAmount}
             onChange={(e) => handleAmountChange('max', e.target.value)}
             placeholder="Max amount"
+            inputMode="decimal"
+            min="0"
+            step="any"
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

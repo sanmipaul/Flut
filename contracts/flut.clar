@@ -1,6 +1,7 @@
 ;; Flut - STX Savings Vault
 (define-map vaults {vault-id: uint} {owner: principal, amount: uint, unlock-height: uint, withdrawn: bool})
 (define-data-var vault-counter uint u0)
+(define-map pending-owner {vault-id: uint} {new-owner: principal})
 
 (define-constant ERR-NOT-FOUND (err u1))
 (define-constant ERR-UNAUTHORIZED (err u2))
@@ -31,6 +32,17 @@
       (asserts! (not (get withdrawn vault)) ERR-VAULT-CLOSED)
       (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
       (map-set vaults {vault-id: vault-id} (merge vault {amount: (+ (get amount vault) amount)}))
+      (ok true))
+    ERR-NOT-FOUND))
+
+
+(define-public (initiate-ownership-transfer (vault-id uint) (new-owner principal))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (begin
+      (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
+      (asserts! (not (is-eq new-owner tx-sender)) ERR-SAME-OWNER)
+      (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
+      (map-set pending-owner {vault-id: vault-id} {new-owner: new-owner})
       (ok true))
     ERR-NOT-FOUND))
 
