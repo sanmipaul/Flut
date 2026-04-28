@@ -178,6 +178,24 @@ describe('getIntervalKey', () => {
 });
 
 // ---------------------------------------------------------------------------
+// isValidTimestamp — boundary values
+// ---------------------------------------------------------------------------
+
+describe('isValidTimestamp — boundary values', () => {
+  it('accepts the lower boundary + 1 ms (after year 2000)', () => {
+    expect(isValidTimestamp(946_684_800_001)).toBe(true);
+  });
+
+  it('rejects exactly year 2000 boundary', () => {
+    expect(isValidTimestamp(946_684_800_000)).toBe(false);
+  });
+
+  it('rejects a large future timestamp beyond 2200', () => {
+    expect(isValidTimestamp(9_999_999_999_999)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // isValidTimestamp
 // ---------------------------------------------------------------------------
 
