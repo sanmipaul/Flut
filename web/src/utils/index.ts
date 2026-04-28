@@ -11,6 +11,7 @@ export {
   toLocalISODate,
   toLocalISOMonth,
 } from './dateKeyUtils';
+export type { ChartInterval } from './dateKeyUtils';
 export { calculateStackingYield } from './calculateStackingYield';
 export {
   formatBtcAmount,
