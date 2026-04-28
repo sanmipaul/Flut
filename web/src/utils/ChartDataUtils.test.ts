@@ -442,6 +442,48 @@ describe('generateCumulativeVolumeData', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Regression: year boundary crossing
+// ---------------------------------------------------------------------------
+
+describe('year boundary regression', () => {
+  it('Dec 31 and Jan 1 fall into different daily buckets', () => {
+    const dec31 = localTs(2023, 12, 31, 23, 59);
+    const jan1 = localTs(2024, 1, 1, 0, 1);
+    const txs = [makeTx({ timestamp: dec31, amount: 100 }), makeTx({ timestamp: jan1, amount: 200 })];
+    const result = generateTimeSeriesData(txs, 'daily');
+    expect(result).toHaveLength(2);
+    expect(result[0].label).toContain('2023');
+    expect(result[1].label).toContain('2024');
+  });
+
+  it('Dec and Jan fall into different monthly buckets', () => {
+    const dec = localTs(2023, 12, 15);
+    const jan = localTs(2024, 1, 15);
+    const txs = [makeTx({ timestamp: dec }), makeTx({ timestamp: jan })];
+    const result = generateTimeSeriesData(txs, 'monthly');
+    expect(result).toHaveLength(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Regression: week crossing month boundary
+// ---------------------------------------------------------------------------
+
+describe('week crossing month boundary', () => {
+  it('Saturday in month A and Sunday in month B get different weekly keys', () => {
+    // Find a month where last day is Saturday and next month starts Sunday
+    // Jan 2022: Jan 29 (Sat), Jan 30 (Sun) in Feb (Feb 1 is Tuesday actually...)
+    // Use a known case: March 31 2024 is a Sunday — week start IS March 31
+    // March 30 2024 is a Saturday — week start is March 24
+    const sat = localTs(2024, 3, 30); // Saturday
+    const sun = localTs(2024, 3, 31); // Sunday — starts new week
+    const txs = [makeTx({ timestamp: sat }), makeTx({ timestamp: sun })];
+    const result = generateTimeSeriesData(txs, 'weekly');
+    expect(result).toHaveLength(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // getTransactionTypeColor
 // ---------------------------------------------------------------------------
 
