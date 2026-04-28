@@ -47,13 +47,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
     }));
   };
 
-  const handleTypeToggle = (type: TransactionType) => {
-    setSelectedTypes((prevTypes) =>
-      prevTypes.includes(type)
-        ? prevTypes.filter((t) => t !== type)
-        : [...prevTypes, type]
-    );
-  };
+
 
   const handleStatusToggle = (status: string) => {
     setSelectedStatuses((prevStatuses) =>
