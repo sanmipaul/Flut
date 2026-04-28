@@ -77,7 +77,12 @@ export function getLocalWeekStartKey(date: Date): string {
 /**
  * Returns a local "YYYY-MM" key suitable for monthly chart buckets.
  *
+ * Uses `getFullYear/getMonth` (local time) instead of `toISOString().slice(0,7)`
+ * (UTC) so a transaction at 23:30 local on December 31 is not grouped into
+ * January of the following year when UTC is ahead.
+ *
  * @example getLocalMonthKey(new Date(2024, 2, 15)) → "2024-03"
+ * @example getLocalMonthKey(new Date(2024, 11, 31)) → "2024-12"
  */
 export function getLocalMonthKey(date: Date): string {
   const y = date.getFullYear();
