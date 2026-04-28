@@ -65,7 +65,10 @@ export const generateCumulativeVolumeData = (
 };
 
 /**
- * Generate transaction count over time
+ * Generate transaction count over time.
+ *
+ * Counts all transactions (regardless of status) grouped by local calendar
+ * using timezone-aware date keys. Invalid timestamps are silently skipped.
  */
 export const generateTransactionCountData = (
   transactions: VaultTransaction[],
