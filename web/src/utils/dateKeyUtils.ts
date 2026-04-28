@@ -1,0 +1,134 @@
+/**
+ * dateKeyUtils
+ *
+ * Timezone-aware date key helpers for chart grouping.
+ * All functions operate on the user's local clock so that a transaction
+ * recorded at "11 pm local" is bucketed into the correct local day/hour,
+ * not the UTC equivalent (which may fall in the next calendar day).
+ */
+
+// ---------------------------------------------------------------------------
+// Zero-padding helper
+// ---------------------------------------------------------------------------
+
+/** Zero-pad a number to at least two digits: 5 → "05". */
+export function padDatePart(n: number): string {
+  return String(n).padStart(2, '0');
+}
+
+// ---------------------------------------------------------------------------
+// Local date key builders
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns a local "YYYY-MM-DDTHH" key suitable for hourly chart buckets.
+ * Uses local year/month/day/hour so that the bucket matches what the user
+ * sees on their clock, not the UTC equivalent.
+ *
+ * @example getLocalHourKey(new Date(2024, 2, 15, 23)) → "2024-03-15T23"
+ */
+export function getLocalHourKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = padDatePart(date.getMonth() + 1);
+  const d = padDatePart(date.getDate());
+  const h = padDatePart(date.getHours());
+  return `${y}-${m}-${d}T${h}`;
+}
+
+/**
+ * Returns a local "YYYY-MM-DD" key suitable for daily chart buckets.
+ *
+ * @example getLocalDayKey(new Date(2024, 2, 15)) → "2024-03-15"
+ */
+export function getLocalDayKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = padDatePart(date.getMonth() + 1);
+  const d = padDatePart(date.getDate());
+  return `${y}-${m}-${d}`;
+}
+
+/**
+ * Returns a local "YYYY-MM-DD" key for the Sunday that starts the week
+ * containing `date`, based on local calendar.
+ *
+ * @example getLocalWeekStartKey(new Date(2024, 2, 15)) → Sunday of that week
+ */
+export function getLocalWeekStartKey(date: Date): string {
+  const weekStart = new Date(date);
+  weekStart.setDate(date.getDate() - date.getDay());
+  return getLocalDayKey(weekStart);
+}
+
+/**
+ * Returns a local "YYYY-MM" key suitable for monthly chart buckets.
+ *
+ * @example getLocalMonthKey(new Date(2024, 2, 15)) → "2024-03"
+ */
+export function getLocalMonthKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = padDatePart(date.getMonth() + 1);
+  return `${y}-${m}`;
+}
+
+/**
+ * Returns a local "YYYY" key for yearly chart buckets.
+ *
+ * @example getLocalYearKey(new Date(2024, 2, 15)) → "2024"
+ */
+export function getLocalYearKey(date: Date): string {
+  return String(date.getFullYear());
+}
+
+// ---------------------------------------------------------------------------
+// Interval dispatch
+// ---------------------------------------------------------------------------
+
+export type ChartInterval = 'hourly' | 'daily' | 'weekly' | 'monthly';
+
+/**
+ * Returns a timezone-aware bucket key for the given interval.
+ * All keys are ISO-style strings that sort correctly lexicographically.
+ */
+export function getIntervalKey(date: Date, interval: ChartInterval): string {
+  switch (interval) {
+    case 'hourly':
+      return getLocalHourKey(date);
+    case 'daily':
+      return getLocalDayKey(date);
+    case 'weekly':
+      return getLocalWeekStartKey(date);
+    case 'monthly':
+      return getLocalMonthKey(date);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Validation helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns true when the timestamp is a finite, positive number that represents
+ * a plausible Unix epoch value (after year 2000 and before year 2200).
+ */
+export function isValidTimestamp(ts: number): boolean {
+  return (
+    Number.isFinite(ts) &&
+    ts > 946_684_800_000 &&   // 2000-01-01 UTC
+    ts < 7_258_118_400_000    // 2200-01-01 UTC
+  );
+}
+
+/**
+ * Returns an ISO "YYYY-MM-DD" string for a timestamp using local date parts.
+ * Useful for display labels in cumulative volume charts.
+ */
+export function toLocalISODate(timestamp: number): string {
+  return getLocalDayKey(new Date(timestamp));
+}
+
+/**
+ * Returns an ISO "YYYY-MM" string for a timestamp using local date parts.
+ */
+export function toLocalISOMonth(timestamp: number): string {
+  return getLocalMonthKey(new Date(timestamp));
+}
