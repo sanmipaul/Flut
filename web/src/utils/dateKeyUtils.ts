@@ -44,7 +44,12 @@ export function getLocalHourKey(date: Date): string {
 /**
  * Returns a local "YYYY-MM-DD" key suitable for daily chart buckets.
  *
+ * The key is built from `getFullYear/getMonth/getDate` (local time) rather
+ * than `toISOString().slice(0,10)` (UTC), preventing cross-day misclassification
+ * for users in negative UTC offsets where local midnight differs from UTC midnight.
+ *
  * @example getLocalDayKey(new Date(2024, 2, 15)) → "2024-03-15"
+ * @example getLocalDayKey(new Date(2024, 0, 7))  → "2024-01-07"
  */
 export function getLocalDayKey(date: Date): string {
   const y = date.getFullYear();
