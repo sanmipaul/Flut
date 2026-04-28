@@ -139,7 +139,11 @@ export function toLocalISODate(timestamp: number): string {
 }
 
 /**
- * Returns an ISO "YYYY-MM" string for a timestamp using local date parts.
+ * Returns a local "YYYY-MM" string for a timestamp using local date parts.
+ *
+ * Unlike `toISOString().slice(0, 7)`, uses the local month rather than UTC,
+ * so a transaction at 23:30 local on Dec 31 is grouped into December,
+ * not January of the next year if UTC is ahead.
  */
 export function toLocalISOMonth(timestamp: number): string {
   return getLocalMonthKey(new Date(timestamp));
