@@ -484,6 +484,125 @@ describe('week crossing month boundary', () => {
 });
 
 // ---------------------------------------------------------------------------
+// generateMovingAverage
+// ---------------------------------------------------------------------------
+
+describe('generateMovingAverage', () => {
+  it('returns same length as input', () => {
+    const data = [
+      { label: '2024-01', value: 10 },
+      { label: '2024-02', value: 20 },
+      { label: '2024-03', value: 30 },
+    ];
+    expect(generateMovingAverage(data, 3)).toHaveLength(3);
+  });
+
+  it('returns empty array for empty input', () => {
+    expect(generateMovingAverage([], 7)).toEqual([]);
+  });
+
+  it('preserves labels from input', () => {
+    const data = [
+      { label: 'a', value: 10 },
+      { label: 'b', value: 20 },
+    ];
+    const result = generateMovingAverage(data, 1);
+    expect(result[0].label).toBe('a');
+    expect(result[1].label).toBe('b');
+  });
+
+  it('computes simple average for window size 1', () => {
+    const data = [{ label: 'x', value: 42 }];
+    const result = generateMovingAverage(data, 1);
+    expect(result[0].value).toBe(42);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// generatePeriodComparison
+// ---------------------------------------------------------------------------
+
+describe('generatePeriodComparison', () => {
+  it('returns two data points: previous and current period', () => {
+    const current = [makeTx({ amount: 500 })];
+    const previous = [makeTx({ amount: 200 })];
+    const result = generatePeriodComparison(current, previous);
+    expect(result).toHaveLength(2);
+    expect(result[0].label).toBe('Previous Period');
+    expect(result[1].label).toBe('Current Period');
+  });
+
+  it('sums only confirmed transactions', () => {
+    const current = [
+      makeTx({ amount: 500, status: 'confirmed' }),
+      makeTx({ amount: 999, status: 'pending' }),
+    ];
+    const previous = [makeTx({ amount: 200, status: 'confirmed' })];
+    const result = generatePeriodComparison(current, previous);
+    expect(result[1].value).toBe(500);
+    expect(result[0].value).toBe(200);
+  });
+
+  it('handles empty periods with zero volume', () => {
+    const result = generatePeriodComparison([], []);
+    expect(result[0].value).toBe(0);
+    expect(result[1].value).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// generateStatusDistribution
+// ---------------------------------------------------------------------------
+
+describe('generateStatusDistribution', () => {
+  it('counts transactions by status', () => {
+    const txs = [
+      makeTx({ status: 'confirmed' }),
+      makeTx({ status: 'confirmed' }),
+      makeTx({ status: 'pending' }),
+      makeTx({ status: 'failed' }),
+    ];
+    const result = generateStatusDistribution(txs);
+    const confirmed = result.find((r) => r.label === 'Confirmed');
+    const pending = result.find((r) => r.label === 'Pending');
+    const failed = result.find((r) => r.label === 'Failed');
+    expect(confirmed?.value).toBe(2);
+    expect(pending?.value).toBe(1);
+    expect(failed?.value).toBe(1);
+  });
+
+  it('returns empty array for empty input', () => {
+    expect(generateStatusDistribution([])).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// generateTransactionTypeDistribution
+// ---------------------------------------------------------------------------
+
+describe('generateTransactionTypeDistribution', () => {
+  it('groups by transaction type and sums amounts', () => {
+    const txs = [
+      makeTx({ type: TransactionType.DEPOSIT, amount: 100 }),
+      makeTx({ type: TransactionType.DEPOSIT, amount: 200 }),
+      makeTx({ type: TransactionType.WITHDRAWAL, amount: 50 }),
+    ];
+    const result = generateTransactionTypeDistribution(txs);
+    const deposits = result.find((r) => r.label === 'Deposits');
+    expect(deposits?.value).toBe(300);
+  });
+
+  it('sorts by value descending', () => {
+    const txs = [
+      makeTx({ type: TransactionType.WITHDRAWAL, amount: 10 }),
+      makeTx({ type: TransactionType.DEPOSIT, amount: 100 }),
+    ];
+    const result = generateTransactionTypeDistribution(txs);
+    expect(result[0].value).toBeGreaterThanOrEqual(result[1].value);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // getTransactionTypeColor
 // ---------------------------------------------------------------------------
 
