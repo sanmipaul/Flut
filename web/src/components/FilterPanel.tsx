@@ -40,24 +40,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
     onFilterChange(filter);
   }, [selectedTypes, selectedStatuses, startDate, endDate, minAmount, maxAmount, onFilterChange]);
 
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
 
-
-
-  const handleStatusToggle = (status: string) => {
-    setSelectedStatuses((prevStatuses) =>
-      prevStatuses.includes(status)
-        ? prevStatuses.filter((s) => s !== status)
-        : [...prevStatuses, status]
-    );
-  };
-
-  const handleDateChange = (type: 'start' | 'end', value: string) => {
     const selectedDate = value ? new Date(value).getTime() : 0;
     const today = new Date();
     today.setHours(23, 59, 59, 999);
