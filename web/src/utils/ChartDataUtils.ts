@@ -184,7 +184,10 @@ export const generateActivityHeatmap = (
  * confirmed transaction volume (sum of amounts) rather than a raw count.
  *
  * Useful when transaction frequency is less interesting than dollar volume
- * and you want to highlight high-value activity windows.
+ * and you want to highlight high-value activity windows. For example, a
+ * single large deposit at 2am on a Tuesday will show as a bright spot in
+ * the weighted heatmap but would be indistinguishable from any other
+ * transaction in the count-based heatmap.
  *
  * Only confirmed transactions with a valid, positive timestamp are included.
  */
