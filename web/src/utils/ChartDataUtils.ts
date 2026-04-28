@@ -5,6 +5,11 @@
 
 import { VaultTransaction, ChartDataPoint, TransactionType } from '../types/TransactionHistory';
 import { HeatmapData } from '../components/ActivityHeatmap';
+import {
+  heatmapSlotKey,
+  slotsToHeatmapData,
+  isValidHeatmapTimestamp,
+} from './activityHeatmapHelpers';
 
 
 /**
