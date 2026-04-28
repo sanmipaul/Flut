@@ -163,6 +163,65 @@ describe('generateActivityHeatmap — full week coverage', () => {
 });
 
 // ---------------------------------------------------------------------------
+// generateWeightedActivityHeatmap
+// ---------------------------------------------------------------------------
+
+describe('generateWeightedActivityHeatmap', () => {
+  it('sums amounts for confirmed transactions in same slot', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const txs = [
+      makeTx({ timestamp: ts, amount: 500, status: 'confirmed' }),
+      makeTx({ timestamp: ts, amount: 300, status: 'confirmed' }),
+    ];
+    const result = generateWeightedActivityHeatmap(txs);
+    expect(result).toHaveLength(1);
+    expect(result[0].value).toBe(800);
+  });
+
+  it('excludes pending transactions from weighted count', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const txs = [
+      makeTx({ timestamp: ts, amount: 500, status: 'pending' }),
+    ];
+    const result = generateWeightedActivityHeatmap(txs);
+    expect(result).toHaveLength(0);
+  });
+
+  it('excludes failed transactions from weighted count', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const txs = [makeTx({ timestamp: ts, amount: 999, status: 'failed' })];
+    const result = generateWeightedActivityHeatmap(txs);
+    expect(result).toHaveLength(0);
+  });
+
+  it('returns empty array for empty input', () => {
+    expect(generateWeightedActivityHeatmap([])).toHaveLength(0);
+  });
+
+  it('row and col are correct for the weighted version', () => {
+    const ts = new Date(2024, 2, 11, 9).getTime(); // Monday 09:00
+    const d = new Date(ts);
+    const result = generateWeightedActivityHeatmap([makeTx({ timestamp: ts })]);
+    expect(result[0].row).toBe(d.getDay());
+    expect(result[0].col).toBe(d.getHours());
+  });
+
+  it('produces different values than count-based heatmap when amounts differ', () => {
+    const t1 = new Date(2024, 2, 11, 9).getTime();
+    const t2 = new Date(2024, 2, 11, 10).getTime();
+    const txs = [
+      makeTx({ timestamp: t1, amount: 1000 }),
+      makeTx({ timestamp: t2, amount: 1 }),
+    ];
+    const count = generateActivityHeatmap(txs);
+    const weighted = generateWeightedActivityHeatmap(txs);
+    expect(count[0].value).toBe(1);
+    expect(count[1].value).toBe(1);
+    expect(weighted[0].value).not.toBe(weighted[1].value);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Mixed status regression
 // ---------------------------------------------------------------------------
 
