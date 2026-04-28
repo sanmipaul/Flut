@@ -222,6 +222,54 @@ describe('generateWeightedActivityHeatmap', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Invalid timestamp handling
+// ---------------------------------------------------------------------------
+
+describe('generateActivityHeatmap — invalid timestamp handling', () => {
+  it('skips transactions with timestamp=0', () => {
+    const txs = [makeTx({ timestamp: 0, status: 'confirmed' })];
+    expect(generateActivityHeatmap(txs)).toHaveLength(0);
+  });
+
+  it('skips transactions with NaN timestamp', () => {
+    const txs = [makeTx({ timestamp: NaN, status: 'confirmed' })];
+    expect(generateActivityHeatmap(txs)).toHaveLength(0);
+  });
+
+  it('skips transactions with negative timestamp', () => {
+    const txs = [makeTx({ timestamp: -1000, status: 'confirmed' })];
+    expect(generateActivityHeatmap(txs)).toHaveLength(0);
+  });
+
+  it('counts valid timestamps alongside invalid ones', () => {
+    const valid = new Date(2024, 2, 11, 14).getTime();
+    const txs = [
+      makeTx({ timestamp: 0, status: 'confirmed' }),
+      makeTx({ timestamp: valid, status: 'confirmed' }),
+    ];
+    const result = generateActivityHeatmap(txs);
+    expect(result).toHaveLength(1);
+    expect(result[0].value).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// generateWeightedActivityHeatmap — invalid timestamp handling
+// ---------------------------------------------------------------------------
+
+describe('generateWeightedActivityHeatmap — invalid timestamp handling', () => {
+  it('skips transactions with timestamp=0', () => {
+    const txs = [makeTx({ timestamp: 0, status: 'confirmed', amount: 999 })];
+    expect(generateWeightedActivityHeatmap(txs)).toHaveLength(0);
+  });
+
+  it('skips NaN timestamps', () => {
+    const txs = [makeTx({ timestamp: NaN, status: 'confirmed', amount: 999 })];
+    expect(generateWeightedActivityHeatmap(txs)).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Mixed status regression
 // ---------------------------------------------------------------------------
 
