@@ -110,16 +110,20 @@ export function getIntervalKey(date: Date, interval: ChartInterval): string {
 // Validation helpers
 // ---------------------------------------------------------------------------
 
+/** Earliest accepted timestamp: 2000-01-01T00:00:00Z */
+const MIN_VALID_TS = 946_684_800_000;
+/** Latest accepted timestamp: 2200-01-01T00:00:00Z */
+const MAX_VALID_TS = 7_258_118_400_000;
+
 /**
  * Returns true when the timestamp is a finite, positive number that represents
  * a plausible Unix epoch value (after year 2000 and before year 2200).
+ *
+ * Rejects NaN, Infinity, zero, negative values, and timestamps for
+ * dates that are clearly invalid (pre-2000 or far-future).
  */
 export function isValidTimestamp(ts: number): boolean {
-  return (
-    Number.isFinite(ts) &&
-    ts > 946_684_800_000 &&   // 2000-01-01 UTC
-    ts < 7_258_118_400_000    // 2200-01-01 UTC
-  );
+  return Number.isFinite(ts) && ts > MIN_VALID_TS && ts < MAX_VALID_TS;
 }
 
 /**
