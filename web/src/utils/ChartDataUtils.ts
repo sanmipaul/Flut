@@ -51,7 +51,7 @@ export const generateCumulativeVolumeData = (
   transactions: VaultTransaction[]
 ): ChartDataPoint[] => {
   const sorted = [...transactions]
-    .filter((tx) => tx.status === 'confirmed')
+    .filter((tx) => tx.status === 'confirmed' && isValidTimestamp(tx.timestamp))
     .sort((a, b) => a.timestamp - b.timestamp);
 
   let cumulative = 0;
