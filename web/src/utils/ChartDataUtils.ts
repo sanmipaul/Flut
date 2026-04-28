@@ -45,7 +45,11 @@ export const generateTimeSeriesData = (
 };
 
 /**
- * Generate cumulative volume data
+ * Generate cumulative volume data.
+ *
+ * Only includes confirmed transactions with valid timestamps. Date labels use
+ * the local "YYYY-MM-DD" format via `toLocalISODate` so output is consistent
+ * regardless of browser locale or timezone offset.
  */
 export const generateCumulativeVolumeData = (
   transactions: VaultTransaction[]
