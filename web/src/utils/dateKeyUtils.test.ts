@@ -228,6 +228,38 @@ describe('toLocalISODate', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Sortability guarantees
+// ---------------------------------------------------------------------------
+
+describe('all key types sort correctly lexicographically', () => {
+  const dates = [
+    new Date(2024, 0, 1, 0),
+    new Date(2024, 5, 15, 12),
+    new Date(2024, 11, 31, 23),
+  ];
+
+  it('hourly keys sort in date order', () => {
+    const keys = dates.map(getLocalHourKey);
+    const sorted = [...keys].sort();
+    expect(keys).toEqual(sorted);
+  });
+
+  it('daily keys sort in date order', () => {
+    const keys = dates.map(getLocalDayKey);
+    const sorted = [...keys].sort();
+    expect(keys).toEqual(sorted);
+  });
+
+  it('monthly keys sort in date order', () => {
+    const keys = dates.map(getLocalMonthKey);
+    const sorted = [...keys].sort();
+    for (let i = 1; i < sorted.length; i++) {
+      expect(sorted[i - 1].localeCompare(sorted[i])).toBeLessThanOrEqual(0);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // toLocalISOMonth
 // ---------------------------------------------------------------------------
 
