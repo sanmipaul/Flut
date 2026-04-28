@@ -127,8 +127,12 @@ export function isValidTimestamp(ts: number): boolean {
 }
 
 /**
- * Returns an ISO "YYYY-MM-DD" string for a timestamp using local date parts.
+ * Returns a local "YYYY-MM-DD" string for a timestamp using local date parts.
  * Useful for display labels in cumulative volume charts.
+ *
+ * Unlike `new Date(ts).toLocaleDateString()`, the output format is always
+ * "YYYY-MM-DD" and does not depend on the user's locale or browser settings.
+ * This makes labels consistent and sortable across environments.
  */
 export function toLocalISODate(timestamp: number): string {
   return getLocalDayKey(new Date(timestamp));
