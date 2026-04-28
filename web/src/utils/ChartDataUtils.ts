@@ -6,10 +6,6 @@
 import { VaultTransaction, ChartDataPoint, TransactionType } from '../types/TransactionHistory';
 import { HeatmapData } from '../components/ActivityHeatmap';
 import {
-  getLocalHourKey,
-  getLocalDayKey,
-  getLocalWeekStartKey,
-  getLocalMonthKey,
   getIntervalKey,
   isValidTimestamp,
   toLocalISODate,
