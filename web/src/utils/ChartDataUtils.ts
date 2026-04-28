@@ -17,7 +17,13 @@ import {
 
 
 /**
- * Transform transactions into time series data
+ * Transform transactions into time series data.
+ *
+ * Groups confirmed transactions by the user's local calendar, not UTC.
+ * A transaction at 23:30 local is bucketed into the correct local day
+ * even when the UTC equivalent falls in the next calendar day.
+ *
+ * Invalid timestamps are silently skipped.
  */
 export const generateTimeSeriesData = (
   transactions: VaultTransaction[],
