@@ -486,6 +486,22 @@ describe('generateCumulativeVolumeData', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Edge case: zero-amount transactions
+// ---------------------------------------------------------------------------
+
+describe('generateTimeSeriesData — zero amount transactions', () => {
+  it('includes zero-amount confirmed transactions in the bucket', () => {
+    const ts = localTs(2024, 3, 15);
+    const txs = [
+      makeTx({ timestamp: ts, amount: 0 }),
+      makeTx({ timestamp: ts, amount: 100 }),
+    ];
+    const result = generateTimeSeriesData(txs, 'daily');
+    expect(result[0].value).toBe(100);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Regression: year boundary crossing
 // ---------------------------------------------------------------------------
 
