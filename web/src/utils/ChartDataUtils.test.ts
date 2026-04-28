@@ -361,6 +361,38 @@ describe('midnight-crossing timezone regression', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Timestamp validation
+// ---------------------------------------------------------------------------
+
+describe('generateTimeSeriesData — invalid timestamp handling', () => {
+  it('silently skips transactions with timestamp=0', () => {
+    const txs = [makeTx({ timestamp: 0 })];
+    expect(generateTimeSeriesData(txs, 'daily')).toEqual([]);
+  });
+
+  it('silently skips transactions with NaN timestamp', () => {
+    const txs = [makeTx({ timestamp: NaN })];
+    expect(generateTimeSeriesData(txs, 'daily')).toEqual([]);
+  });
+
+  it('silently skips transactions with negative timestamp', () => {
+    const txs = [makeTx({ timestamp: -1 })];
+    expect(generateTimeSeriesData(txs, 'daily')).toEqual([]);
+  });
+
+  it('processes valid timestamps alongside invalid ones', () => {
+    const valid = localTs(2024, 3, 15);
+    const txs = [
+      makeTx({ timestamp: 0, amount: 999 }),
+      makeTx({ timestamp: valid, amount: 100 }),
+    ];
+    const result = generateTimeSeriesData(txs, 'daily');
+    expect(result).toHaveLength(1);
+    expect(result[0].value).toBe(100);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // generateCumulativeVolumeData
 // ---------------------------------------------------------------------------
 
