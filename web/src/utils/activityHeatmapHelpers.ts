@@ -15,7 +15,12 @@ import { HeatmapData } from '../components/ActivityHeatmap';
  * Format: "{dayOfWeek}-{hour}" where dayOfWeek is 0 (Sun) – 6 (Sat)
  * and hour is 0–23. Both use local time.
  *
+ * The intentionally compact format avoids zero-padding because the keys
+ * are used as Map keys only — they are not displayed directly in the UI.
+ * Row and col values are derived via parseSlotKey when building HeatmapData.
+ *
  * @example heatmapSlotKey(new Date(2024, 2, 11, 14)) → "1-14"  (Monday 14:00)
+ * @example heatmapSlotKey(new Date(2024, 2, 10, 0))  → "0-0"   (Sunday midnight)
  */
 export function heatmapSlotKey(date: Date): string {
   return `${date.getDay()}-${date.getHours()}`;
