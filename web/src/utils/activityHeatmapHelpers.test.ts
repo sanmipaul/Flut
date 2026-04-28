@@ -6,6 +6,7 @@ import {
   parseSlotKey,
   slotsToHeatmapData,
   isValidHeatmapTimestamp,
+  MAX_HEATMAP_SLOTS,
 } from './activityHeatmapHelpers';
 
 // ---------------------------------------------------------------------------
@@ -98,6 +99,16 @@ describe('slotsToHeatmapData', () => {
     expect(item).toHaveProperty('value');
     expect(item).toHaveProperty('row');
     expect(item).toHaveProperty('col');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// MAX_HEATMAP_SLOTS
+// ---------------------------------------------------------------------------
+
+describe('MAX_HEATMAP_SLOTS', () => {
+  it('equals 168 (7 days × 24 hours)', () => {
+    expect(MAX_HEATMAP_SLOTS).toBe(168);
   });
 });
 
