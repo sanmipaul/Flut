@@ -52,7 +52,7 @@ export const generateCumulativeVolumeData = (
   return sorted.map((tx) => {
     cumulative += tx.amount;
     return {
-      label: new Date(tx.timestamp).toLocaleDateString(),
+      label: toLocalISODate(tx.timestamp),
       value: cumulative,
     };
   });
