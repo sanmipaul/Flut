@@ -28,7 +28,10 @@ export function padDatePart(n: number): string {
  * Uses local year/month/day/hour so that the bucket matches what the user
  * sees on their clock, not the UTC equivalent.
  *
+ * Keys sort correctly lexicographically because all components are zero-padded.
+ *
  * @example getLocalHourKey(new Date(2024, 2, 15, 23)) → "2024-03-15T23"
+ * @example getLocalHourKey(new Date(2024, 0, 5, 8))   → "2024-01-05T08"
  */
 export function getLocalHourKey(date: Date): string {
   const y = date.getFullYear();
