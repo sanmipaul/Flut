@@ -4,6 +4,9 @@
  * Internal helpers for building activity heatmap slot keys from Date objects.
  * Factored out so generateActivityHeatmap and generateWeightedActivityHeatmap
  * share a single, tested implementation.
+ *
+ * All functions use local time (getDay, getHours) so the heatmap reflects
+ * the user's actual usage patterns rather than UTC-shifted times.
  */
 import { HeatmapData } from '../components/ActivityHeatmap';
 
