@@ -57,6 +57,10 @@ export const DEFAULT_WINDOW_SIZE = 7;
 /**
  * Compute the start index of the sliding window centred at position `i`.
  * Uses a symmetric window: half the window extends left, half right.
+ * Never returns a negative index.
+ *
+ * @example windowStart(5, 3) → 4   // i=5, extends 1 left
+ * @example windowStart(0, 7) → 0   // clamped to 0
  */
 export function windowStart(i: number, windowSize: number): number {
   return Math.max(0, i - Math.floor(windowSize / 2));
@@ -64,6 +68,10 @@ export function windowStart(i: number, windowSize: number): number {
 
 /**
  * Compute the exclusive end index of the sliding window centred at `i`.
+ * Never exceeds `dataLength`.
+ *
+ * @example windowEnd(5, 3, 10) → 7   // i=5, extends 2 right
+ * @example windowEnd(9, 7, 10) → 10  // clamped to dataLength
  */
 export function windowEnd(i: number, windowSize: number, dataLength: number): number {
   return Math.min(dataLength, i + Math.ceil(windowSize / 2));
