@@ -91,7 +91,11 @@ export function windowEnd(i: number, windowSize: number, dataLength: number): nu
  * Returns 0 for an empty array instead of NaN.
  *
  * The 0-fallback means that functions built on top of this helper always
- * produce finite output without requiring callers to handle NaN.
+ * produce finite output without requiring callers to handle NaN, as long
+ * as all input values are themselves finite.
+ *
+ * Note: if input values contain NaN, the result will also be NaN.
+ * This function only guards against empty arrays, not NaN values.
  *
  * @example arithmeticMean([10, 20, 30]) → 20
  * @example arithmeticMean([])           → 0  (not NaN)
