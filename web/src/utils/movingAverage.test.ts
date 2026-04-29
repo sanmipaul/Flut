@@ -208,6 +208,26 @@ describe('regression: window=0 previously produced NaN', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Input immutability
+// ---------------------------------------------------------------------------
+
+describe('generateMovingAverage — input immutability', () => {
+  it('does not mutate the input array', () => {
+    const data = [
+      { label: 'a', value: 10 },
+      { label: 'b', value: 20 },
+      { label: 'c', value: 30 },
+    ];
+    const original = data.map((p) => ({ ...p }));
+    generateMovingAverage(data, 3);
+    data.forEach((p, i) => {
+      expect(p.label).toBe(original[i].label);
+      expect(p.value).toBe(original[i].value);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Smoothing reduces variance
 // ---------------------------------------------------------------------------
 
