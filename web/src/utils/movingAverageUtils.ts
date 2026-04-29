@@ -3,6 +3,12 @@
  *
  * Pure helpers for computing moving averages over ChartDataPoint arrays.
  * All functions are side-effect free and safe to call in useMemo.
+ *
+ * The core invariant upheld by every average function:
+ *   - Output length === input length (no data is dropped).
+ *   - All output values are finite (no NaN or Infinity).
+ *   - The input array is never mutated.
+ *   - Invalid window sizes (0, negative, NaN) are silently clamped to 1.
  */
 import { ChartDataPoint } from '../types/TransactionHistory';
 
