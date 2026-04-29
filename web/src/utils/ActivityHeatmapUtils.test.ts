@@ -184,6 +184,24 @@ describe('generateActivityHeatmap — full week coverage', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Heatmap value never negative
+// ---------------------------------------------------------------------------
+
+describe('heatmap values are never negative', () => {
+  it('generateActivityHeatmap values are >= 0', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const result = generateActivityHeatmap([makeTx({ timestamp: ts })]);
+    result.forEach((item) => expect(item.value).toBeGreaterThanOrEqual(0));
+  });
+
+  it('generateWeightedActivityHeatmap values are >= 0', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const result = generateWeightedActivityHeatmap([makeTx({ timestamp: ts, amount: 100 })]);
+    result.forEach((item) => expect(item.value).toBeGreaterThanOrEqual(0));
+  });
+});
+
+// ---------------------------------------------------------------------------
 // generateWeightedActivityHeatmap
 // ---------------------------------------------------------------------------
 
