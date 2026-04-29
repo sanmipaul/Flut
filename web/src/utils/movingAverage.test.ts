@@ -112,6 +112,24 @@ describe('generateMovingAverage — empty and single-item input', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Two-element dataset
+// ---------------------------------------------------------------------------
+
+describe('generateMovingAverage — two-element dataset', () => {
+  it('window=1 returns each point unchanged', () => {
+    const result = generateMovingAverage([{ label: 'a', value: 10 }, { label: 'b', value: 20 }], 1);
+    expect(result[0].value).toBe(10);
+    expect(result[1].value).toBe(20);
+  });
+
+  it('window=2 first point is average of first two', () => {
+    const result = generateMovingAverage([{ label: 'a', value: 10 }, { label: 'b', value: 20 }], 2);
+    // centred: index=0 → start=0, end=1 → [10] → 10
+    expect(result[0].value).toBeCloseTo(10);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Numerical correctness
 // ---------------------------------------------------------------------------
 
