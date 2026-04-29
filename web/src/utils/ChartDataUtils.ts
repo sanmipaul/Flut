@@ -5,7 +5,7 @@
 
 import { VaultTransaction, ChartDataPoint, TransactionType } from '../types/TransactionHistory';
 import { HeatmapData } from '../components/ActivityHeatmap';
-import { centredMovingAverage, clampWindowSize } from './movingAverageUtils';
+import { centredMovingAverage, DEFAULT_WINDOW_SIZE } from './movingAverageUtils';
 
 
 /**
@@ -217,7 +217,7 @@ export const generatePeriodComparison = (
  */
 export const generateMovingAverage = (
   data: ChartDataPoint[],
-  windowSize: number = 7
+  windowSize: number = DEFAULT_WINDOW_SIZE
 ): ChartDataPoint[] => {
   return centredMovingAverage(data, windowSize);
 };
