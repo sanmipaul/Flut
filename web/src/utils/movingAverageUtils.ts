@@ -165,8 +165,8 @@ export function weightedMovingAverage(
     slice.forEach((p, j) => {
       const weight = j + 1;
       weightedSum += p.value * weight;
-      totalWeight += weight;
     });
+    const totalWeight = triangularNumber(slice.length);
     return {
       label: point.label,
       value: totalWeight === 0 ? 0 : weightedSum / totalWeight,
