@@ -291,6 +291,33 @@ describe('generateActivityHeatmapForType', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Regression: original bug — unconfirmed txs inflated counts
+// ---------------------------------------------------------------------------
+
+describe('regression: unconfirmed transactions must not inflate heatmap counts', () => {
+  it('1 confirmed + 99 pending = count of 1, not 100', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const confirmed = makeTx({ timestamp: ts, status: 'confirmed' });
+    const pending = Array.from({ length: 99 }, () =>
+      makeTx({ timestamp: ts, status: 'pending' })
+    );
+    const result = generateActivityHeatmap([confirmed, ...pending]);
+    expect(result).toHaveLength(1);
+    expect(result[0].value).toBe(1);
+  });
+
+  it('weighted: 1 confirmed $500 + 99 failed $1 = sum of $500, not $599', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const confirmed = makeTx({ timestamp: ts, status: 'confirmed', amount: 500 });
+    const failed = Array.from({ length: 99 }, () =>
+      makeTx({ timestamp: ts, status: 'failed', amount: 1 })
+    );
+    const result = generateWeightedActivityHeatmap([confirmed, ...failed]);
+    expect(result[0].value).toBe(500);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // generateWeightedActivityHeatmap — invalid timestamp handling
 // ---------------------------------------------------------------------------
 
