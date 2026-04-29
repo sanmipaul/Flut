@@ -15,6 +15,19 @@ function pts(...values: number[]): ChartDataPoint[] {
 }
 
 // ---------------------------------------------------------------------------
+// Default window size
+// ---------------------------------------------------------------------------
+
+describe('generateMovingAverage — default window size', () => {
+  it('uses window=7 when no second argument is provided', () => {
+    const data = Array.from({ length: 10 }, (_, i) => ({ label: String(i), value: i * 10 }));
+    const withDefault = generateMovingAverage(data);
+    const withExplicit = generateMovingAverage(data, 7);
+    expect(withDefault).toEqual(withExplicit);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Window size validation — the core bug
 // ---------------------------------------------------------------------------
 
