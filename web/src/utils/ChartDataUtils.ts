@@ -204,27 +204,22 @@ export const generatePeriodComparison = (
 };
 
 /**
- * Generate moving average
+ * Generate a centred moving average over an array of ChartDataPoints.
+ *
+ * The window is clamped to [1, data.length] so invalid values like 0,
+ * negative numbers, or values larger than the input never cause NaN output
+ * or division-by-zero errors.
+ *
+ * @param data       - Input data points
+ * @param windowSize - Smoothing window (default 7). Non-positive values are
+ *                     treated as 1 (identity); values > data.length are
+ *                     clamped to data.length.
  */
 export const generateMovingAverage = (
   data: ChartDataPoint[],
   windowSize: number = 7
 ): ChartDataPoint[] => {
-  const result: ChartDataPoint[] = [];
-
-  for (let i = 0; i < data.length; i++) {
-    const start = Math.max(0, i - Math.floor(windowSize / 2));
-    const end = Math.min(data.length, i + Math.ceil(windowSize / 2));
-    const window = data.slice(start, end);
-    const avg = window.reduce((sum, point) => sum + point.value, 0) / window.length;
-
-    result.push({
-      label: data[i].label,
-      value: avg,
-    });
-  }
-
-  return result;
+  return centredMovingAverage(data, windowSize);
 };
 
 /**
