@@ -307,6 +307,37 @@ describe('generateWeightedActivityHeatmap — invalid timestamp handling', () =>
 });
 
 // ---------------------------------------------------------------------------
+// Parametrised: all three heatmap functions skip unconfirmed transactions
+// ---------------------------------------------------------------------------
+
+describe.each([
+  ['generateActivityHeatmap', generateActivityHeatmap],
+  ['generateWeightedActivityHeatmap', generateWeightedActivityHeatmap],
+] as const)('%s — confirmed-only guarantee', (_name, fn) => {
+  it('returns empty for all-pending input', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const txs = [makeTx({ timestamp: ts, status: 'pending' })];
+    expect(fn(txs)).toHaveLength(0);
+  });
+
+  it('returns empty for all-failed input', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const txs = [makeTx({ timestamp: ts, status: 'failed' })];
+    expect(fn(txs)).toHaveLength(0);
+  });
+
+  it('counts only confirmed transactions', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const txs = [
+      makeTx({ timestamp: ts, status: 'confirmed' }),
+      makeTx({ timestamp: ts, status: 'pending' }),
+    ];
+    const result = fn(txs);
+    expect(result).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Mixed status regression
 // ---------------------------------------------------------------------------
 
