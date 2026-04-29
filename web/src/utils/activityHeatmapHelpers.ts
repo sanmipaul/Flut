@@ -70,3 +70,17 @@ export function isValidHeatmapTimestamp(ts: number): boolean {
  * Useful for pre-allocating Maps or validating result set sizes in tests.
  */
 export const MAX_HEATMAP_SLOTS = 168;
+
+/**
+ * Normalise HeatmapData values to a 0–1 range based on the maximum value
+ * in the array. Useful when a heatmap component expects relative intensity
+ * rather than raw counts or raw amounts.
+ *
+ * Returns the original array unchanged when it is empty or the max is zero.
+ */
+export function normalizeHeatmapValues(data: HeatmapData[]): HeatmapData[] {
+  if (data.length === 0) return data;
+  const max = Math.max(...data.map((d) => d.value));
+  if (max === 0) return data;
+  return data.map((d) => ({ ...d, value: d.value / max }));
+}
