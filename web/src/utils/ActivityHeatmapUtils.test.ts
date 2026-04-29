@@ -7,6 +7,7 @@
 import {
   generateActivityHeatmap,
   generateWeightedActivityHeatmap,
+  generateActivityHeatmapForType,
 } from './ChartDataUtils';
 import { VaultTransaction, TransactionType } from '../types/TransactionHistory';
 
