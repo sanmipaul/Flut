@@ -8,6 +8,7 @@ import {
   isValidHeatmapTimestamp,
   MAX_HEATMAP_SLOTS,
   normalizeHeatmapValues,
+  sortHeatmapData,
 } from './activityHeatmapHelpers';
 
 // ---------------------------------------------------------------------------
@@ -207,5 +208,42 @@ describe('isValidHeatmapTimestamp', () => {
 
   it('accepts a timestamp for year 2010', () => {
     expect(isValidHeatmapTimestamp(new Date(2010, 0, 1).getTime())).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// sortHeatmapData
+// ---------------------------------------------------------------------------
+
+describe('sortHeatmapData', () => {
+  it('sorts by row ascending, then col ascending', () => {
+    const data = [
+      { label: '3-5', value: 1, row: 3, col: 5 },
+      { label: '1-9', value: 2, row: 1, col: 9 },
+      { label: '1-3', value: 3, row: 1, col: 3 },
+    ];
+    const result = sortHeatmapData(data);
+    expect(result[0]).toMatchObject({ row: 1, col: 3 });
+    expect(result[1]).toMatchObject({ row: 1, col: 9 });
+    expect(result[2]).toMatchObject({ row: 3, col: 5 });
+  });
+
+  it('returns empty array for empty input', () => {
+    expect(sortHeatmapData([])).toEqual([]);
+  });
+
+  it('does not mutate the original array', () => {
+    const data = [
+      { label: '3-5', value: 1, row: 3, col: 5 },
+      { label: '1-9', value: 2, row: 1, col: 9 },
+    ];
+    const original = [...data];
+    sortHeatmapData(data);
+    expect(data[0]).toEqual(original[0]);
+  });
+
+  it('handles single-item array', () => {
+    const data = [{ label: '2-10', value: 5, row: 2, col: 10 }];
+    expect(sortHeatmapData(data)).toHaveLength(1);
   });
 });
