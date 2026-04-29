@@ -7,6 +7,8 @@ export {
   arithmeticMean,
   centredMovingAverage,
   trailingMovingAverage,
+  weightedMovingAverage,
+  DEFAULT_WINDOW_SIZE,
 } from './movingAverageUtils';
 export { calculateStackingYield } from './calculateStackingYield';
 export {
