@@ -9,6 +9,8 @@ import {
   arithmeticMean,
   centredMovingAverage,
   trailingMovingAverage,
+  weightedMovingAverage,
+  DEFAULT_WINDOW_SIZE,
 } from './movingAverageUtils';
 import { ChartDataPoint } from '../types/TransactionHistory';
 
@@ -271,5 +273,66 @@ describe('trailingMovingAverage', () => {
     const result = trailingMovingAverage(data, 2);
     expect(result[0].label).toBe('X');
     expect(result[1].label).toBe('Y');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// weightedMovingAverage
+// ---------------------------------------------------------------------------
+
+describe('weightedMovingAverage', () => {
+  it('returns empty for empty input', () => {
+    expect(weightedMovingAverage([], 3)).toEqual([]);
+  });
+
+  it('first point equals its own value', () => {
+    const data = pts(10, 20, 30);
+    const result = weightedMovingAverage(data, 3);
+    expect(result[0].value).toBe(10);
+  });
+
+  it('produces finite values for all valid window sizes', () => {
+    const data = pts(1, 2, 3, 4, 5);
+    for (const w of [1, 2, 3, 5, 10]) {
+      weightedMovingAverage(data, w).forEach((p) =>
+        expect(Number.isFinite(p.value)).toBe(true)
+      );
+    }
+  });
+
+  it('invalid window sizes produce finite values', () => {
+    const data = pts(1, 2, 3);
+    for (const w of [0, -1, NaN]) {
+      weightedMovingAverage(data, w).forEach((p) =>
+        expect(Number.isFinite(p.value)).toBe(true)
+      );
+    }
+  });
+
+  it('recent values are weighted more than older values', () => {
+    // [1, 100] with window=2
+    // WMA = (1*1 + 100*2) / (1+2) = 201/3 = 67
+    // Simple MA = (1+100)/2 = 50.5
+    const data = pts(1, 100);
+    const wma = weightedMovingAverage(data, 2);
+    const sma = trailingMovingAverage(data, 2);
+    expect(wma[1].value).toBeGreaterThan(sma[1].value);
+  });
+
+  it('preserves labels', () => {
+    const data: ChartDataPoint[] = [{ label: 'A', value: 1 }, { label: 'B', value: 2 }];
+    const result = weightedMovingAverage(data, 2);
+    expect(result[0].label).toBe('A');
+    expect(result[1].label).toBe('B');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DEFAULT_WINDOW_SIZE
+// ---------------------------------------------------------------------------
+
+describe('DEFAULT_WINDOW_SIZE', () => {
+  it('equals 7', () => {
+    expect(DEFAULT_WINDOW_SIZE).toBe(7);
   });
 });
