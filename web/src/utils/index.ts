@@ -6,6 +6,7 @@ export {
   isValidHeatmapTimestamp,
   normalizeHeatmapValues,
   sortHeatmapData,
+  getTopActiveSlots,
   MAX_HEATMAP_SLOTS,
 } from './activityHeatmapHelpers';
 export { calculateStackingYield } from './calculateStackingYield';
