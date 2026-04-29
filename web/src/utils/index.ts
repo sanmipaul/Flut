@@ -4,6 +4,7 @@ export {
   parseSlotKey,
   slotsToHeatmapData,
   isValidHeatmapTimestamp,
+  normalizeHeatmapValues,
   MAX_HEATMAP_SLOTS,
 } from './activityHeatmapHelpers';
 export { calculateStackingYield } from './calculateStackingYield';
