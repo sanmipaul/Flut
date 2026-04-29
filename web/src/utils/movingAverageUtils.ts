@@ -30,10 +30,19 @@ export function clampWindowSize(windowSize: number, dataLength: number): number 
 
 /**
  * Returns true when the window size is a valid integer >= 1.
+ *
+ * Does not check whether the window fits within a particular dataset —
+ * use `clampWindowSize` to normalize before passing to average functions.
  */
 export function isValidWindowSize(windowSize: number): boolean {
   return Number.isInteger(windowSize) && windowSize >= 1;
 }
+
+/**
+ * The default window size used by `generateMovingAverage`.
+ * A 7-point window is idiomatic for daily data (one week of smoothing).
+ */
+export const DEFAULT_WINDOW_SIZE = 7;
 
 // ---------------------------------------------------------------------------
 // Window boundary helpers
