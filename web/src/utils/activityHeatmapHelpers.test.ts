@@ -7,6 +7,7 @@ import {
   slotsToHeatmapData,
   isValidHeatmapTimestamp,
   MAX_HEATMAP_SLOTS,
+  normalizeHeatmapValues,
 } from './activityHeatmapHelpers';
 
 // ---------------------------------------------------------------------------
@@ -126,6 +127,52 @@ describe('slotsToHeatmapData', () => {
 describe('MAX_HEATMAP_SLOTS', () => {
   it('equals 168 (7 days × 24 hours)', () => {
     expect(MAX_HEATMAP_SLOTS).toBe(168);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// normalizeHeatmapValues
+// ---------------------------------------------------------------------------
+
+describe('normalizeHeatmapValues', () => {
+  it('scales the max value to 1', () => {
+    const data = [
+      { label: '1-9', value: 10, row: 1, col: 9 },
+      { label: '2-9', value: 5, row: 2, col: 9 },
+    ];
+    const result = normalizeHeatmapValues(data);
+    expect(result[0].value).toBe(1);
+    expect(result[1].value).toBeCloseTo(0.5);
+  });
+
+  it('returns empty array unchanged', () => {
+    expect(normalizeHeatmapValues([])).toEqual([]);
+  });
+
+  it('returns array unchanged when max is 0', () => {
+    const data = [{ label: '1-9', value: 0, row: 1, col: 9 }];
+    const result = normalizeHeatmapValues(data);
+    expect(result[0].value).toBe(0);
+  });
+
+  it('does not mutate the original array', () => {
+    const data = [{ label: '1-9', value: 10, row: 1, col: 9 }];
+    const original = data[0].value;
+    normalizeHeatmapValues(data);
+    expect(data[0].value).toBe(original);
+  });
+
+  it('all values in result are in range [0, 1]', () => {
+    const data = [
+      { label: '0-0', value: 3, row: 0, col: 0 },
+      { label: '1-9', value: 7, row: 1, col: 9 },
+      { label: '6-23', value: 15, row: 6, col: 23 },
+    ];
+    const result = normalizeHeatmapValues(data);
+    result.forEach((item) => {
+      expect(item.value).toBeGreaterThanOrEqual(0);
+      expect(item.value).toBeLessThanOrEqual(1);
+    });
   });
 });
 
