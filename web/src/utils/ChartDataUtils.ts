@@ -5,6 +5,7 @@
 
 import { VaultTransaction, ChartDataPoint, TransactionType } from '../types/TransactionHistory';
 import { HeatmapData } from '../components/ActivityHeatmap';
+import { centredMovingAverage, clampWindowSize } from './movingAverageUtils';
 
 
 /**
