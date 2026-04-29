@@ -255,6 +255,42 @@ describe('generateActivityHeatmap — invalid timestamp handling', () => {
 });
 
 // ---------------------------------------------------------------------------
+// generateActivityHeatmapForType
+// ---------------------------------------------------------------------------
+
+describe('generateActivityHeatmapForType', () => {
+  it('only counts transactions of the specified type', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const txs = [
+      makeTx({ timestamp: ts, type: TransactionType.DEPOSIT }),
+      makeTx({ timestamp: ts, type: TransactionType.WITHDRAWAL }),
+      makeTx({ timestamp: ts, type: TransactionType.DEPOSIT }),
+    ];
+    const result = generateActivityHeatmapForType(txs, TransactionType.DEPOSIT);
+    expect(result).toHaveLength(1);
+    expect(result[0].value).toBe(2);
+  });
+
+  it('returns empty array when no transactions match the type', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const txs = [makeTx({ timestamp: ts, type: TransactionType.WITHDRAWAL })];
+    const result = generateActivityHeatmapForType(txs, TransactionType.DEPOSIT);
+    expect(result).toHaveLength(0);
+  });
+
+  it('excludes unconfirmed transactions even when type matches', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const txs = [makeTx({ timestamp: ts, type: TransactionType.DEPOSIT, status: 'pending' })];
+    const result = generateActivityHeatmapForType(txs, TransactionType.DEPOSIT);
+    expect(result).toHaveLength(0);
+  });
+
+  it('returns empty array for empty input', () => {
+    expect(generateActivityHeatmapForType([], TransactionType.DEPOSIT)).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // generateWeightedActivityHeatmap — invalid timestamp handling
 // ---------------------------------------------------------------------------
 
