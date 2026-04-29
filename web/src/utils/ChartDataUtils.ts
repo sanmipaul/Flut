@@ -161,7 +161,15 @@ export const generateStatusDistribution = (
  * Generate heatmap data for transaction activity.
  *
  * Only confirmed transactions are counted to ensure the heatmap reflects
- * actual settled activity, not speculative or failed attempts.
+ * actual settled activity, not speculative or failed attempts. Pending
+ * and failed transactions are silently excluded.
+ *
+ * Each cell in the heatmap corresponds to a (day-of-week, hour) slot using
+ * the user's local time, so the pattern reflects real usage hours.
+ * Transactions with invalid timestamps (zero, NaN, negative) are skipped.
+ *
+ * @see generateWeightedActivityHeatmap for a volume-based variant
+ * @see generateActivityHeatmapForType to filter by transaction type
  */
 export const generateActivityHeatmap = (
   transactions: VaultTransaction[]
