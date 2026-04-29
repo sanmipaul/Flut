@@ -132,6 +132,14 @@ export function trailingMovingAverage(
 }
 
 /**
+ * Compute the sum of the first n natural numbers: 1 + 2 + ... + n = n(n+1)/2.
+ * Used internally by `weightedMovingAverage` to compute the total weight denominator.
+ */
+function triangularNumber(n: number): number {
+  return (n * (n + 1)) / 2;
+}
+
+/**
  * Compute a linearly-weighted trailing moving average (WMA).
  *
  * More recent points receive higher weights. For a window of size w at index i:
