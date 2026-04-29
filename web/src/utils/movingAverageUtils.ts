@@ -68,6 +68,36 @@ export function arithmeticMean(values: number[]): number {
 }
 
 /**
+ * Compute a trailing (backward-looking) moving average over ChartDataPoints.
+ *
+ * For each point at index i, the window spans [i - windowSize + 1, i].
+ * Points near the start of the array use however many points are available
+ * (no warm-up padding).
+ *
+ * This variant is useful for financial-style charts where the smoothed line
+ * should only use historical values, not future ones.
+ *
+ * @param data       - Input data points
+ * @param windowSize - Trailing window size (clamped to [1, data.length])
+ */
+export function trailingMovingAverage(
+  data: ChartDataPoint[],
+  windowSize: number
+): ChartDataPoint[] {
+  if (data.length === 0) return [];
+  const safeWindow = clampWindowSize(windowSize, data.length);
+
+  return data.map((point, i) => {
+    const start = Math.max(0, i - safeWindow + 1);
+    const slice = data.slice(start, i + 1);
+    return {
+      label: point.label,
+      value: arithmeticMean(slice.map((p) => p.value)),
+    };
+  });
+}
+
+/**
  * Compute a centred moving average over a ChartDataPoint array.
  *
  * The window is symmetric: for point at index i, it spans
