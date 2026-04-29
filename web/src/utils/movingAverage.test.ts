@@ -121,6 +121,22 @@ describe('generateMovingAverage — numerical correctness', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Large dataset performance baseline
+// ---------------------------------------------------------------------------
+
+describe('generateMovingAverage — large dataset', () => {
+  it('handles 1000-element array without error', () => {
+    const data = Array.from({ length: 1000 }, (_, i) => ({
+      label: String(i),
+      value: Math.sin(i),
+    }));
+    const result = generateMovingAverage(data, 7);
+    expect(result).toHaveLength(1000);
+    result.forEach((p) => expect(Number.isFinite(p.value)).toBe(true));
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Label preservation
 // ---------------------------------------------------------------------------
 
