@@ -50,6 +50,14 @@ describe('generateMovingAverage — default window size', () => {
 // Window size validation — the core bug
 // ---------------------------------------------------------------------------
 
+describe('generateMovingAverage — Infinity window size', () => {
+  it('Infinity window is clamped to data.length, produces finite values', () => {
+    const data = pts(10, 20, 30, 40, 50);
+    const result = generateMovingAverage(data, Infinity);
+    result.forEach((p) => expect(Number.isFinite(p.value)).toBe(true));
+  });
+});
+
 describe('generateMovingAverage — window size validation', () => {
   it('windowSize=0 should not produce NaN values', () => {
     const data = pts(10, 20, 30);
