@@ -86,6 +86,37 @@ describe('clampWindowSize', () => {
 });
 
 // ---------------------------------------------------------------------------
+// clampWindowSize — extended edge cases
+// ---------------------------------------------------------------------------
+
+describe('clampWindowSize — extended edge cases', () => {
+  it('clamps window=1 to 1 (no change)', () => {
+    expect(clampWindowSize(1, 10)).toBe(1);
+  });
+
+  it('equals dataLength when window === dataLength', () => {
+    expect(clampWindowSize(5, 5)).toBe(5);
+  });
+
+  it('negative dataLength treated as 1', () => {
+    expect(clampWindowSize(3, -5)).toBe(1);
+  });
+
+  it('result is always an integer', () => {
+    for (const w of [0, 1, 2.9, 3.1, 7, 100]) {
+      const result = clampWindowSize(w, 10);
+      expect(Number.isInteger(result)).toBe(true);
+    }
+  });
+
+  it('result is always >= 1', () => {
+    for (const w of [-100, -1, 0, 0.5, 1]) {
+      expect(clampWindowSize(w, 10)).toBeGreaterThanOrEqual(1);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // isValidWindowSize
 // ---------------------------------------------------------------------------
 
