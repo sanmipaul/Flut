@@ -127,6 +127,41 @@ export function trailingMovingAverage(
 }
 
 /**
+ * Compute a linearly-weighted trailing moving average (WMA).
+ *
+ * More recent points receive higher weights. For a window of size w at index i:
+ *   weight[j] = (j - start + 1)  (1 for oldest, w for most recent)
+ *
+ * Useful when recent data should be emphasised over older data.
+ * Falls back to a simple average when only one point is available.
+ *
+ * Invalid window sizes are clamped via `clampWindowSize`.
+ */
+export function weightedMovingAverage(
+  data: ChartDataPoint[],
+  windowSize: number
+): ChartDataPoint[] {
+  if (data.length === 0) return [];
+  const safeWindow = clampWindowSize(windowSize, data.length);
+
+  return data.map((point, i) => {
+    const start = Math.max(0, i - safeWindow + 1);
+    const slice = data.slice(start, i + 1);
+    let weightedSum = 0;
+    let totalWeight = 0;
+    slice.forEach((p, j) => {
+      const weight = j + 1;
+      weightedSum += p.value * weight;
+      totalWeight += weight;
+    });
+    return {
+      label: point.label,
+      value: totalWeight === 0 ? 0 : weightedSum / totalWeight,
+    };
+  });
+}
+
+/**
  * Compute a centred moving average over a ChartDataPoint array.
  *
  * The window is symmetric: for point at index i, it spans
