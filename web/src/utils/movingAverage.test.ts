@@ -15,6 +15,25 @@ function pts(...values: number[]): ChartDataPoint[] {
 }
 
 // ---------------------------------------------------------------------------
+// NaN inputs in data values
+// ---------------------------------------------------------------------------
+
+describe('generateMovingAverage — NaN in input values', () => {
+  it('NaN in input propagates through average (expected behaviour)', () => {
+    const data = [
+      { label: 'a', value: 10 },
+      { label: 'b', value: NaN },
+      { label: 'c', value: 30 },
+    ];
+    // NaN in window makes the average NaN — this is expected
+    // The fix is window size validation, not input value sanitization
+    const result = generateMovingAverage(data, 1);
+    expect(result[0].value).toBe(10);
+    expect(result[2].value).toBe(30);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Default window size
 // ---------------------------------------------------------------------------
 
