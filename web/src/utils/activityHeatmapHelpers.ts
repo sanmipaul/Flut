@@ -72,6 +72,15 @@ export function isValidHeatmapTimestamp(ts: number): boolean {
 export const MAX_HEATMAP_SLOTS = 168;
 
 /**
+ * Sort HeatmapData by row (day) then col (hour) ascending.
+ * Produces a deterministic order suitable for rendering a grid top-to-bottom,
+ * left-to-right (Sunday hour 0 → Saturday hour 23).
+ */
+export function sortHeatmapData(data: HeatmapData[]): HeatmapData[] {
+  return [...data].sort((a, b) => a.row - b.row || a.col - b.col);
+}
+
+/**
  * Normalise HeatmapData values to a 0–1 range based on the maximum value
  * in the array. Useful when a heatmap component expects relative intensity
  * rather than raw counts or raw amounts.
