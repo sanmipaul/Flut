@@ -51,7 +51,10 @@ export function isValidWindowSize(windowSize: number): boolean {
 
 /**
  * The default window size used by `generateMovingAverage`.
- * A 7-point window is idiomatic for daily data (one week of smoothing).
+ *
+ * A 7-point window is idiomatic for daily data (one week of smoothing)
+ * and is the value that best balances noise reduction with responsiveness
+ * for typical vault transaction time series in this application.
  */
 export const DEFAULT_WINDOW_SIZE = 7;
 
