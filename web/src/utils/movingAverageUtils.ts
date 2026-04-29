@@ -19,14 +19,19 @@ import { ChartDataPoint } from '../types/TransactionHistory';
 /**
  * Clamp a requested window size to a valid range [1, dataLength].
  *
- * - window <= 0 is treated as 1 (identity: each point is its own average)
+ * - window <= 0 or NaN is treated as 1 (identity: each point is its own average)
+ * - Infinity is clamped to dataLength
  * - window > dataLength is clamped to dataLength (full-array average)
  * - Non-integer values are floored to the nearest integer >= 1
+ * - dataLength <= 0 returns 1 (safe default)
+ *
+ * The return value is always a positive integer.
  *
  * @example clampWindowSize(0, 10)   → 1
  * @example clampWindowSize(3, 10)   → 3
  * @example clampWindowSize(100, 10) → 10
  * @example clampWindowSize(2.7, 10) → 2
+ * @example clampWindowSize(NaN, 10) → 1
  */
 export function clampWindowSize(windowSize: number, dataLength: number): number {
   if (!Number.isFinite(windowSize) || windowSize <= 0) return 1;
