@@ -19,6 +19,31 @@ function pts(...values: number[]): ChartDataPoint[] {
 }
 
 // ---------------------------------------------------------------------------
+// Parametrised: all average functions produce finite-only output
+// ---------------------------------------------------------------------------
+
+describe.each([
+  ['centredMovingAverage', centredMovingAverage],
+  ['trailingMovingAverage', trailingMovingAverage],
+  ['weightedMovingAverage', weightedMovingAverage],
+] as const)('%s — never produces NaN', (_name, fn) => {
+  const invalidWindows = [0, -1, -100, NaN, Infinity, -Infinity];
+  it.each(invalidWindows)('window=%s returns finite values', (w) => {
+    const data = pts(5, 10, 15, 20);
+    fn(data, w as number).forEach((p) => expect(Number.isFinite(p.value)).toBe(true));
+  });
+
+  it('empty input returns empty array', () => {
+    expect(fn([], 7)).toEqual([]);
+  });
+
+  it('output length equals input length', () => {
+    const data = pts(1, 2, 3, 4, 5);
+    expect(fn(data, 3)).toHaveLength(5);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // clampWindowSize
 // ---------------------------------------------------------------------------
 
