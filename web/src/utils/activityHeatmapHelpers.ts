@@ -81,6 +81,17 @@ export function sortHeatmapData(data: HeatmapData[]): HeatmapData[] {
 }
 
 /**
+ * Return the top N most active heatmap slots, sorted by value descending.
+ * Useful for surfacing peak activity windows in a summary UI.
+ *
+ * @param data - Heatmap data array (unsorted is fine)
+ * @param n    - Number of top slots to return (default: 5)
+ */
+export function getTopActiveSlots(data: HeatmapData[], n = 5): HeatmapData[] {
+  return [...data].sort((a, b) => b.value - a.value).slice(0, n);
+}
+
+/**
  * Normalise HeatmapData values to a 0–1 range based on the maximum value
  * in the array. Useful when a heatmap component expects relative intensity
  * rather than raw counts or raw amounts.
