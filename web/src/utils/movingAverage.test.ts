@@ -151,3 +151,48 @@ describe('generateMovingAverage — output values are always finite', () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// Regression: original NaN bug
+// ---------------------------------------------------------------------------
+
+describe('regression: window=0 previously produced NaN', () => {
+  it('window=0 returns all-finite values', () => {
+    const data = pts(1, 2, 3, 4, 5);
+    const result = generateMovingAverage(data, 0);
+    result.forEach((p) => expect(Number.isNaN(p.value)).toBe(false));
+  });
+
+  it('window=-1 returns all-finite values', () => {
+    const data = pts(10, 20, 30);
+    const result = generateMovingAverage(data, -1);
+    result.forEach((p) => expect(Number.isNaN(p.value)).toBe(false));
+  });
+
+  it('window=0 behaves as identity (each point unchanged)', () => {
+    const data = pts(10, 20, 30);
+    const result = generateMovingAverage(data, 0);
+    expect(result[0].value).toBe(10);
+    expect(result[1].value).toBe(20);
+    expect(result[2].value).toBe(30);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Smoothing reduces variance
+// ---------------------------------------------------------------------------
+
+describe('generateMovingAverage — smoothing reduces variance', () => {
+  it('variance of smoothed output <= variance of input for w=3', () => {
+    const data = pts(1, 100, 1, 100, 1);
+    const result = generateMovingAverage(data, 3);
+    const mean = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
+    const variance = (arr: number[]) => {
+      const m = mean(arr);
+      return arr.reduce((s, v) => s + (v - m) ** 2, 0) / arr.length;
+    };
+    const inputV = variance(data.map((p) => p.value));
+    const outputV = variance(result.map((p) => p.value));
+    expect(outputV).toBeLessThanOrEqual(inputV);
+  });
+});
