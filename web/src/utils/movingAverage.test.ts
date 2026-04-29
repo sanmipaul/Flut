@@ -276,6 +276,19 @@ describe('regression: window=0 previously produced NaN', () => {
 });
 
 // ---------------------------------------------------------------------------
+// All-negative values
+// ---------------------------------------------------------------------------
+
+describe('generateMovingAverage — all-negative values', () => {
+  it('correctly averages negative values', () => {
+    const data = pts(-30, -20, -10);
+    const result = generateMovingAverage(data, 3);
+    result.forEach((p) => expect(Number.isFinite(p.value)).toBe(true));
+    expect(result[1].value).toBeCloseTo(-20);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Input immutability
 // ---------------------------------------------------------------------------
 
