@@ -296,6 +296,20 @@ describe('generateMovingAverage — input immutability', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Monotonic input stays monotonic after smoothing
+// ---------------------------------------------------------------------------
+
+describe('generateMovingAverage — monotonic input', () => {
+  it('strictly increasing input stays weakly increasing after smoothing', () => {
+    const data = pts(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    const result = generateMovingAverage(data, 3);
+    for (let i = 1; i < result.length; i++) {
+      expect(result[i].value).toBeGreaterThanOrEqual(result[i - 1].value);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Smoothing reduces variance
 // ---------------------------------------------------------------------------
 
