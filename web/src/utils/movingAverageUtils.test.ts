@@ -8,6 +8,7 @@ import {
   windowEnd,
   arithmeticMean,
   centredMovingAverage,
+  trailingMovingAverage,
 } from './movingAverageUtils';
 import { ChartDataPoint } from '../types/TransactionHistory';
 
@@ -219,5 +220,56 @@ describe('centredMovingAverage', () => {
         expect(Number.isFinite(p.value)).toBe(true);
       });
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// trailingMovingAverage
+// ---------------------------------------------------------------------------
+
+describe('trailingMovingAverage', () => {
+  it('returns empty for empty input', () => {
+    expect(trailingMovingAverage([], 3)).toEqual([]);
+  });
+
+  it('first point is always its own value (only one data point available)', () => {
+    const data = pts(42, 10, 20);
+    const result = trailingMovingAverage(data, 3);
+    expect(result[0].value).toBe(42);
+  });
+
+  it('window=2 second point is average of first two', () => {
+    const data = pts(10, 20, 30);
+    const result = trailingMovingAverage(data, 2);
+    expect(result[1].value).toBeCloseTo(15); // avg(10, 20)
+  });
+
+  it('window=3 third point is average of first three', () => {
+    const data = pts(10, 20, 30, 40);
+    const result = trailingMovingAverage(data, 3);
+    expect(result[2].value).toBeCloseTo(20); // avg(10, 20, 30)
+  });
+
+  it('does not use future values', () => {
+    // If trailing uses future data, result[0] would not equal input[0]
+    const data = pts(10, 100, 100);
+    const result = trailingMovingAverage(data, 2);
+    expect(result[0].value).toBe(10);
+  });
+
+  it('all values are finite for any window size', () => {
+    const data = pts(5, 10, 15);
+    for (const w of [0, 1, 2, 3, 100, -1]) {
+      trailingMovingAverage(data, w).forEach((p) => {
+        expect(Number.isFinite(p.value)).toBe(true);
+      });
+    }
+  });
+
+  it('preserves labels', () => {
+    const data: ChartDataPoint[] = [{ label: 'X', value: 5 }, { label: 'Y', value: 10 }];
+    const result = trailingMovingAverage(data, 2);
+    expect(result[0].label).toBe('X');
+    expect(result[1].label).toBe('Y');
   });
 });
