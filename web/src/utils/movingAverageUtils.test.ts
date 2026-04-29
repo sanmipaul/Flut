@@ -391,4 +391,26 @@ describe('DEFAULT_WINDOW_SIZE', () => {
   it('equals 7', () => {
     expect(DEFAULT_WINDOW_SIZE).toBe(7);
   });
+
+  it('is a valid window size', () => {
+    expect(isValidWindowSize(DEFAULT_WINDOW_SIZE)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// weightedMovingAverage — exact WMA calculation
+// ---------------------------------------------------------------------------
+
+describe('weightedMovingAverage — exact calculation', () => {
+  it('WMA([10, 20], window=2) = (10*1 + 20*2) / 3 = 50/3', () => {
+    const data = [{ label: 'a', value: 10 }, { label: 'b', value: 20 }];
+    const result = weightedMovingAverage(data, 2);
+    expect(result[1].value).toBeCloseTo(50 / 3);
+  });
+
+  it('WMA([1, 2, 3], window=3) = (1*1 + 2*2 + 3*3) / 6 = 14/6', () => {
+    const data = [{ label: 'a', value: 1 }, { label: 'b', value: 2 }, { label: 'c', value: 3 }];
+    const result = weightedMovingAverage(data, 3);
+    expect(result[2].value).toBeCloseTo(14 / 6);
+  });
 });
