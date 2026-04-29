@@ -233,6 +233,23 @@ describe('generateMovingAverage — output values are always finite', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Idempotency: calling twice with same args produces same result
+// ---------------------------------------------------------------------------
+
+describe('generateMovingAverage — idempotency', () => {
+  it('two calls with identical arguments produce identical results', () => {
+    const data = [
+      { label: 'a', value: 10 },
+      { label: 'b', value: 20 },
+      { label: 'c', value: 30 },
+    ];
+    const r1 = generateMovingAverage(data, 3);
+    const r2 = generateMovingAverage(data, 3);
+    expect(r1).toEqual(r2);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Regression: original NaN bug
 // ---------------------------------------------------------------------------
 
