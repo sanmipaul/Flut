@@ -206,14 +206,19 @@ export const generatePeriodComparison = (
 /**
  * Generate a centred moving average over an array of ChartDataPoints.
  *
- * The window is clamped to [1, data.length] so invalid values like 0,
- * negative numbers, or values larger than the input never cause NaN output
- * or division-by-zero errors.
+ * The window is clamped to [1, data.length] via `clampWindowSize` so invalid
+ * values like 0, negative numbers, NaN, or values larger than the input
+ * never cause NaN output or division-by-zero errors.
+ *
+ * Output length always equals input length. The input array is not mutated.
  *
  * @param data       - Input data points
  * @param windowSize - Smoothing window (default 7). Non-positive values are
- *                     treated as 1 (identity); values > data.length are
- *                     clamped to data.length.
+ *                     treated as 1 (identity — each point is its own average);
+ *                     values > data.length are clamped to data.length
+ *                     (produces a full-range average for each point).
+ * @see centredMovingAverage in movingAverageUtils for the underlying implementation
+ * @see trailingMovingAverage if you need a backward-looking window instead
  */
 export const generateMovingAverage = (
   data: ChartDataPoint[],
