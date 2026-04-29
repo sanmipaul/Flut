@@ -1,6 +1,10 @@
 /**
  * Chart Data Transformation Utilities
- * Converts transaction data into chart-ready formats
+ *
+ * Converts vault transaction data into chart-ready formats.
+ * All heatmap functions (generateActivityHeatmap, generateWeightedActivityHeatmap,
+ * generateActivityHeatmapForType) only process confirmed transactions so that
+ * displayed activity patterns reflect settled on-chain events only.
  */
 
 import { VaultTransaction, ChartDataPoint, TransactionType } from '../types/TransactionHistory';
