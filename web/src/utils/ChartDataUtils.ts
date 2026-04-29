@@ -208,6 +208,33 @@ export const generateWeightedActivityHeatmap = (
 };
 
 /**
+ * Generate a count-based activity heatmap filtered to a single transaction type.
+ *
+ * Useful when you want to visualise when a specific type of event (e.g. only
+ * DEPOSIT or only EMERGENCY_WITHDRAWAL) occurs throughout the week, without
+ * noise from other transaction categories.
+ *
+ * Only confirmed transactions with a valid timestamp and matching type are counted.
+ */
+export const generateActivityHeatmapForType = (
+  transactions: VaultTransaction[],
+  type: TransactionType
+): HeatmapData[] => {
+  const heatmap = new Map<string, number>();
+
+  transactions.forEach((tx) => {
+    if (tx.status !== 'confirmed') return;
+    if (tx.type !== type) return;
+    if (!isValidHeatmapTimestamp(tx.timestamp)) return;
+
+    const key = heatmapSlotKey(new Date(tx.timestamp));
+    heatmap.set(key, (heatmap.get(key) || 0) + 1);
+  });
+
+  return slotsToHeatmapData(heatmap);
+};
+
+/**
  * Generate comparison data for two periods
  */
 export const generatePeriodComparison = (
