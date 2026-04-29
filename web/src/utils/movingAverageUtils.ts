@@ -132,8 +132,13 @@ export function trailingMovingAverage(
 }
 
 /**
- * Compute the sum of the first n natural numbers: 1 + 2 + ... + n = n(n+1)/2.
- * Used internally by `weightedMovingAverage` to compute the total weight denominator.
+ * Compute the n-th triangular number: 1 + 2 + ... + n = n(n+1)/2.
+ *
+ * This is the sum of the first n natural numbers and equals the total weight
+ * denominator for a linearly-weighted trailing average with n data points.
+ *
+ * @example triangularNumber(3) → 6   (1+2+3)
+ * @example triangularNumber(4) → 10  (1+2+3+4)
  */
 function triangularNumber(n: number): number {
   return (n * (n + 1)) / 2;
