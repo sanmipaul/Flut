@@ -1,10 +1,19 @@
 /**
  * Chart Data Transformation Utilities
- * Converts transaction data into chart-ready formats
+ *
+ * Converts vault transaction data into chart-ready formats.
+ * All heatmap functions (generateActivityHeatmap, generateWeightedActivityHeatmap,
+ * generateActivityHeatmapForType) only process confirmed transactions so that
+ * displayed activity patterns reflect settled on-chain events only.
  */
 
 import { VaultTransaction, ChartDataPoint, TransactionType } from '../types/TransactionHistory';
 import { HeatmapData } from '../components/ActivityHeatmap';
+import {
+  heatmapSlotKey,
+  slotsToHeatmapData,
+  isValidHeatmapTimestamp,
+} from './activityHeatmapHelpers';
 
 
 /**
@@ -153,7 +162,18 @@ export const generateStatusDistribution = (
 };
 
 /**
- * Generate heatmap data for transaction activity
+ * Generate heatmap data for transaction activity.
+ *
+ * Only confirmed transactions are counted to ensure the heatmap reflects
+ * actual settled activity, not speculative or failed attempts. Pending
+ * and failed transactions are silently excluded.
+ *
+ * Each cell in the heatmap corresponds to a (day-of-week, hour) slot using
+ * the user's local time, so the pattern reflects real usage hours.
+ * Transactions with invalid timestamps (zero, NaN, negative) are skipped.
+ *
+ * @see generateWeightedActivityHeatmap for a volume-based variant
+ * @see generateActivityHeatmapForType to filter by transaction type
  */
 export const generateActivityHeatmap = (
   transactions: VaultTransaction[]
@@ -161,24 +181,75 @@ export const generateActivityHeatmap = (
   const heatmap = new Map<string, number>();
 
   transactions.forEach((tx) => {
-    const date = new Date(tx.timestamp);
-    const day = date.getDay();
-    const hour = date.getHours();
-    const key = `${day}-${hour}`;
+    if (tx.status !== 'confirmed') return;
+    if (!isValidHeatmapTimestamp(tx.timestamp)) return;
 
+    const key = heatmapSlotKey(new Date(tx.timestamp));
     heatmap.set(key, (heatmap.get(key) || 0) + 1);
   });
 
-  // Convert Map to HeatmapData array
-  return Array.from(heatmap.entries()).map(([key, value]) => {
-    const [dayStr, hourStr] = key.split('-');
-    return {
-      label: key,
-      value,
-      row: parseInt(dayStr, 10),
-      col: parseInt(hourStr, 10),
-    };
+  return slotsToHeatmapData(heatmap);
+};
+
+/**
+ * Generate a weighted activity heatmap where each slot value is the total
+ * confirmed transaction volume (sum of amounts) rather than a raw count.
+ *
+ * Useful when transaction frequency is less interesting than dollar volume
+ * and you want to highlight high-value activity windows. For example, a
+ * single large deposit at 2am on a Tuesday will show as a bright spot in
+ * the weighted heatmap but would be indistinguishable from any other
+ * transaction in the count-based heatmap.
+ *
+ * Only confirmed transactions with a valid, positive timestamp are included.
+ */
+export const generateWeightedActivityHeatmap = (
+  transactions: VaultTransaction[]
+): HeatmapData[] => {
+  const heatmap = new Map<string, number>();
+
+  transactions.forEach((tx) => {
+    if (tx.status !== 'confirmed') return;
+    if (!isValidHeatmapTimestamp(tx.timestamp)) return;
+
+    const key = heatmapSlotKey(new Date(tx.timestamp));
+    heatmap.set(key, (heatmap.get(key) || 0) + tx.amount);
   });
+
+  return slotsToHeatmapData(heatmap);
+};
+
+/**
+ * Generate a count-based activity heatmap filtered to a single transaction type.
+ *
+ * Useful when you want to visualise when a specific type of event (e.g. only
+ * DEPOSIT or only EMERGENCY_WITHDRAWAL) occurs throughout the week, without
+ * noise from other transaction categories.
+ *
+ * Only confirmed transactions with a valid timestamp and matching type are counted.
+ *
+ * @example
+ *   // Show only deposit activity
+ *   const depositHeatmap = generateActivityHeatmapForType(txs, TransactionType.DEPOSIT);
+ *
+ * @see generateActivityHeatmap for counting all transaction types
+ */
+export const generateActivityHeatmapForType = (
+  transactions: VaultTransaction[],
+  type: TransactionType
+): HeatmapData[] => {
+  const heatmap = new Map<string, number>();
+
+  transactions.forEach((tx) => {
+    if (tx.status !== 'confirmed') return;
+    if (tx.type !== type) return;
+    if (!isValidHeatmapTimestamp(tx.timestamp)) return;
+
+    const key = heatmapSlotKey(new Date(tx.timestamp));
+    heatmap.set(key, (heatmap.get(key) || 0) + 1);
+  });
+
+  return slotsToHeatmapData(heatmap);
 };
 
 /**
