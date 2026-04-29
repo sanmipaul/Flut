@@ -1,6 +1,9 @@
 /**
  * Chart Data Transformation Utilities
- * Converts transaction data into chart-ready formats
+ *
+ * Converts vault transaction data into chart-ready formats.
+ * All window-based smoothing (generateMovingAverage) uses clampWindowSize
+ * to prevent NaN output from invalid window parameters.
  */
 
 import { VaultTransaction, ChartDataPoint, TransactionType } from '../types/TransactionHistory';
