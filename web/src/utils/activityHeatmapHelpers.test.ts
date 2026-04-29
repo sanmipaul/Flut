@@ -9,6 +9,7 @@ import {
   MAX_HEATMAP_SLOTS,
   normalizeHeatmapValues,
   sortHeatmapData,
+  getTopActiveSlots,
 } from './activityHeatmapHelpers';
 
 // ---------------------------------------------------------------------------
@@ -208,6 +209,51 @@ describe('isValidHeatmapTimestamp', () => {
 
   it('accepts a timestamp for year 2010', () => {
     expect(isValidHeatmapTimestamp(new Date(2010, 0, 1).getTime())).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getTopActiveSlots
+// ---------------------------------------------------------------------------
+
+describe('getTopActiveSlots', () => {
+  const data = [
+    { label: '0-0', value: 1, row: 0, col: 0 },
+    { label: '1-9', value: 5, row: 1, col: 9 },
+    { label: '2-14', value: 3, row: 2, col: 14 },
+    { label: '3-7', value: 10, row: 3, col: 7 },
+    { label: '4-22', value: 2, row: 4, col: 22 },
+    { label: '5-12', value: 8, row: 5, col: 12 },
+  ];
+
+  it('returns top 5 slots by default', () => {
+    const result = getTopActiveSlots(data);
+    expect(result).toHaveLength(5);
+  });
+
+  it('returns slots sorted by value descending', () => {
+    const result = getTopActiveSlots(data);
+    for (let i = 1; i < result.length; i++) {
+      expect(result[i - 1].value).toBeGreaterThanOrEqual(result[i].value);
+    }
+  });
+
+  it('respects custom n', () => {
+    expect(getTopActiveSlots(data, 3)).toHaveLength(3);
+  });
+
+  it('returns all items when n exceeds array length', () => {
+    expect(getTopActiveSlots(data, 100)).toHaveLength(data.length);
+  });
+
+  it('does not mutate the original array', () => {
+    const original = [...data];
+    getTopActiveSlots(data);
+    expect(data).toEqual(original);
+  });
+
+  it('returns empty for empty input', () => {
+    expect(getTopActiveSlots([])).toEqual([]);
   });
 });
 
