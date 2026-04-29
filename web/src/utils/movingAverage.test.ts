@@ -134,6 +134,20 @@ describe('generateMovingAverage — numerical correctness', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Single-element dataset
+// ---------------------------------------------------------------------------
+
+describe('generateMovingAverage — single-element dataset', () => {
+  it('returns the single element unchanged for any window size', () => {
+    for (const w of [0, 1, 7, 100]) {
+      const result = generateMovingAverage([{ label: 'x', value: 42 }], w);
+      expect(result).toHaveLength(1);
+      expect(result[0].value).toBe(42);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Large dataset performance baseline
 // ---------------------------------------------------------------------------
 
