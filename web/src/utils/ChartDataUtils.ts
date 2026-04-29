@@ -223,6 +223,12 @@ export const generateWeightedActivityHeatmap = (
  * noise from other transaction categories.
  *
  * Only confirmed transactions with a valid timestamp and matching type are counted.
+ *
+ * @example
+ *   // Show only deposit activity
+ *   const depositHeatmap = generateActivityHeatmapForType(txs, TransactionType.DEPOSIT);
+ *
+ * @see generateActivityHeatmap for counting all transaction types
  */
 export const generateActivityHeatmapForType = (
   transactions: VaultTransaction[],
