@@ -84,8 +84,15 @@ export function sortHeatmapData(data: HeatmapData[]): HeatmapData[] {
  * Return the top N most active heatmap slots, sorted by value descending.
  * Useful for surfacing peak activity windows in a summary UI.
  *
+ * Returns a new array — the original is not mutated.
+ * When `data.length < n`, all items are returned.
+ *
  * @param data - Heatmap data array (unsorted is fine)
  * @param n    - Number of top slots to return (default: 5)
+ *
+ * @example
+ *   const peaks = getTopActiveSlots(generateActivityHeatmap(txs), 3);
+ *   // peaks[0] = busiest (day, hour) slot
  */
 export function getTopActiveSlots(data: HeatmapData[], n = 5): HeatmapData[] {
   return [...data].sort((a, b) => b.value - a.value).slice(0, n);
