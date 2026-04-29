@@ -6,6 +6,7 @@ export {
   windowEnd,
   arithmeticMean,
   centredMovingAverage,
+  trailingMovingAverage,
 } from './movingAverageUtils';
 export { calculateStackingYield } from './calculateStackingYield';
 export {
