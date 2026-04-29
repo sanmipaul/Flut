@@ -148,6 +148,26 @@ describe('generateActivityHeatmap — structure', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Single transaction coverage
+// ---------------------------------------------------------------------------
+
+describe('generateActivityHeatmap — single transaction', () => {
+  it('returns exactly one slot for a single confirmed transaction', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const result = generateActivityHeatmap([makeTx({ timestamp: ts })]);
+    expect(result).toHaveLength(1);
+    expect(result[0].value).toBe(1);
+  });
+
+  it('label matches the slot key format "{day}-{hour}"', () => {
+    const ts = new Date(2024, 2, 11, 14).getTime();
+    const d = new Date(ts);
+    const result = generateActivityHeatmap([makeTx({ timestamp: ts })]);
+    expect(result[0].label).toBe(`${d.getDay()}-${d.getHours()}`);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // All 7 days covered
 // ---------------------------------------------------------------------------
 
