@@ -13,6 +13,7 @@ import { PeriodSelector } from './PeriodSelector';
 import { LineChart } from './LineChart';
 // Importing bar chart component
 import { BarChart } from './BarChart';
+// Importing pie chart component
 import { PieChart } from './PieChart';
 import { ActivityHeatmap } from './ActivityHeatmap';
 import { TransactionDetailModal } from './TransactionDetailModal';
