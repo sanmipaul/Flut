@@ -1,4 +1,5 @@
 import React from 'react';
+// Emergency withdrawal button component for initiating emergency withdrawals
 import { useIsMobile } from '../context/ResponsiveContext';
 
 interface EmergencyWithdrawalButtonProps {
