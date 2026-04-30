@@ -47,6 +47,10 @@ export const DepositModal: React.FC<DepositModalProps> = ({
       <div className="modal-content">
         <h2>Deposit to Vault #{vaultId}</h2>
         <p className="deposit-hint">Add more STX to this vault. The lock period remains unchanged.</p>
+
+        <div className="form-group">
+          <label htmlFor="deposit-amount">Amount (STX)</label>
+        </div>
       </div>
     </div>
   );
