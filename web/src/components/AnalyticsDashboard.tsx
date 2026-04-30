@@ -30,6 +30,7 @@ import { FilteredEmptyState } from './FilteredEmptyState';
 import { useEmptyState } from '../hooks/useEmptyState';
 // Importing analytics empty icon component
 import { AnalyticsEmptyIcon } from './AnalyticsEmptyIcon';
+// Importing responsive context hooks
 import { useIsMobile, useIsSmallMobile, useIsPortrait } from '../context/ResponsiveContext';
 import { VaultTransaction, TransactionType } from '../types/TransactionHistory';
 import {
