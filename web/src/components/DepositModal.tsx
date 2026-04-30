@@ -60,6 +60,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({
             step="0.000001"
             disabled={loading}
           />
+          <small>Minimum deposit is 1 microSTX. Funds are added to the existing lock.</small>
         </div>
 
         {error && <div className="error-message">{error}</div>}
