@@ -102,13 +102,31 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
       <table className="w-full" role="table" aria-label="Vault transaction history">
         <thead className="bg-gray-100 border-b">
           <tr>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200" onClick={() => { setSortBy('type'); setSortDesc(!sortDesc); }}>
+            <th
+              className="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200"
+              onClick={() => { setSortBy('type'); setSortDesc(!sortDesc); }}
+              tabIndex={0}
+              aria-sort={sortBy === 'type' ? (sortDesc ? 'descending' : 'ascending') : 'none'}
+              aria-label="Sort transactions by type"
+            >
               Type
             </th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200" onClick={() => { setSortBy('date'); setSortDesc(!sortDesc); }}>
+            <th
+              className="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200"
+              onClick={() => { setSortBy('date'); setSortDesc(!sortDesc); }}
+              tabIndex={0}
+              aria-sort={sortBy === 'date' ? (sortDesc ? 'descending' : 'ascending') : 'none'}
+              aria-label="Sort transactions by date"
+            >
               Date
             </th>
-            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200" onClick={() => { setSortBy('amount'); setSortDesc(!sortDesc); }}>
+            <th
+              className="px-6 py-3 text-right text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200"
+              onClick={() => { setSortBy('amount'); setSortDesc(!sortDesc); }}
+              tabIndex={0}
+              aria-sort={sortBy === 'amount' ? (sortDesc ? 'descending' : 'ascending') : 'none'}
+              aria-label="Sort transactions by amount"
+            >
               Amount
             </th>
             <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
