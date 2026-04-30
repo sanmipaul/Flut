@@ -924,6 +924,23 @@ button:disabled {
   z-index: 999;
 }
 
+/* Deposit Section */
+.deposit-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: rgba(85, 70, 255, 0.04);
+  border-radius: 6px;
+  border: 1px solid rgba(85, 70, 255, 0.2);
+}
+
+.deposit-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
 /* ============================================================
    Dark mode overrides for specific components
    ============================================================ */
