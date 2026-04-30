@@ -1072,6 +1072,11 @@ button:disabled {
   color: var(--error-color);
 }
 
+[data-theme='dark'] .deposit-section {
+  background-color: rgba(123, 111, 255, 0.06);
+  border-color: rgba(123, 111, 255, 0.2);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .app-main {
