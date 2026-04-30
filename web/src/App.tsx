@@ -323,6 +323,7 @@ const AppInner: React.FC = () => {
               onSetBeneficiary={handleSetBeneficiary}
               onFetchVault={handleFetchVault}
               onEmergencyWithdraw={handleEmergencyWithdraw}
+              onDeposit={handleDeposit}
               penaltyRate={10}
               onSettingsChange={handleSettingsChange}
             />
