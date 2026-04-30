@@ -101,6 +101,13 @@ export const DepositModal: React.FC<DepositModalProps> = ({
           <small id="deposit-amount-hint">Minimum deposit is 1 microSTX. Funds are added to the existing lock.</small>
         </div>
 
+        {currentAmount !== undefined && isAmountValid(amount) && (
+          <div className="deposit-balance-row">
+            <span className="deposit-balance-label">New Balance After Deposit:</span>
+            <span className="deposit-balance-value">{(currentAmount + parseFloat(amount)).toLocaleString()} STX</span>
+          </div>
+        )}
+
         {error && <div className="error-message">{error}</div>}
 
         <div className="modal-actions">
