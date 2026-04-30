@@ -21,6 +21,7 @@ import { ActivityHeatmap } from './ActivityHeatmap';
 import { TransactionDetailModal } from './TransactionDetailModal';
 // Importing error boundary component
 import { ErrorBoundary } from './ErrorBoundary';
+// Importing empty state component
 import { EmptyState } from './EmptyState';
 import { EmptyChartPlaceholder } from './EmptyChartPlaceholder';
 import { FilteredEmptyState } from './FilteredEmptyState';
