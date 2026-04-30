@@ -390,6 +390,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
       <DepositModal
         isOpen={showDepositModal}
         vaultId={vault.vaultId}
+        currentAmount={vault.amount}
         onDeposit={handleDeposit}
         onClose={() => setShowDepositModal(false)}
       />
