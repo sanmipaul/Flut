@@ -41,4 +41,15 @@ describe('TransactionTable', () => {
     expect(rows[1].textContent).toContain('Deposit');
     expect(rows[2].textContent).toContain('Withdraw');
   });
+
+  it('sorts transaction rows by amount when the Amount header is clicked', () => {
+    render(<TransactionTable transactions={transactions} />);
+
+    const amountHeader = screen.getByText('Amount');
+    fireEvent.click(amountHeader);
+
+    const rows = screen.getAllByRole('row');
+    expect(rows[1].textContent).toContain('Deposit');
+    expect(rows[2].textContent).toContain('Withdraw');
+  });
 });
