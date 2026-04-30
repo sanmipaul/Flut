@@ -123,6 +123,8 @@ export const DepositModal: React.FC<DepositModalProps> = ({
             className="btn-primary"
             onClick={handleDeposit}
             disabled={loading || !isAmountValid(amount)}
+            aria-label={`Confirm deposit of ${isAmountValid(amount) ? amount : '0'} STX to vault ${vaultId}`}
+            aria-busy={loading}
           >
             {loading ? 'Depositing...' : 'Deposit'}
           </button>
