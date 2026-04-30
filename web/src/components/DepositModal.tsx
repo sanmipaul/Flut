@@ -46,6 +46,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({
     <div className="modal-overlay">
       <div className="modal-content">
         <h2>Deposit to Vault #{vaultId}</h2>
+        <p className="deposit-hint">Add more STX to this vault. The lock period remains unchanged.</p>
       </div>
     </div>
   );
