@@ -1518,6 +1518,14 @@ button:disabled {
   }
 }
 
+@media (max-width: 640px) {
+  .deposit-balance-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+}
+
 /* Reduced motion: disable fill transition and pulse */
 @media (prefers-reduced-motion: reduce) {
   .vault-lock-progress__fill {
