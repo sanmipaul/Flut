@@ -48,7 +48,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
   const [selectedTransaction, setSelectedTransaction] = useState<VaultTransaction | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'patterns'>('overview');
+  const [currentTab, setCurrentTab] = useState<'overview' | 'transactions' | 'patterns'>('overview');
 
   const { hasTransactions, hasFilteredTransactions, isFilteredEmpty } = useEmptyState(transactions, filteredTransactions);
 
@@ -112,9 +112,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           {(['overview', 'transactions', 'patterns'] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setCurrentTab(tab)}
               className={`flex-1 px-3 py-2 rounded text-sm font-medium transition ${
-                activeTab === tab ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+                currentTab === tab ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'
               }`}
               style={{
                 minHeight: isSmallMobile ? 48 : 44,
@@ -127,7 +127,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </div>
 
         {/* Overview Tab */}
-        {activeTab === 'overview' && (
+        {currentTab === 'overview' && (
           <div className="space-y-4">
             {performance && <PerformanceMetrics metrics={performance} />}
             {timeSeriesData.length > 0 && (
@@ -142,7 +142,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         )}
 
         {/* Transactions Tab with virtualization */}
-        {activeTab === 'transactions' && (
+        {currentTab === 'transactions' && (
           <div className="space-y-4">
             <div className="flex gap-2">
               <button
@@ -174,7 +174,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         )}
 
         {/* Patterns Tab */}
-        {activeTab === 'patterns' && (
+        {currentTab === 'patterns' && (
           <div className="space-y-4">
             {distributionData.length > 0 && (
               <PieChart 
