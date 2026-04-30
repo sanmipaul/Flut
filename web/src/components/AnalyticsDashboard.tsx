@@ -28,6 +28,7 @@ import { EmptyChartPlaceholder } from './EmptyChartPlaceholder';
 // Importing filtered empty state component
 import { FilteredEmptyState } from './FilteredEmptyState';
 import { useEmptyState } from '../hooks/useEmptyState';
+// Importing analytics empty icon component
 import { AnalyticsEmptyIcon } from './AnalyticsEmptyIcon';
 import { useIsMobile, useIsSmallMobile, useIsPortrait } from '../context/ResponsiveContext';
 import { VaultTransaction, TransactionType } from '../types/TransactionHistory';
