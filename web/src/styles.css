@@ -935,6 +935,12 @@ button:disabled {
   border: 1px solid rgba(85, 70, 255, 0.2);
 }
 
+.deposit-section__header h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 1rem;
+  color: var(--primary-color);
+}
+
 .deposit-hint {
   margin: 0;
   font-size: 0.85rem;
