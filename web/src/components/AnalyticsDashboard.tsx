@@ -15,6 +15,7 @@ import { LineChart } from './LineChart';
 import { BarChart } from './BarChart';
 // Importing pie chart component
 import { PieChart } from './PieChart';
+// Importing activity heatmap component
 import { ActivityHeatmap } from './ActivityHeatmap';
 import { TransactionDetailModal } from './TransactionDetailModal';
 import { ErrorBoundary } from './ErrorBoundary';
