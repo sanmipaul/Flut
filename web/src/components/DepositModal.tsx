@@ -22,6 +22,24 @@ export const DepositModal: React.FC<DepositModalProps> = ({
     return val.trim() !== '' && !isNaN(n) && n > 0;
   };
 
+  const handleDeposit = async () => {
+    setError('');
+    if (!isAmountValid(amount)) {
+      setError('Please enter a valid amount greater than 0');
+      return;
+    }
+    try {
+      setLoading(true);
+      await onDeposit(vaultId, parseFloat(amount));
+      setAmount('');
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Deposit failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
