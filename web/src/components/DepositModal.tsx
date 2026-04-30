@@ -61,6 +61,21 @@ export const DepositModal: React.FC<DepositModalProps> = ({
             disabled={loading}
           />
         </div>
+
+        {error && <div className="error-message">{error}</div>}
+
+        <div className="modal-actions">
+          <button className="btn-secondary" onClick={onClose} disabled={loading}>
+            Cancel
+          </button>
+          <button
+            className="btn-primary"
+            onClick={handleDeposit}
+            disabled={loading || !isAmountValid(amount)}
+          >
+            {loading ? 'Depositing...' : 'Deposit'}
+          </button>
+        </div>
       </div>
     </div>
   );
