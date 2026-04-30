@@ -308,16 +308,18 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {timeSeriesData.length > 0 && (
+            {timeSeriesData.length > 0 ? (
               <LineChart 
                 data={timeSeriesData} 
                 title="Transaction Volume Over Time" 
                 yAxisLabel="STX" 
                 height={isSmallMobile ? 250 : 300} 
               />
+            ) : (
+              <EmptyChartPlaceholder height={isSmallMobile ? 250 : 300} />
             )}
 
-            {cumulativeData.length > 0 && (
+            {cumulativeData.length > 0 ? (
               <BarChart 
                 data={cumulativeData} 
                 title="Cumulative Volume by Month" 
@@ -325,17 +327,21 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 height={isSmallMobile ? 250 : 300} 
                 barColor="#10b981" 
               />
+            ) : (
+              <EmptyChartPlaceholder height={isSmallMobile ? 250 : 300} />
             )}
 
-            {distributionData.length > 0 && (
+            {distributionData.length > 0 ? (
               <PieChart 
                 data={distributionData} 
                 title="Transaction Type Distribution" 
                 height={isSmallMobile ? 250 : 300} 
               />
+            ) : (
+              <EmptyChartPlaceholder height={isSmallMobile ? 250 : 300} />
             )}
 
-            {heatmapData && heatmapData.length > 0 && (
+            {heatmapData && heatmapData.length > 0 ? (
               <div style={{ maxHeight: isSmallMobile ? '350px' : '450px', overflow: 'auto' }}>
                 <ActivityHeatmap
                   data={heatmapData}
@@ -345,6 +351,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   colorScheme="blue"
                 />
               </div>
+            ) : (
+              <EmptyChartPlaceholder height={isSmallMobile ? 350 : 450} />
             )}
           </div>
 
