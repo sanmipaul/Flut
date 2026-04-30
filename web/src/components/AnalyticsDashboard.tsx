@@ -157,13 +157,15 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         {currentTab === 'overview' && (
           <div className="space-y-4">
             {performance && <PerformanceMetrics metrics={performance} />}
-            {timeSeriesData.length > 0 && (
+            {timeSeriesData.length > 0 ? (
               <LineChart 
                 data={timeSeriesData} 
                 title="Transaction Volume" 
                 yAxisLabel="STX" 
                 height={isSmallMobile ? 200 : 250} 
               />
+            ) : (
+              <EmptyChartPlaceholder height={isSmallMobile ? 200 : 250} />
             )}
           </div>
         )}
