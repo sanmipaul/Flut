@@ -1,9 +1,9 @@
 /**
  * Analytics Data Hook
- * Provides analytics data and calculations
+ * Provides analytics data and calculations with persistent filter state
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   VaultTransaction,
   TransactionStats,
@@ -17,6 +17,9 @@ import {
   calculateVaultPerformance,
   filterTransactions,
 } from '../utils/AnalyticsUtils';
+import { loadDualStorage, saveDualStorage } from '../utils/storage';
+
+const ANALYTICS_FILTER_KEY = 'flut-analytics-filter';
 
 export const useAnalytics = (
   transactions: VaultTransaction[] = [],
@@ -33,11 +36,23 @@ export const useAnalytics = (
   updateFilter: (newFilter: TransactionFilter) => void;
   clearFilters: () => void;
 } => {
+  // Load persisted filter state
+  const loadPersistedFilter = useMemo((): TransactionFilter => {
+    if (typeof window === 'undefined') return {};
+    const persisted = loadDualStorage<TransactionFilter>(ANALYTICS_FILTER_KEY);
+    return persisted || {};
+  }, []);
+
   const [stats, setStats] = useState<TransactionStats | null>(null);
   const [performance, setPerformance] = useState<VaultPerformanceMetrics | null>(null);
   const [filteredTransactions, setFilteredTransactions] = useState<VaultTransaction[]>(transactions);
-  const [currentFilter, setCurrentFilter] = useState<TransactionFilter>({});
+  const [currentFilter, setCurrentFilter] = useState<TransactionFilter>(loadPersistedFilter);
   const [selectedPeriod, setSelectedPeriod] = useState(ANALYTICS_PERIODS[2]); // Default to 30 days
+
+  // Persist filter changes
+  useEffect(() => {
+    saveDualStorage(ANALYTICS_FILTER_KEY, currentFilter);
+  }, [currentFilter]);
 
   // Calculate stats when transactions change
   useEffect(() => {
@@ -61,7 +76,7 @@ export const useAnalytics = (
     setFilteredTransactions(filtered);
   }, [transactions, currentFilter]);
 
-  // Filter by selected period
+  // Apply period filter
   const applyPeriodFilter = useCallback((period: typeof ANALYTICS_PERIODS[number]) => {
     setSelectedPeriod(period);
 

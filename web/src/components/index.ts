@@ -18,3 +18,6 @@ export type { LiveAnnouncerProps } from './LiveAnnouncer';
 
 export { AnnouncementIndicator } from './AnnouncementIndicator';
 export type { AnnouncementIndicatorProps } from './AnnouncementIndicator';
+
+export { HeatmapFilterPanel } from './HeatmapFilterPanel';
+export type { HeatmapFilterPanelProps } from './HeatmapFilterPanel';

@@ -87,6 +87,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const distributionData = useMemo(() => generateTransactionTypeDistribution(filteredTransactions), [filteredTransactions]);
   const heatmapData = useMemo(() => generateActivityHeatmap(filteredTransactions), [filteredTransactions]);
 
+  // Heatmap filter hook - persists state across sessions
+  const { filter: heatmapFilter, filteredData: filteredHeatmapData, updateFilter: updateHeatmapFilter, resetFilter: resetHeatmapFilter, clearFilter: clearHeatmapFilter } = useHeatmapFilter(heatmapData);
+
   const handleTransactionClick = (tx: VaultTransaction) => {
     setSelectedTransaction(tx);
     setShowDetailModal(true);
@@ -217,14 +220,14 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 height={isSmallMobile ? 200 : 250} 
               />
             )}
-            {heatmapData && heatmapData.length > 0 && (
+            {filteredHeatmapData && filteredHeatmapData.length > 0 && (
               <div style={{ maxHeight: isSmallMobile ? '300px' : '400px', overflow: 'auto' }}>
                 <ActivityHeatmap
-                  data={heatmapData}
+                  data={filteredHeatmapData}
                   title="Activity by Day/Hour"
                   rowLabels={Array.from({ length: 7 }, (_, i) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i])}
                   colLabels={Array.from({ length: 24 }, (_, i) => `${i}:00`)}
-                  colorScheme="blue"
+                  colorScheme={heatmapFilter.colorScheme}
                 />
               </div>
             )}
@@ -280,8 +283,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left Sidebar - Filters */}
-        <div>
+        <div className="space-y-4">
           <FilterPanel onFilterChange={updateFilter} transactionTypes={transactionTypes} />
+          <HeatmapFilterPanel 
+            filter={heatmapFilter} 
+            onChange={updateHeatmapFilter}
+            onReset={resetHeatmapFilter}
+          />
         </div>
 
         {/* Main Content */}
@@ -353,11 +361,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             {heatmapData && heatmapData.length > 0 ? (
               <div style={{ maxHeight: isSmallMobile ? '350px' : '450px', overflow: 'auto' }}>
                 <ActivityHeatmap
-                  data={heatmapData}
+                  data={filteredHeatmapData}
                   title="Activity Heatmap (Day × Hour)"
                   rowLabels={['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']}
                   colLabels={Array.from({ length: 24 }, (_, i) => (i % 6 === 0 ? `${i}:00` : ''))}
-                  colorScheme="blue"
+                  colorScheme={heatmapFilter.colorScheme}
                 />
               </div>
             ) : (
@@ -404,9 +412,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       {/* Transaction Detail Modal */}
       <TransactionDetailModal transaction={selectedTransaction} isOpen={showDetailModal} onClose={() => setShowDetailModal(false)} />
-    </div>
+      </div>
     </ErrorBoundary>
   );
 };
 
-export default AnalyticsDashboard;
