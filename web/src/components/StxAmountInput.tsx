@@ -43,6 +43,7 @@ const StxAmountInput: React.FC<StxAmountInputProps> = ({
 }) => {
   const [error, setError] = useState<string>('');
   const [touched, setTouched] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
 
   useEffect(() => {
     if (!touched) return;
@@ -52,29 +53,34 @@ const StxAmountInput: React.FC<StxAmountInputProps> = ({
     if (value === '' || value === undefined) {
       setError('');
       onParsed?.(NaN);
+      setAnnouncement('');
       return;
     }
 
     if (isNaN(parsed)) {
       setError('Enter a valid number (e.g. 100, 1.5, 2k, 1M)');
       onParsed?.(NaN);
+      setAnnouncement('Error: Enter a valid number');
       return;
     }
 
     if (parsed < min) {
       setError(`Minimum amount is ${formatStx(min, { decimals: 0 })}`);
       onParsed?.(NaN);
+      setAnnouncement(`Error: Minimum amount is ${formatStx(min, { decimals: 0 })}`);
       return;
     }
 
     if (max !== undefined && parsed > max) {
       setError(`Maximum amount is ${formatStx(max, { decimals: 0 })}`);
       onParsed?.(NaN);
+      setAnnouncement(`Error: Maximum amount is ${formatStx(max, { decimals: 0 })}`);
       return;
     }
 
     setError('');
     onParsed?.(parsed);
+    setAnnouncement(`Valid amount: ${formatStx(parsed, { decimals: 2 })} STX`);
   }, [value, touched, min, max, onParsed]);
 
   const inputId = id ?? 'stx-amount-input';
