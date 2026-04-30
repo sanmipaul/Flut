@@ -7,6 +7,7 @@ import { TransactionTable } from './TransactionTable';
 import { PerformanceMetrics } from './PerformanceMetrics';
 // Importing filter panel component
 import { FilterPanel } from './FilterPanel';
+// Importing period selector component
 import { PeriodSelector } from './PeriodSelector';
 import { LineChart } from './LineChart';
 import { BarChart } from './BarChart';
