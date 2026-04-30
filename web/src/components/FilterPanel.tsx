@@ -3,6 +3,7 @@ import { TransactionType, TransactionFilter } from '../types/TransactionHistory'
 import { getTransactionTypeLabel } from '../utils/AnalyticsUtils';
 
 const FILTER_STORAGE_KEY = 'flut-filter-panel-state';
+const FILTER_SESSION_KEY = 'flut-filter-panel-session';
 
 interface FilterPanelState {
   selectedTypes: TransactionType[];
@@ -14,28 +15,73 @@ interface FilterPanelState {
   expandedSections: { [key: string]: boolean };
 }
 
-interface FilterPanelProps {
-  onFilterChange: (filter: TransactionFilter) => void;
-  transactionTypes: TransactionType[];
+function isStorageAvailable(storage: Storage): boolean {
+  try {
+    const testKey = '__storage_test__';
+    storage.setItem(testKey, testKey);
+    storage.removeItem(testKey);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function saveState(state: FilterPanelState, isSession = false) {
+  try {
+    const storage = isSession ? sessionStorage : localStorage;
+    if (isStorageAvailable(storage)) {
+      storage.setItem(isSession ? FILTER_SESSION_KEY : FILTER_STORAGE_KEY, JSON.stringify(state));
+    }
+  } catch (e) {
+    console.warn('Failed to save filter state', e);
+  }
+}
+
+function loadState(isSession = false): FilterPanelState | null {
+  try {
+    const storage = isSession ? sessionStorage : localStorage;
+    if (isStorageAvailable(storage)) {
+      const stored = storage.getItem(isSession ? FILTER_SESSION_KEY : FILTER_STORAGE_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load filter state', e);
+  }
+  return null;
 }
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transactionTypes }) => {
   const loadPersistedState = (): FilterPanelState => {
     if (typeof window === 'undefined') {
+      return getDefaultState();
+    }
+    // Try localStorage first, then sessionStorage
+    const persisted = loadState(false) || loadState(true);
+    if (persisted) {
       return {
-        selectedTypes: [],
-        selectedStatuses: [],
-        startDate: '',
-        endDate: '',
-        minAmount: '',
-        maxAmount: '',
-        expandedSections: {
-          dateRange: true,
-          type: false,
-          amount: false,
-          status: false,
-        },
+        ...getDefaultState(),
+        ...persisted,
       };
+    }
+    return getDefaultState();
+  };
+
+  const getDefaultState = (): FilterPanelState => ({
+    selectedTypes: [],
+    selectedStatuses: [],
+    startDate: '',
+    endDate: '',
+    minAmount: '',
+    maxAmount: '',
+    expandedSections: {
+      dateRange: true,
+      type: false,
+      amount: false,
+      status: false,
+    },
+  });
     }
     try {
       const stored = localStorage.getItem(FILTER_STORAGE_KEY);
@@ -83,22 +129,19 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
   const [maxAmount, setMaxAmount] = useState<string>(() => loadPersistedState().maxAmount);
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>(() => loadPersistedState().expandedSections);
 
-  // Persist filter state to localStorage whenever it changes
+  // Persist filter state to storage whenever it changes
   useEffect(() => {
-    try {
-      const state: FilterPanelState = {
-        selectedTypes,
-        selectedStatuses,
-        startDate,
-        endDate,
-        minAmount,
-        maxAmount,
-        expandedSections,
-      };
-      localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {
-      console.warn('Failed to save filter state to localStorage', e);
-    }
+    const state: FilterPanelState = {
+      selectedTypes,
+      selectedStatuses,
+      startDate,
+      endDate,
+      minAmount,
+      maxAmount,
+      expandedSections,
+    };
+    saveState(state, false); // Save to localStorage
+    saveState(state, true);  // Also save to sessionStorage as fallback
   }, [selectedTypes, selectedStatuses, startDate, endDate, minAmount, maxAmount, expandedSections]);
 
   const toggleSection = (section: string) => {
@@ -168,6 +211,16 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
     onFilterChange({});
   };
 
+  const clearAllStorage = () => {
+    try {
+      localStorage.removeItem(FILTER_STORAGE_KEY);
+      sessionStorage.removeItem(FILTER_SESSION_KEY);
+    } catch (e) {
+      console.warn('Failed to clear filter storage', e);
+    }
+    resetFilters();
+  };
+
   const FilterSection: React.FC<{ title: string; sectionKey: string; children: React.ReactNode }> = ({
     title,
     sectionKey,
@@ -187,16 +240,34 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
     </div>
   );
 
+  const activeFilterCount = selectedTypes.length + selectedStatuses.length + (startDate ? 1 : 0) + (endDate ? 1 : 0) + (minAmount ? 1 : 0) + (maxAmount ? 1 : 0);
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-fit sticky top-4">
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
-        <button
-          onClick={resetFilters}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-        >
-          Reset
-        </button>
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+          {activeFilterCount > 0 && (
+            <span className="text-xs text-blue-600 font-medium">
+              {activeFilterCount} active {activeFilterCount === 1 ? 'filter' : 'filters'}
+            </span>
+          )}
+        </div>
+        <div className="flex gap-1">
+          <button
+            onClick={clearAllStorage}
+            className="text-xs text-gray-500 hover:text-gray-700 font-medium px-2 py-1 rounded hover:bg-gray-100"
+            title="Clear saved filters"
+          >
+            Clear Storage
+          </button>
+          <button
+            onClick={resetFilters}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Reset
+          </button>
+        </div>
       </div>
 
       {/* Date Range Filter */}
