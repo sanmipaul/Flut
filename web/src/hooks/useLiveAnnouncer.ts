@@ -6,7 +6,7 @@
  * assistive technology users without disrupting visual UI.
  *
  * Usage:
- *   const { announce, clear } = useLiveAnnouncer();
+ *   const { announce, clear, message, politeness } = useLiveAnnouncer();
  *   announce('Form submitted successfully');
  */
 import { useState, useCallback, useEffect } from 'react';
@@ -32,6 +32,8 @@ export interface UseLiveAnnouncerOptions {
   debounceMs?: number;
 }
 
+let debounceTimer: NodeJS.Timeout | null = null;
+
 /**
  * Custom hook that provides screen reader announcement capabilities
  */
@@ -43,7 +45,6 @@ export function useLiveAnnouncer({
   const [politeness, setPoliteness] = useState<'polite' | 'assertive'>(
     defaultPoliteness
   );
-  const debounceTimer = useState<NodeJS.Timeout | null>(() => null)[0];
 
   const announce = useCallback(
     (newMessage: string, newPoliteness: 'polite' | 'assertive' = defaultPoliteness) => {
@@ -56,7 +57,7 @@ export function useLiveAnnouncer({
       setMessage(newMessage);
       setPoliteness(newPoliteness);
     },
-    [debounceTimer, defaultPoliteness]
+    [defaultPoliteness]
   );
 
   const clear = useCallback(() => {
