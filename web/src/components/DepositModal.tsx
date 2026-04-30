@@ -27,6 +27,16 @@ export const DepositModal: React.FC<DepositModalProps> = ({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen && !loading) {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, loading, onClose]);
+
   const isAmountValid = (val: string): boolean => {
     const n = parseFloat(val);
     return val.trim() !== '' && !isNaN(n) && n > 0;
