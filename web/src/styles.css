@@ -941,6 +941,27 @@ button:disabled {
   color: var(--text-light);
 }
 
+.deposit-balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--secondary-color);
+  border-radius: 4px;
+  margin-bottom: var(--spacing-md);
+  font-size: 0.9rem;
+}
+
+.deposit-balance-label {
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.deposit-balance-value {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
 /* ============================================================
    Dark mode overrides for specific components
    ============================================================ */
