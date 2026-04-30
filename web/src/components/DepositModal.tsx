@@ -70,6 +70,9 @@ export const DepositModal: React.FC<DepositModalProps> = ({
 
   const parsedAmount = parseFloat(amount);
   const amountIsPositive = !isNaN(parsedAmount) && parsedAmount > 0;
+  const newBalance = currentAmount !== undefined && amountIsPositive
+    ? currentAmount + parsedAmount
+    : undefined;
 
   if (!isOpen) return null;
 
