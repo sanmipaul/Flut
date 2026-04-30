@@ -9,6 +9,7 @@ import { PerformanceMetrics } from './PerformanceMetrics';
 import { FilterPanel } from './FilterPanel';
 // Importing period selector component
 import { PeriodSelector } from './PeriodSelector';
+// Importing line chart component
 import { LineChart } from './LineChart';
 import { BarChart } from './BarChart';
 import { PieChart } from './PieChart';
