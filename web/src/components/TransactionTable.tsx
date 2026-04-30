@@ -99,7 +99,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <table className="w-full">
+      <table className="w-full" role="table" aria-label="Vault transaction history">
         <thead className="bg-gray-100 border-b">
           <tr>
             <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200" onClick={() => { setSortBy('type'); setSortDesc(!sortDesc); }}>
