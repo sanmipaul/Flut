@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { FormField } from './FormField';
 import { useValidatedInput } from '../hooks/useValidatedInput';
+import { useLiveAnnouncer } from '../hooks/useLiveAnnouncer';
 import type { Validator } from '../utils/validation';
 
 interface ValidatedInputProps {
@@ -27,18 +28,16 @@ export function ValidatedInput({
     validator,
     validateOnBlur: true
   });
-  const [announcement, setAnnouncement] = useState('');
+  const { message: announcement, announce } = useLiveAnnouncer();
   
   useEffect(() => {
     if (!validation.isValid && validation.errors.length > 0) {
       const errorText = `Error: ${validation.errors.join('. ')}`;
-      setAnnouncement(errorText);
+      announce(errorText, 'polite');
     } else if (validation.isValid && value !== '') {
-      setAnnouncement('Input is valid');
-    } else {
-      setAnnouncement('');
+      announce('Input is valid', 'polite');
     }
-  }, [validation, value]);
+  }, [validation, value, announce]);
   
   return (
     <>
