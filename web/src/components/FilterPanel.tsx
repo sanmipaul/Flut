@@ -1,6 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { TransactionType, TransactionFilter } from '../types/TransactionHistory';
 import { getTransactionTypeLabel } from '../utils/AnalyticsUtils';
+
+const FILTER_STORAGE_KEY = 'flut-filter-panel-state';
+
+interface FilterPanelState {
+  selectedTypes: TransactionType[];
+  selectedStatuses: string[];
+  startDate: string;
+  endDate: string;
+  minAmount: string;
+  maxAmount: string;
+  expandedSections: { [key: string]: boolean };
+}
 
 interface FilterPanelProps {
   onFilterChange: (filter: TransactionFilter) => void;
@@ -8,19 +20,86 @@ interface FilterPanelProps {
 }
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transactionTypes }) => {
-  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
-    dateRange: true,
-    type: false,
-    amount: false,
-    status: false,
-  });
+  const loadPersistedState = (): FilterPanelState => {
+    if (typeof window === 'undefined') {
+      return {
+        selectedTypes: [],
+        selectedStatuses: [],
+        startDate: '',
+        endDate: '',
+        minAmount: '',
+        maxAmount: '',
+        expandedSections: {
+          dateRange: true,
+          type: false,
+          amount: false,
+          status: false,
+        },
+      };
+    }
+    try {
+      const stored = localStorage.getItem(FILTER_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return {
+          selectedTypes: parsed.selectedTypes || [],
+          selectedStatuses: parsed.selectedStatuses || [],
+          startDate: parsed.startDate || '',
+          endDate: parsed.endDate || '',
+          minAmount: parsed.minAmount || '',
+          maxAmount: parsed.maxAmount || '',
+          expandedSections: parsed.expandedSections || {
+            dateRange: true,
+            type: false,
+            amount: false,
+            status: false,
+          },
+        };
+      }
+    } catch (e) {
+      console.warn('Failed to load filter state from localStorage', e);
+    }
+    return {
+      selectedTypes: [],
+      selectedStatuses: [],
+      startDate: '',
+      endDate: '',
+      minAmount: '',
+      maxAmount: '',
+      expandedSections: {
+        dateRange: true,
+        type: false,
+        amount: false,
+        status: false,
+      },
+    };
+  };
 
-  const [selectedTypes, setSelectedTypes] = useState<TransactionType[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
-  const [minAmount, setMinAmount] = useState<string>('');
-  const [maxAmount, setMaxAmount] = useState<string>('');
+  const [selectedTypes, setSelectedTypes] = useState<TransactionType[]>(() => loadPersistedState().selectedTypes);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(() => loadPersistedState().selectedStatuses);
+  const [startDate, setStartDate] = useState<string>(() => loadPersistedState().startDate);
+  const [endDate, setEndDate] = useState<string>(() => loadPersistedState().endDate);
+  const [minAmount, setMinAmount] = useState<string>(() => loadPersistedState().minAmount);
+  const [maxAmount, setMaxAmount] = useState<string>(() => loadPersistedState().maxAmount);
+  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>(() => loadPersistedState().expandedSections);
+
+  // Persist filter state to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      const state: FilterPanelState = {
+        selectedTypes,
+        selectedStatuses,
+        startDate,
+        endDate,
+        minAmount,
+        maxAmount,
+        expandedSections,
+      };
+      localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.warn('Failed to save filter state to localStorage', e);
+    }
+  }, [selectedTypes, selectedStatuses, startDate, endDate, minAmount, maxAmount, expandedSections]);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
@@ -45,17 +124,19 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
     applyFilter(selectedTypes, newStatuses, startDate, endDate, minAmount, maxAmount);
   };
 
-  const applyFilter = (types: TransactionType[], statuses: string[], start: string, end: string, min: string, max: string) => {
-    const filter: TransactionFilter = {
-      types: types.length > 0 ? types : undefined,
-      status: statuses.length > 0 ? statuses as ('pending' | 'confirmed' | 'failed')[] : undefined,
-      startDate: start ? new Date(start).getTime() : undefined,
-      endDate: end ? new Date(end).getTime() : undefined,
-      minAmount: min ? parseFloat(min) : undefined,
-      maxAmount: max ? parseFloat(max) : undefined,
-    };
-    onFilterChange(filter);
-  };
+  const applyFilter = useMemo(() => (
+    (types: TransactionType[], statuses: string[], start: string, end: string, min: string, max: string) => {
+      const filter: TransactionFilter = {
+        types: types.length > 0 ? types : undefined,
+        status: statuses.length > 0 ? statuses as ('pending' | 'confirmed' | 'failed')[] : undefined,
+        startDate: start ? new Date(start).getTime() : undefined,
+        endDate: end ? new Date(end).getTime() : undefined,
+        minAmount: min ? parseFloat(min) : undefined,
+        maxAmount: max ? parseFloat(max) : undefined,
+      };
+      onFilterChange(filter);
+    }
+  ), [onFilterChange]);
 
   const handleDateChange = (type: 'start' | 'end', value: string) => {
     if (type === 'start') {
