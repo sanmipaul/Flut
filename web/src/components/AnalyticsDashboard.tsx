@@ -19,6 +19,7 @@ import { PieChart } from './PieChart';
 import { ActivityHeatmap } from './ActivityHeatmap';
 // Importing transaction detail modal component
 import { TransactionDetailModal } from './TransactionDetailModal';
+// Importing error boundary component
 import { ErrorBoundary } from './ErrorBoundary';
 import { EmptyState } from './EmptyState';
 import { EmptyChartPlaceholder } from './EmptyChartPlaceholder';
