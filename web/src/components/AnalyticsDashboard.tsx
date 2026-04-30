@@ -23,6 +23,7 @@ import { TransactionDetailModal } from './TransactionDetailModal';
 import { ErrorBoundary } from './ErrorBoundary';
 // Importing empty state component
 import { EmptyState } from './EmptyState';
+// Importing empty chart placeholder component
 import { EmptyChartPlaceholder } from './EmptyChartPlaceholder';
 import { FilteredEmptyState } from './FilteredEmptyState';
 import { useEmptyState } from '../hooks/useEmptyState';
