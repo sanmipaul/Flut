@@ -358,6 +358,9 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
 
       {!vault.isWithdrawn && onDeposit && (
         <section className="deposit-section">
+          <div className="deposit-section__header">
+            <h3>Add Funds</h3>
+          </div>
           <button
             className="btn-secondary"
             onClick={() => setShowDepositModal(true)}
