@@ -1,3 +1,6 @@
+export { default as DepositModal, DepositModal as DepositModalNamed } from './DepositModal';
+export type { DepositModalProps } from './DepositModal';
+
 export { default as VaultCountdown } from './VaultCountdown';
 export type { VaultCountdownProps } from './VaultCountdown';
 
