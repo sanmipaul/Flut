@@ -79,9 +79,11 @@ const StxAmountInput: React.FC<StxAmountInputProps> = ({
 
   const inputId = id ?? 'stx-amount-input';
   const errorId = `${inputId}-error`;
+  const hasValue = value !== '' && value !== undefined;
+  const isValid = hasValue && !error;
 
   return (
-    <div className={`stx-amount-input ${className}`.trim()}>
+    <div className={`stx-amount-input ${className} ${error ? 'stx-amount-input--invalid' : ''} ${isValid ? 'stx-amount-input--valid' : ''}`.trim()}>
       <div className="stx-amount-input__field">
         <input
           id={inputId}
