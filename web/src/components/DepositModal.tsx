@@ -111,7 +111,12 @@ export const DepositModal: React.FC<DepositModalProps> = ({
         {error && <div className="error-message">{error}</div>}
 
         <div className="modal-actions">
-          <button className="btn-secondary" onClick={onClose} disabled={loading}>
+          <button
+            className="btn-secondary"
+            onClick={onClose}
+            disabled={loading}
+            aria-label="Cancel deposit"
+          >
             Cancel
           </button>
           <button
