@@ -100,6 +100,21 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
     }
   };
 
+  const handleDeposit = async (id: number, amount: number) => {
+    try {
+      setSubmitting(true);
+      if (onDeposit) {
+        await onDeposit(id, amount);
+      }
+      const updated = await onFetchVault(vaultId);
+      setVault(updated);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Deposit failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSetBeneficiary = async () => {
     if (!vault || !newBeneficiary.trim()) return;
     if (beneficiaryValidation && !beneficiaryValidation.isValid) {
