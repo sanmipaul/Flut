@@ -46,17 +46,26 @@ interface AnalyticsDashboardProps {
   vaultId: string;
   transactions: VaultTransaction[];
   transactionTypes: TransactionType[];
+  createdAt: number;
+  currentBalance: number;
 }
 
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   vaultId,
   transactions,
   transactionTypes,
+  createdAt,
+  currentBalance,
 }) => {
   const isMobile = useIsMobile();
   const isSmallMobile = useIsSmallMobile();
   const isPortrait = useIsPortrait();
-  const { stats, performance, filteredTransactions, currentFilter, selectedPeriod, applyPeriodFilter, updateFilter, clearFilters } = useAnalytics(transactions);
+  const { stats, performance, filteredTransactions, currentFilter, selectedPeriod, applyPeriodFilter, updateFilter, clearFilters } = useAnalytics(
+    transactions,
+    vaultId,
+    createdAt,
+    currentBalance
+  );
 
   const [selectedTransaction, setSelectedTransaction] = useState<VaultTransaction | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
