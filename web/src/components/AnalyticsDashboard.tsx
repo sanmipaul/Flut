@@ -25,6 +25,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { EmptyState } from './EmptyState';
 // Importing empty chart placeholder component
 import { EmptyChartPlaceholder } from './EmptyChartPlaceholder';
+// Importing filtered empty state component
 import { FilteredEmptyState } from './FilteredEmptyState';
 import { useEmptyState } from '../hooks/useEmptyState';
 import { AnalyticsEmptyIcon } from './AnalyticsEmptyIcon';
