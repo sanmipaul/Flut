@@ -2611,3 +2611,19 @@ select:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(85, 70, 255, 0.25);
 }
+
+/* StxAmountInput validation states */
+.stx-amount-input--valid .stx-amount-input__text {
+  border-color: var(--success-color);
+}
+
+.stx-amount-input--invalid .stx-amount-input__text {
+  border-color: var(--error-color);
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+.stx-amount-input__error {
+  font-size: 0.875rem;
+  color: var(--error-color);
+  margin-top: var(--spacing-xs);
+}
