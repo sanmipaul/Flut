@@ -5,6 +5,7 @@ import { useAnalytics } from '../hooks/useAnalytics';
 import { TransactionTable } from './TransactionTable';
 // Importing performance metrics component
 import { PerformanceMetrics } from './PerformanceMetrics';
+// Importing filter panel component
 import { FilterPanel } from './FilterPanel';
 import { PeriodSelector } from './PeriodSelector';
 import { LineChart } from './LineChart';
