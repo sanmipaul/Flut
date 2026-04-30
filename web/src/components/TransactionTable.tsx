@@ -18,8 +18,16 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'type'>('date');
   const [sortDesc, setSortDesc] = useState(true);
 
+  const sortValue = (value: number | string, other: number | string) => {
+    if (typeof value === 'string' && typeof other === 'string') {
+      return value.localeCompare(other);
+    }
+    return (value as number) - (other as number);
+  };
+
   const sorted = [...transactions].sort((a, b) => {
-    let aVal: any, bVal: any;
+    let aVal: number | string = 0;
+    let bVal: number | string = 0;
     switch (sortBy) {
       case 'date':
         aVal = a.timestamp;
@@ -34,7 +42,8 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
         bVal = b.type;
         break;
     }
-    return sortDesc ? bVal - aVal : aVal - bVal;
+    const comparison = sortValue(aVal, bVal);
+    return sortDesc ? -comparison : comparison;
   });
 
   const getStatusColor = (status: string) => {

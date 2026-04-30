@@ -23,8 +23,6 @@ import { TransactionDetailModal } from './TransactionDetailModal';
 import { ErrorBoundary } from './ErrorBoundary';
 // Importing empty state component
 import { EmptyState } from './EmptyState';
-// Importing empty chart placeholder component
-import { EmptyChartPlaceholder } from './EmptyChartPlaceholder';
 // Importing filtered empty state component
 import { FilteredEmptyState } from './FilteredEmptyState';
 import { useEmptyState } from '../hooks/useEmptyState';
@@ -38,8 +36,8 @@ import {
   generateCumulativeVolumeData,
   generateTransactionTypeDistribution,
   generateActivityHeatmap,
-  getTransactionTypeColor,
 } from '../utils/ChartDataUtils';
+import { formatCurrency } from '../utils/AnalyticsUtils';
 import { exportTransactionsWithDownload, exportMetricsWithDownload } from '../utils/ExportUtils';
 
 interface AnalyticsDashboardProps {
@@ -70,6 +68,14 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [selectedTransaction, setSelectedTransaction] = useState<VaultTransaction | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [currentTab, setCurrentTab] = useState<'overview' | 'transactions' | 'patterns'>('overview');
+
+  const StatsSummaryCard: React.FC<{ label: string; value: string; detail?: string }> = ({ label, value, detail }) => (
+    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <p className="text-sm font-medium text-gray-600">{label}</p>
+      <p className="text-2xl font-semibold text-gray-900 mt-2">{value}</p>
+      {detail && <p className="text-xs text-gray-500 mt-1">{detail}</p>}
+    </div>
+  );
 
   const { hasTransactions, hasFilteredTransactions, isFilteredEmpty } = useEmptyState(transactions, filteredTransactions);
 
@@ -271,6 +277,32 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <div className="lg:col-span-3 space-y-6">
           {/* Performance Metrics Cards */}
           {performance && <PerformanceMetrics metrics={performance} />}
+
+          {/* Statistics Summary */}
+          {stats && (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              <StatsSummaryCard
+                label="Total Transactions"
+                value={`${stats.totalTransactions}`}
+                detail={`Success ${stats.successRate.toFixed(1)}%`}
+              />
+              <StatsSummaryCard
+                label="Confirmed Volume"
+                value={`${formatCurrency(stats.totalVolume)} STX`}
+                detail={`${Object.values(stats.transactionsByType).reduce((sum, count) => sum + count, 0)} records`}
+              />
+              <StatsSummaryCard
+                label="Average Tx Size"
+                value={`${formatCurrency(stats.averageTransactionSize)} STX`}
+                detail="Confirmed only"
+              />
+              <StatsSummaryCard
+                label="Recent Activity"
+                value={stats.newestTransaction ? new Date(stats.newestTransaction.timestamp).toLocaleDateString() : 'N/A'}
+                detail={stats.oldestTransaction ? `from ${new Date(stats.oldestTransaction.timestamp).toLocaleDateString()}` : undefined}
+              />
+            </div>
+          )}
 
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
