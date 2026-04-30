@@ -194,9 +194,11 @@ export function weightedMovingAverage(
  * clipped to [0, data.length).
  *
  * This is a pure function — the original array is not mutated.
+ * Any invalid `windowSize` (0, negative, NaN, Infinity) is clamped to 1 by
+ * `clampWindowSize` so the function always returns finite values.
  *
  * @param data       - Input data points
- * @param windowSize - Number of data points to average (must be >= 1)
+ * @param windowSize - Number of data points to average (clamped to [1, data.length])
  * @returns A new array of the same length with smoothed values
  */
 export function centredMovingAverage(
