@@ -23,6 +23,7 @@ interface VaultDetailProps {
   onSetBeneficiary: (vaultId: number, beneficiary: string) => Promise<void>;
   onFetchVault: (vaultId: number) => Promise<Vault>;
   onEmergencyWithdraw?: (vaultId: number) => Promise<void>;
+  onDeposit?: (vaultId: number, amount: number) => Promise<void>;
   penaltyRate?: number;
   /** Called when the user changes any vault setting, so the parent can refresh its sidebar */
   onSettingsChange?: () => void;
