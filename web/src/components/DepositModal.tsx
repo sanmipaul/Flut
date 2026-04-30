@@ -51,7 +51,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({
   return (
     <div className="modal-overlay" onClick={handleOverlayClick} role="dialog" aria-modal="true" aria-labelledby="deposit-modal-title">
       <div className="modal-content">
-        <h2>Deposit to Vault #{vaultId}</h2>
+        <h2 id="deposit-modal-title">Deposit to Vault #{vaultId}</h2>
         <p className="deposit-hint">Add more STX to this vault. The lock period remains unchanged.</p>
 
         <div className="form-group">
