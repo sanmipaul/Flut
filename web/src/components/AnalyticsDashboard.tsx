@@ -1,15 +1,34 @@
 import React, { useState, useMemo } from 'react';
+// AnalyticsDashboard component for displaying vault analytics
 import { useAnalytics } from '../hooks/useAnalytics';
+// Importing transaction table component
 import { TransactionTable } from './TransactionTable';
+// Importing performance metrics component
 import { PerformanceMetrics } from './PerformanceMetrics';
+// Importing filter panel component
 import { FilterPanel } from './FilterPanel';
+// Importing period selector component
 import { PeriodSelector } from './PeriodSelector';
+// Importing line chart component
 import { LineChart } from './LineChart';
+// Importing bar chart component
 import { BarChart } from './BarChart';
+// Importing pie chart component
 import { PieChart } from './PieChart';
+// Importing activity heatmap component
 import { ActivityHeatmap } from './ActivityHeatmap';
+// Importing transaction detail modal component
 import { TransactionDetailModal } from './TransactionDetailModal';
+// Importing error boundary component
 import { ErrorBoundary } from './ErrorBoundary';
+// Importing empty state component
+import { EmptyState } from './EmptyState';
+// Importing filtered empty state component
+import { FilteredEmptyState } from './FilteredEmptyState';
+import { useEmptyState } from '../hooks/useEmptyState';
+// Importing analytics empty icon component
+import { AnalyticsEmptyIcon } from './AnalyticsEmptyIcon';
+// Importing responsive context hooks
 import { useIsMobile, useIsSmallMobile, useIsPortrait } from '../context/ResponsiveContext';
 import { VaultTransaction, TransactionType } from '../types/TransactionHistory';
 import {
@@ -17,31 +36,52 @@ import {
   generateCumulativeVolumeData,
   generateTransactionTypeDistribution,
   generateActivityHeatmap,
-  getTransactionTypeColor,
 } from '../utils/ChartDataUtils';
+import { formatCurrency } from '../utils/AnalyticsUtils';
 import { exportTransactionsWithDownload, exportMetricsWithDownload } from '../utils/ExportUtils';
 
 interface AnalyticsDashboardProps {
   vaultId: string;
   transactions: VaultTransaction[];
   transactionTypes: TransactionType[];
+  createdAt: number;
+  currentBalance: number;
 }
 
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   vaultId,
   transactions,
   transactionTypes,
+  createdAt,
+  currentBalance,
 }) => {
   const isMobile = useIsMobile();
   const isSmallMobile = useIsSmallMobile();
   const isPortrait = useIsPortrait();
-  const { stats, performance, filteredTransactions, currentFilter, selectedPeriod, applyPeriodFilter, updateFilter, clearFilters } = useAnalytics(transactions);
+  const chartColumns = isPortrait ? 1 : 2;
+  const { stats, performance, filteredTransactions, currentFilter, selectedPeriod, applyPeriodFilter, updateFilter, clearFilters } = useAnalytics(
+    transactions,
+    vaultId,
+    createdAt,
+    currentBalance
+  );
 
   const [selectedTransaction, setSelectedTransaction] = useState<VaultTransaction | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'patterns'>('overview');
+  const [currentTab, setCurrentTab] = useState<'overview' | 'transactions' | 'patterns'>('overview');
+
+  const StatsSummaryCard: React.FC<{ label: string; value: string; detail?: string }> = ({ label, value, detail }) => (
+    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <p className="text-sm font-medium text-gray-600">{label}</p>
+      <p className="text-2xl font-semibold text-gray-900 mt-2">{value}</p>
+      {detail && <p className="text-xs text-gray-500 mt-1">{detail}</p>}
+    </div>
+  );
+
+  const { hasTransactions, hasFilteredTransactions, isFilteredEmpty } = useEmptyState(transactions, filteredTransactions);
 
   // Generate chart data
+  // Chart data — only computed when filtered transactions exist
   const timeSeriesData = useMemo(() => generateTimeSeriesData(filteredTransactions, 'daily'), [filteredTransactions]);
   const cumulativeData = useMemo(() => generateCumulativeVolumeData(filteredTransactions), [filteredTransactions]);
   const distributionData = useMemo(() => generateTransactionTypeDistribution(filteredTransactions), [filteredTransactions]);
@@ -66,6 +106,24 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     }
   };
 
+
+  if (!hasTransactions) {
+    return (
+      <EmptyState
+        title="No transactions yet"
+        description="Once you create a vault and make deposits, your analytics will appear here."
+        icon={<AnalyticsEmptyIcon className="h-16 w-16 text-indigo-300" />}
+      />
+    );
+  }
+
+
+  if (isFilteredEmpty) {
+    return (
+      <FilteredEmptyState onClear={clearFilters} />
+    );
+  }
+
   // Mobile layout with optimizations
   if (isMobile) {
     return (
@@ -82,9 +140,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           {(['overview', 'transactions', 'patterns'] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setCurrentTab(tab)}
               className={`flex-1 px-3 py-2 rounded text-sm font-medium transition ${
-                activeTab === tab ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+                currentTab === tab ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'
               }`}
               style={{
                 minHeight: isSmallMobile ? 48 : 44,
@@ -97,27 +155,31 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </div>
 
         {/* Overview Tab */}
-        {activeTab === 'overview' && (
+        {currentTab === 'overview' && (
           <div className="space-y-4">
             {performance && <PerformanceMetrics metrics={performance} />}
-            {timeSeriesData.length > 0 && (
+            {timeSeriesData.length > 0 ? (
               <LineChart 
                 data={timeSeriesData} 
                 title="Transaction Volume" 
                 yAxisLabel="STX" 
                 height={isSmallMobile ? 200 : 250} 
               />
+            ) : (
+              <EmptyChartPlaceholder height={isSmallMobile ? 200 : 250} />
             )}
           </div>
         )}
 
         {/* Transactions Tab with virtualization */}
-        {activeTab === 'transactions' && (
+        {currentTab === 'transactions' && (
           <div className="space-y-4">
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={handleExportCSV}
-                className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                aria-label="Export filtered transactions as CSV"
+                className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                 style={{
                   minHeight: isSmallMobile ? 48 : 44,
                 }}
@@ -125,8 +187,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 Export CSV
               </button>
               <button
+                type="button"
                 onClick={handleExportJSON}
-                className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                aria-label="Export filtered transactions as JSON"
+                className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style={{
                   minHeight: isSmallMobile ? 48 : 44,
                 }}
@@ -144,7 +208,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         )}
 
         {/* Patterns Tab */}
-        {activeTab === 'patterns' && (
+        {currentTab === 'patterns' && (
           <div className="space-y-4">
             {distributionData.length > 0 && (
               <PieChart 
@@ -185,8 +249,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </div>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={handleExportMetricsCSV}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 text-sm"
+            aria-label="Export current analytics metrics as CSV"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
             style={{
               minHeight: isSmallMobile ? 48 : 44,
               minWidth: isSmallMobile ? 48 : 44,
@@ -195,8 +261,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             Export Metrics
           </button>
           <button 
+            type="button"
             onClick={clearFilters} 
-            className="px-4 py-2 bg-gray-300 text-gray-900 rounded-lg font-medium hover:bg-gray-400 text-sm"
+            aria-label="Reset all analytics filters"
+            className="px-4 py-2 bg-gray-300 text-gray-900 rounded-lg font-medium hover:bg-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
             style={{
               minHeight: isSmallMobile ? 48 : 44,
               minWidth: isSmallMobile ? 48 : 44,
@@ -221,18 +289,46 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           {/* Performance Metrics Cards */}
           {performance && <PerformanceMetrics metrics={performance} />}
 
+          {/* Statistics Summary */}
+          {stats && (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              <StatsSummaryCard
+                label="Total Transactions"
+                value={`${stats.totalTransactions}`}
+                detail={`Success ${stats.successRate.toFixed(1)}%`}
+              />
+              <StatsSummaryCard
+                label="Confirmed Volume"
+                value={`${formatCurrency(stats.totalVolume)} STX`}
+                detail={`${Object.values(stats.transactionsByType).reduce((sum, count) => sum + count, 0)} records`}
+              />
+              <StatsSummaryCard
+                label="Average Tx Size"
+                value={`${formatCurrency(stats.averageTransactionSize)} STX`}
+                detail="Confirmed only"
+              />
+              <StatsSummaryCard
+                label="Recent Activity"
+                value={stats.newestTransaction ? new Date(stats.newestTransaction.timestamp).toLocaleDateString() : 'N/A'}
+                detail={stats.oldestTransaction ? `from ${new Date(stats.oldestTransaction.timestamp).toLocaleDateString()}` : undefined}
+              />
+            </div>
+          )}
+
           {/* Charts Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {timeSeriesData.length > 0 && (
+          <div className={`grid grid-cols-1 ${chartColumns === 2 ? 'lg:grid-cols-2' : ''} gap-6`}>
+            {timeSeriesData.length > 0 ? (
               <LineChart 
                 data={timeSeriesData} 
                 title="Transaction Volume Over Time" 
                 yAxisLabel="STX" 
                 height={isSmallMobile ? 250 : 300} 
               />
+            ) : (
+              <EmptyChartPlaceholder height={isSmallMobile ? 250 : 300} />
             )}
 
-            {cumulativeData.length > 0 && (
+            {cumulativeData.length > 0 ? (
               <BarChart 
                 data={cumulativeData} 
                 title="Cumulative Volume by Month" 
@@ -240,17 +336,21 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 height={isSmallMobile ? 250 : 300} 
                 barColor="#10b981" 
               />
+            ) : (
+              <EmptyChartPlaceholder height={isSmallMobile ? 250 : 300} />
             )}
 
-            {distributionData.length > 0 && (
+            {distributionData.length > 0 ? (
               <PieChart 
                 data={distributionData} 
                 title="Transaction Type Distribution" 
                 height={isSmallMobile ? 250 : 300} 
               />
+            ) : (
+              <EmptyChartPlaceholder height={isSmallMobile ? 250 : 300} />
             )}
 
-            {heatmapData && heatmapData.length > 0 && (
+            {heatmapData && heatmapData.length > 0 ? (
               <div style={{ maxHeight: isSmallMobile ? '350px' : '450px', overflow: 'auto' }}>
                 <ActivityHeatmap
                   data={heatmapData}
@@ -260,6 +360,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   colorScheme="blue"
                 />
               </div>
+            ) : (
+              <EmptyChartPlaceholder height={isSmallMobile ? 350 : 450} />
             )}
           </div>
 

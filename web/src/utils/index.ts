@@ -1,15 +1,14 @@
 export { blocksToSeconds, secondsToUnits, padTwo, buildAriaLabel } from './countdownUtils';
 export {
-  clampWindowSize,
-  isValidWindowSize,
-  windowStart,
-  windowEnd,
-  arithmeticMean,
-  centredMovingAverage,
-  trailingMovingAverage,
-  weightedMovingAverage,
-  DEFAULT_WINDOW_SIZE,
-} from './movingAverageUtils';
+  heatmapSlotKey,
+  parseSlotKey,
+  slotsToHeatmapData,
+  isValidHeatmapTimestamp,
+  normalizeHeatmapValues,
+  sortHeatmapData,
+  getTopActiveSlots,
+  MAX_HEATMAP_SLOTS,
+} from './activityHeatmapHelpers';
 export { calculateStackingYield } from './calculateStackingYield';
 export {
   formatBtcAmount,
