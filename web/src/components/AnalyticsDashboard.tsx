@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 // AnalyticsDashboard component for displaying vault analytics
 import { useAnalytics } from '../hooks/useAnalytics';
 // Importing transaction table component
+import { TransactionTable } from './TransactionTable';
 import { PerformanceMetrics } from './PerformanceMetrics';
 import { FilterPanel } from './FilterPanel';
 import { PeriodSelector } from './PeriodSelector';
