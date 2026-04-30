@@ -68,13 +68,16 @@ export const DepositModal: React.FC<DepositModalProps> = ({
           <label htmlFor="deposit-amount">Amount (STX)</label>
           <input
             id="deposit-amount"
+            ref={inputRef}
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && !loading) handleDeposit(); }}
             placeholder="Enter amount in STX"
             min="0.000001"
             step="0.000001"
             disabled={loading}
+            aria-describedby="deposit-amount-hint"
           />
           <small>Minimum deposit is 1 microSTX. Funds are added to the existing lock.</small>
         </div>
