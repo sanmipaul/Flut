@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CopyButton from './CopyButton';
 import EmergencyWithdrawalButton from './EmergencyWithdrawalButton';
 import PenaltyWarningModal from './PenaltyWarningModal';
+import DepositModal from './DepositModal';
 import VaultCountdown from './VaultCountdown';
 import StackingYieldCard from './StackingYieldCard';
 import { AddressValidationResult, areAddressesOnSameNetwork } from '../utils/StacksAddressUtils';
@@ -26,6 +27,7 @@ interface VaultDetailProps {
   onSetBeneficiary: (vaultId: number, beneficiary: string) => Promise<void>;
   onFetchVault: (vaultId: number) => Promise<Vault>;
   onEmergencyWithdraw?: (vaultId: number) => Promise<void>;
+  onDeposit?: (vaultId: number, amount: number) => Promise<void>;
   penaltyRate?: number;
   /** Called when the user changes any vault setting, so the parent can refresh its sidebar */
   onSettingsChange?: () => void;
@@ -37,6 +39,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   onSetBeneficiary,
   onFetchVault,
   onEmergencyWithdraw,
+  onDeposit,
   penaltyRate = 10,
   onSettingsChange,
 }) => {
@@ -48,6 +51,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   const [showBeneficiaryForm, setShowBeneficiaryForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [showPenaltyModal, setShowPenaltyModal] = useState<boolean>(false);
+  const [showDepositModal, setShowDepositModal] = useState<boolean>(false);
   const [copyAnnouncement, setCopyAnnouncement] = useState<string>('');
 
   const handleAddressCopied = (text: string, success: boolean) => {
@@ -95,6 +99,21 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
       setVault(updated);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to withdraw');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeposit = async (id: number, amount: number) => {
+    try {
+      setSubmitting(true);
+      if (onDeposit) {
+        await onDeposit(id, amount);
+      }
+      const updated = await onFetchVault(vaultId);
+      setVault(updated);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Deposit failed');
     } finally {
       setSubmitting(false);
     }
@@ -341,6 +360,23 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
         </section>
       )}
 
+      {!vault.isWithdrawn && onDeposit && (
+        <section className="deposit-section">
+          <div className="deposit-section__header">
+            <h3>Add Funds</h3>
+          </div>
+          <button
+            className="btn-secondary"
+            onClick={() => setShowDepositModal(true)}
+            disabled={submitting}
+            aria-label={`Deposit funds to vault ${vault.vaultId}`}
+          >
+            Deposit Funds
+          </button>
+          <p className="deposit-hint">Add more STX to this vault without resetting the lock period.</p>
+        </section>
+      )}
+
       {!isUnlocked && !vault.isWithdrawn && (
         <section className="vault-actions emergency-section">
           <EmergencyWithdrawalButton
@@ -357,6 +393,14 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
       )}
 
       <VaultSettingsPanel vaultId={vaultId} onSettingsChange={onSettingsChange} />
+
+      <DepositModal
+        isOpen={showDepositModal}
+        vaultId={vault.vaultId}
+        currentAmount={vault.amount}
+        onDeposit={handleDeposit}
+        onClose={() => setShowDepositModal(false)}
+      />
 
       {error && <div className="error-message">{error}</div>}
 

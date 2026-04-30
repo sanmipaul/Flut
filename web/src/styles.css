@@ -924,6 +924,50 @@ button:disabled {
   z-index: 999;
 }
 
+/* Deposit Section */
+.deposit-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: rgba(85, 70, 255, 0.04);
+  border-radius: 6px;
+  border: 1px solid rgba(85, 70, 255, 0.2);
+}
+
+.deposit-section__header h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 1rem;
+  color: var(--primary-color);
+}
+
+.deposit-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.deposit-balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--secondary-color);
+  border-radius: 4px;
+  margin-bottom: var(--spacing-md);
+  font-size: 0.9rem;
+}
+
+.deposit-balance-label {
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.deposit-balance-value {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
 /* ============================================================
    Dark mode overrides for specific components
    ============================================================ */
@@ -1053,6 +1097,15 @@ button:disabled {
 
 [data-theme='dark'] .vault-detail.error {
   color: var(--error-color);
+}
+
+[data-theme='dark'] .deposit-section {
+  background-color: rgba(123, 111, 255, 0.06);
+  border-color: rgba(123, 111, 255, 0.2);
+}
+
+[data-theme='dark'] .deposit-balance-row {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* Responsive */
@@ -1462,6 +1515,14 @@ button:disabled {
   .vault-lock-progress__labels {
     flex-direction: column;
     gap: 2px;
+  }
+}
+
+@media (max-width: 640px) {
+  .deposit-balance-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
   }
 }
 
