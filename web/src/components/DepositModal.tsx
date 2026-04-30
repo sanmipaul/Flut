@@ -15,6 +15,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({
 }) => {
   const [amount, setAmount] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
   if (!isOpen) return null;
 
