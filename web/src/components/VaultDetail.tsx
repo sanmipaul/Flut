@@ -134,15 +134,15 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
     !networkMismatch;
 
   if (loading) {
-    return <div className="vault-detail loading">Loading vault details...</div>;
+    return <div className="vault-detail loading" role="status" aria-live="polite">Loading vault details...</div>;
   }
 
   if (error && !vault) {
-    return <div className="vault-detail error">Error: {error}</div>;
+    return <div className="vault-detail error" role="alert" aria-live="assertive">Error: {error}</div>;
   }
 
   if (!vault) {
-    return <div className="vault-detail not-found">Vault not found</div>;
+    return <div className="vault-detail not-found" role="status">Vault not found</div>;
   }
 
   const colorTagClass = settings.colorTag !== 'none'
