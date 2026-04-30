@@ -35,6 +35,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   onSetBeneficiary,
   onFetchVault,
   onEmergencyWithdraw,
+  onDeposit,
   penaltyRate = 10,
   onSettingsChange,
 }) => {
