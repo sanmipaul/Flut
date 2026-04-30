@@ -76,6 +76,13 @@ export const DepositModal: React.FC<DepositModalProps> = ({
         <h2 id="deposit-modal-title">Deposit to Vault #{vaultId}</h2>
         <p className="deposit-hint">Add more STX to this vault. The lock period remains unchanged.</p>
 
+        {currentAmount !== undefined && (
+          <div className="deposit-balance-row">
+            <span className="deposit-balance-label">Current Balance:</span>
+            <span className="deposit-balance-value">{currentAmount.toLocaleString()} STX</span>
+          </div>
+        )}
+
         <div className="form-group">
           <label htmlFor="deposit-amount">Amount (STX)</label>
           <input
