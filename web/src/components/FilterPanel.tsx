@@ -1,9 +1,20 @@
-import React, { useState, useEffect, useMemo } from 'react';
+/**
+ * FilterPanel
+ *
+ * Sidebar filter panel for transaction analytics with persistent state.
+ * Supports filtering by date range, transaction type, amount range, and status.
+ * All filter state is persisted to localStorage and sessionStorage.
+ */
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { TransactionType, TransactionFilter } from '../types/TransactionHistory';
 import { getTransactionTypeLabel } from '../utils/AnalyticsUtils';
+import {
+  saveDualStorage,
+  loadDualStorage,
+  clearDualStorage,
+} from '../utils/storage';
 
 const FILTER_STORAGE_KEY = 'flut-filter-panel-state';
-const FILTER_SESSION_KEY = 'flut-filter-panel-session';
 
 interface FilterPanelState {
   selectedTypes: TransactionType[];
@@ -15,121 +26,67 @@ interface FilterPanelState {
   expandedSections: { [key: string]: boolean };
 }
 
-function isStorageAvailable(storage: Storage): boolean {
-  try {
-    const testKey = '__storage_test__';
-    storage.setItem(testKey, testKey);
-    storage.removeItem(testKey);
-    return true;
-  } catch (e) {
-    return false;
-  }
+interface FilterPanelProps {
+  onFilterChange: (filter: TransactionFilter) => void;
+  transactionTypes: TransactionType[];
 }
 
-function saveState(state: FilterPanelState, isSession = false) {
-  try {
-    const storage = isSession ? sessionStorage : localStorage;
-    if (isStorageAvailable(storage)) {
-      storage.setItem(isSession ? FILTER_SESSION_KEY : FILTER_STORAGE_KEY, JSON.stringify(state));
-    }
-  } catch (e) {
-    console.warn('Failed to save filter state', e);
-  }
-}
+const getDefaultState = (): FilterPanelState => ({
+  selectedTypes: [],
+  selectedStatuses: [],
+  startDate: '',
+  endDate: '',
+  minAmount: '',
+  maxAmount: '',
+  expandedSections: {
+    dateRange: true,
+    type: false,
+    amount: false,
+    status: false,
+  },
+});
 
-function loadState(isSession = false): FilterPanelState | null {
-  try {
-    const storage = isSession ? sessionStorage : localStorage;
-    if (isStorageAvailable(storage)) {
-      const stored = storage.getItem(isSession ? FILTER_SESSION_KEY : FILTER_STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    }
-  } catch (e) {
-    console.warn('Failed to load filter state', e);
+const loadPersistedState = (): FilterPanelState => {
+  if (typeof window === 'undefined') {
+    return getDefaultState();
   }
-  return null;
-}
+  const persisted = loadDualStorage<FilterPanelState>(FILTER_STORAGE_KEY);
+  return persisted ? { ...getDefaultState(), ...persisted } : getDefaultState();
+};
+
+const FilterSection: React.FC<{
+  title: string;
+  sectionKey: string;
+  children: React.ReactNode;
+}> = ({ title, sectionKey, children }) => {
+  const [isExpanded, setIsExpanded] = useState(sectionKey === 'dateRange');
+  return (
+    <div className="border-b border-gray-200 last:border-b-0">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition"
+      >
+        <span className="font-medium text-gray-900">{title}</span>
+        <span className={`text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+          ▼
+        </span>
+      </button>
+      {isExpanded && <div className="px-4 py-3 bg-gray-50 space-y-3">{children}</div>}
+    </div>
+  );
+};
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transactionTypes }) => {
-  const loadPersistedState = (): FilterPanelState => {
-    if (typeof window === 'undefined') {
-      return getDefaultState();
-    }
-    // Try localStorage first, then sessionStorage
-    const persisted = loadState(false) || loadState(true);
-    if (persisted) {
-      return {
-        ...getDefaultState(),
-        ...persisted,
-      };
-    }
-    return getDefaultState();
-  };
+  const initialState = loadPersistedState();
 
-  const getDefaultState = (): FilterPanelState => ({
-    selectedTypes: [],
-    selectedStatuses: [],
-    startDate: '',
-    endDate: '',
-    minAmount: '',
-    maxAmount: '',
-    expandedSections: {
-      dateRange: true,
-      type: false,
-      amount: false,
-      status: false,
-    },
-  });
-    }
-    try {
-      const stored = localStorage.getItem(FILTER_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return {
-          selectedTypes: parsed.selectedTypes || [],
-          selectedStatuses: parsed.selectedStatuses || [],
-          startDate: parsed.startDate || '',
-          endDate: parsed.endDate || '',
-          minAmount: parsed.minAmount || '',
-          maxAmount: parsed.maxAmount || '',
-          expandedSections: parsed.expandedSections || {
-            dateRange: true,
-            type: false,
-            amount: false,
-            status: false,
-          },
-        };
-      }
-    } catch (e) {
-      console.warn('Failed to load filter state from localStorage', e);
-    }
-    return {
-      selectedTypes: [],
-      selectedStatuses: [],
-      startDate: '',
-      endDate: '',
-      minAmount: '',
-      maxAmount: '',
-      expandedSections: {
-        dateRange: true,
-        type: false,
-        amount: false,
-        status: false,
-      },
-    };
-  };
+  const [selectedTypes, setSelectedTypes] = useState<TransactionType[]>(initialState.selectedTypes);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(initialState.selectedStatuses);
+  const [startDate, setStartDate] = useState<string>(initialState.startDate);
+  const [endDate, setEndDate] = useState<string>(initialState.endDate);
+  const [minAmount, setMinAmount] = useState<string>(initialState.minAmount);
+  const [maxAmount, setMaxAmount] = useState<string>(initialState.maxAmount);
 
-  const [selectedTypes, setSelectedTypes] = useState<TransactionType[]>(() => loadPersistedState().selectedTypes);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(() => loadPersistedState().selectedStatuses);
-  const [startDate, setStartDate] = useState<string>(() => loadPersistedState().startDate);
-  const [endDate, setEndDate] = useState<string>(() => loadPersistedState().endDate);
-  const [minAmount, setMinAmount] = useState<string>(() => loadPersistedState().minAmount);
-  const [maxAmount, setMaxAmount] = useState<string>(() => loadPersistedState().maxAmount);
-  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>(() => loadPersistedState().expandedSections);
-
-  // Persist filter state to storage whenever it changes
+  // Persist state on change
   useEffect(() => {
     const state: FilterPanelState = {
       selectedTypes,
@@ -138,18 +95,25 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
       endDate,
       minAmount,
       maxAmount,
-      expandedSections,
+      expandedSections: getDefaultState().expandedSections,
     };
-    saveState(state, false); // Save to localStorage
-    saveState(state, true);  // Also save to sessionStorage as fallback
-  }, [selectedTypes, selectedStatuses, startDate, endDate, minAmount, maxAmount, expandedSections]);
+    saveDualStorage(FILTER_STORAGE_KEY, state);
+  }, [selectedTypes, selectedStatuses, startDate, endDate, minAmount, maxAmount]);
 
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
+  const applyFilter = useCallback(
+    (types: TransactionType[], statuses: string[], start: string, end: string, min: string, max: string) => {
+      const filter: TransactionFilter = {
+        types: types.length > 0 ? types : undefined,
+        status: statuses.length > 0 ? statuses as ('pending' | 'confirmed' | 'failed')[] : undefined,
+        startDate: start ? new Date(start).getTime() : undefined,
+        endDate: end ? new Date(end).getTime() : undefined,
+        minAmount: min ? parseFloat(min) : undefined,
+        maxAmount: max ? parseFloat(max) : undefined,
+      };
+      onFilterChange(filter);
+    },
+    [onFilterChange]
+  );
 
   const handleTypeToggle = (type: TransactionType) => {
     const newTypes = selectedTypes.includes(type)
@@ -166,20 +130,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
     setSelectedStatuses(newStatuses);
     applyFilter(selectedTypes, newStatuses, startDate, endDate, minAmount, maxAmount);
   };
-
-  const applyFilter = useMemo(() => (
-    (types: TransactionType[], statuses: string[], start: string, end: string, min: string, max: string) => {
-      const filter: TransactionFilter = {
-        types: types.length > 0 ? types : undefined,
-        status: statuses.length > 0 ? statuses as ('pending' | 'confirmed' | 'failed')[] : undefined,
-        startDate: start ? new Date(start).getTime() : undefined,
-        endDate: end ? new Date(end).getTime() : undefined,
-        minAmount: min ? parseFloat(min) : undefined,
-        maxAmount: max ? parseFloat(max) : undefined,
-      };
-      onFilterChange(filter);
-    }
-  ), [onFilterChange]);
 
   const handleDateChange = (type: 'start' | 'end', value: string) => {
     if (type === 'start') {
@@ -212,33 +162,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
   };
 
   const clearAllStorage = () => {
-    try {
-      localStorage.removeItem(FILTER_STORAGE_KEY);
-      sessionStorage.removeItem(FILTER_SESSION_KEY);
-    } catch (e) {
-      console.warn('Failed to clear filter storage', e);
-    }
+    clearDualStorage(FILTER_STORAGE_KEY);
     resetFilters();
   };
-
-  const FilterSection: React.FC<{ title: string; sectionKey: string; children: React.ReactNode }> = ({
-    title,
-    sectionKey,
-    children,
-  }) => (
-    <div className="border-b border-gray-200 last:border-b-0">
-      <button
-        onClick={() => toggleSection(sectionKey)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition"
-      >
-        <span className="font-medium text-gray-900">{title}</span>
-        <span className={`text-gray-500 transition-transform ${expandedSections[sectionKey] ? 'rotate-180' : ''}`}>
-          ▼
-        </span>
-      </button>
-      {expandedSections[sectionKey] && <div className="px-4 py-3 bg-gray-50 space-y-3">{children}</div>}
-    </div>
-  );
 
   const activeFilterCount = selectedTypes.length + selectedStatuses.length + (startDate ? 1 : 0) + (endDate ? 1 : 0) + (minAmount ? 1 : 0) + (maxAmount ? 1 : 0);
 
@@ -270,7 +196,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
         </div>
       </div>
 
-      {/* Date Range Filter */}
       <FilterSection title="Date Range" sectionKey="dateRange">
         <div className="space-y-2">
           <input
@@ -278,19 +203,16 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
             value={startDate}
             onChange={(e) => handleDateChange('start', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Start date"
           />
           <input
             type="date"
             value={endDate}
             onChange={(e) => handleDateChange('end', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="End date"
           />
         </div>
       </FilterSection>
 
-      {/* Transaction Type Filter */}
       <FilterSection title="Transaction Type" sectionKey="type">
         <div className="space-y-2 max-h-48 overflow-y-auto">
           {transactionTypes.map((type) => (
@@ -307,7 +229,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
         </div>
       </FilterSection>
 
-      {/* Amount Range Filter */}
       <FilterSection title="Amount Range" sectionKey="amount">
         <div className="space-y-2">
           <input
@@ -327,7 +248,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
         </div>
       </FilterSection>
 
-      {/* Status Filter */}
       <FilterSection title="Status" sectionKey="status">
         <div className="space-y-2">
           {['confirmed', 'pending', 'failed'].map((status) => (
