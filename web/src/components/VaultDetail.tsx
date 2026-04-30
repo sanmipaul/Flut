@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PenaltyWarningModal from './PenaltyWarningModal';
+import DepositModal from './DepositModal';
 import VaultCountdown from './VaultCountdown';
 import StackingYieldCard from './StackingYieldCard';
 
