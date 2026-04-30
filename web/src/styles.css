@@ -2530,3 +2530,84 @@ button:disabled {
     transition: none;
   }
 }
+
+/* =========================================================================
+   Form Validation Styles
+   ========================================================================= */
+
+.form-field {
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--text-dark);
+  margin-bottom: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.required-indicator {
+  color: var(--error-color);
+}
+
+.form-input-wrapper {
+  position: relative;
+}
+
+.form-input-wrapper.has-error input,
+.form-input-wrapper.has-error textarea,
+.form-input-wrapper.has-error select {
+  border-color: var(--error-color);
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+.form-input-wrapper.has-error input:focus,
+.form-input-wrapper.has-error textarea:focus,
+.form-input-wrapper.has-error select:focus {
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+.form-help-text {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  margin-top: var(--spacing-xs);
+}
+
+.form-error-text {
+  font-size: 0.875rem;
+  color: var(--error-color);
+  margin-top: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.form-error-text::before {
+  content: '⚠';
+  font-size: 0.75rem;
+}
+
+/* Validation input states */
+input:invalid:not(:placeholder-shown),
+textarea:invalid:not(:placeholder-shown) {
+  border-color: var(--error-color);
+}
+
+input:valid:not(:placeholder-shown),
+textarea:valid:not(:placeholder-shown) {
+  border-color: var(--success-color);
+}
+
+/* Focus states */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(85, 70, 255, 0.25);
+}
