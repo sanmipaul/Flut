@@ -249,8 +249,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </div>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={handleExportMetricsCSV}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 text-sm"
+            aria-label="Export current analytics metrics as CSV"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
             style={{
               minHeight: isSmallMobile ? 48 : 44,
               minWidth: isSmallMobile ? 48 : 44,
@@ -259,8 +261,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             Export Metrics
           </button>
           <button 
+            type="button"
             onClick={clearFilters} 
-            className="px-4 py-2 bg-gray-300 text-gray-900 rounded-lg font-medium hover:bg-gray-400 text-sm"
+            aria-label="Reset all analytics filters"
+            className="px-4 py-2 bg-gray-300 text-gray-900 rounded-lg font-medium hover:bg-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
             style={{
               minHeight: isSmallMobile ? 48 : 44,
               minWidth: isSmallMobile ? 48 : 44,
