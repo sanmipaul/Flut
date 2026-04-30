@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 export interface DepositModalProps {
   isOpen: boolean;
   vaultId: number;
+  currentAmount?: number;
   onDeposit: (vaultId: number, amount: number) => Promise<void>;
   onClose: () => void;
 }
