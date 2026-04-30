@@ -79,7 +79,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({
             disabled={loading}
             aria-describedby="deposit-amount-hint"
           />
-          <small>Minimum deposit is 1 microSTX. Funds are added to the existing lock.</small>
+          <small id="deposit-amount-hint">Minimum deposit is 1 microSTX. Funds are added to the existing lock.</small>
         </div>
 
         {error && <div className="error-message">{error}</div>}
