@@ -13,6 +13,8 @@ export const DepositModal: React.FC<DepositModalProps> = ({
   onDeposit,
   onClose,
 }) => {
+  const [amount, setAmount] = useState<string>('');
+
   if (!isOpen) return null;
 
   return (
