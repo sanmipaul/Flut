@@ -11,6 +11,7 @@ export interface DepositModalProps {
 export const DepositModal: React.FC<DepositModalProps> = ({
   isOpen,
   vaultId,
+  currentAmount,
   onDeposit,
   onClose,
 }) => {
