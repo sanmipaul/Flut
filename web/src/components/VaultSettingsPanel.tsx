@@ -10,7 +10,7 @@
  *
  * Settings are persisted to localStorage via useVaultSettings.
  */
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { useVaultSettings } from '../hooks/useVaultSettings';
 import {
   VAULT_COLOR_TAGS,
@@ -30,6 +30,7 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
 }) => {
   const { settings, updateSettings, resetSettings } = useVaultSettings(vaultId);
   const [isOpen, setIsOpen] = React.useState(false);
+  const [announcement, setAnnouncement] = useState<string>('');
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Collapse on Escape key
@@ -42,150 +43,172 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen]);
 
+  const makeAnnouncement = useCallback((message: string) => {
+    setAnnouncement(message);
+    // Clear after a delay
+    setTimeout(() => setAnnouncement(''), 1000);
+  }, []);
+
   const handleUpdate = useCallback(
     <K extends keyof typeof settings>(key: K, value: typeof settings[K]) => {
       updateSettings({ [key]: value } as Partial<typeof settings>);
       onSettingsChange?.();
+      // Announce key setting changes
+      if (key === 'nickname') {
+        makeAnnouncement(`Nickname set to: ${value || 'cleared'}`);
+      } else if (key === 'compactDisplay') {
+        makeAnnouncement(`Compact display ${value ? 'enabled' : 'disabled'}`);
+      } else if (key === 'pinned') {
+        makeAnnouncement(`Vault ${value ? 'pinned' : 'unpinned'}`);
+      } else if (key === 'colorTag') {
+        makeAnnouncement(`Colour tag set to: ${VAULT_COLOR_TAG_LABELS[value as VaultColorTag]}`);
+      }
     },
-    [updateSettings, onSettingsChange]
+    [updateSettings, onSettingsChange, makeAnnouncement]
   );
 
   const handleReset = useCallback(() => {
     resetSettings();
     onSettingsChange?.();
-  }, [resetSettings, onSettingsChange]);
+    makeAnnouncement('Settings reset to defaults');
+  }, [resetSettings, onSettingsChange, makeAnnouncement]);
 
   return (
-    <div className="vault-settings-panel" ref={panelRef}>
-      <button
-        className="vault-settings-panel__toggle"
-        onClick={() => setIsOpen((prev) => !prev)}
-        aria-expanded={isOpen}
-        aria-controls={`vault-settings-${vaultId}`}
-      >
-        <span className="vault-settings-panel__toggle-label">Vault Settings</span>
-        <span
-          className={`vault-settings-panel__caret ${isOpen ? 'vault-settings-panel__caret--open' : ''}`}
-          aria-hidden="true"
+    <>
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </div>
+      <div className="vault-settings-panel" ref={panelRef}>
+        <button
+          className="vault-settings-panel__toggle"
+          onClick={() => setIsOpen((prev) => !prev)}
+          aria-expanded={isOpen}
+          aria-controls={`vault-settings-${vaultId}`}
         >
-          ▾
-        </span>
-      </button>
+          <span className="vault-settings-panel__toggle-label">Vault Settings</span>
+          <span
+            className={`vault-settings-panel__caret ${isOpen ? 'vault-settings-panel__caret--open' : ''}`}
+            aria-hidden="true"
+          >
+            ▾
+          </span>
+        </button>
 
-      <div
-        id={`vault-settings-${vaultId}`}
-        className={`vault-settings-panel__body ${isOpen ? 'vault-settings-panel__body--open' : ''}`}
-        data-testid={`vault-settings-body-${vaultId}`}
-        hidden={!isOpen}
-      >
-        <fieldset className="settings-fieldset">
-          <legend className="settings-fieldset__legend">Display</legend>
+        <div
+          id={`vault-settings-${vaultId}`}
+          className={`vault-settings-panel__body ${isOpen ? 'vault-settings-panel__body--open' : ''}`}
+          data-testid={`vault-settings-body-${vaultId}`}
+          hidden={!isOpen}
+        >
+          <fieldset className="settings-fieldset">
+            <legend className="settings-fieldset__legend">Display</legend>
 
-          {/* Nickname */}
-          <div className="settings-row">
-            <label htmlFor={`nickname-${vaultId}`} className="settings-label">
-              Nickname
-            </label>
-            <input
-              id={`nickname-${vaultId}`}
-              type="text"
-              className="settings-input"
-              value={settings.nickname}
-              maxLength={40}
-              placeholder="e.g. Emergency Fund"
-              aria-describedby={`nickname-count-${vaultId}`}
-              onChange={(e) => handleUpdate('nickname', e.target.value)}
+            {/* Nickname */}
+            <div className="settings-row">
+              <label htmlFor={`nickname-${vaultId}`} className="settings-label">
+                Nickname
+              </label>
+              <input
+                id={`nickname-${vaultId}`}
+                type="text"
+                className="settings-input"
+                value={settings.nickname}
+                maxLength={40}
+                placeholder="e.g. Emergency Fund"
+                aria-describedby={`nickname-count-${vaultId}`}
+                onChange={(e) => handleUpdate('nickname', e.target.value)}
+              />
+              <span
+                id={`nickname-count-${vaultId}`}
+                className="settings-char-count"
+                aria-live="polite"
+              >
+                {settings.nickname.length}/40
+              </span>
+            </div>
+
+            {/* Compact display */}
+            <div className="settings-row settings-row--inline">
+              <label htmlFor={`compact-${vaultId}`} className="settings-label">
+                Compact amounts
+              </label>
+              <input
+                id={`compact-${vaultId}`}
+                type="checkbox"
+                className="settings-checkbox"
+                checked={settings.compactDisplay}
+                onChange={(e) => handleUpdate('compactDisplay', e.target.checked)}
+              />
+            </div>
+
+            {/* Pinned */}
+            <div className="settings-row settings-row--inline">
+              <label htmlFor={`pinned-${vaultId}`} className="settings-label">
+                Pin to top
+              </label>
+              <input
+                id={`pinned-${vaultId}`}
+                type="checkbox"
+                className="settings-checkbox"
+                checked={settings.pinned}
+                onChange={(e) => handleUpdate('pinned', e.target.checked)}
+              />
+            </div>
+          </fieldset>
+
+          {/* Color tag */}
+          <fieldset className="settings-fieldset">
+            <legend className="settings-fieldset__legend">Colour Tag</legend>
+            <div className="color-tag-picker" role="group" aria-label="Vault colour tag">
+              {VAULT_COLOR_TAGS.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  className={`color-tag-btn color-tag-btn--${tag} ${settings.colorTag === tag ? 'color-tag-btn--selected' : ''}`}
+                  onClick={() => handleUpdate('colorTag', tag as VaultColorTag)}
+                  aria-pressed={settings.colorTag === tag}
+                  aria-label={VAULT_COLOR_TAG_LABELS[tag]}
+                  title={VAULT_COLOR_TAG_LABELS[tag]}
+                />
+              ))}
+            </div>
+          </fieldset>
+
+          {/* Note */}
+          <fieldset className="settings-fieldset">
+            <legend className="settings-fieldset__legend">Personal Note</legend>
+            <textarea
+              id={`note-${vaultId}`}
+              className="settings-textarea"
+              value={settings.note}
+              maxLength={300}
+              placeholder="Add a private reminder or note about this vault…"
+              rows={3}
+              aria-label="Personal note"
+              aria-describedby={`note-count-${vaultId}`}
+              onChange={(e) => handleUpdate('note', e.target.value)}
             />
             <span
-              id={`nickname-count-${vaultId}`}
+              id={`note-count-${vaultId}`}
               className="settings-char-count"
               aria-live="polite"
             >
-              {settings.nickname.length}/40
+              {settings.note.length}/300
             </span>
+          </fieldset>
+
+          <div className="settings-actions">
+            <button
+              type="button"
+              className="btn-ghost btn-small"
+              onClick={handleReset}
+            >
+              Reset to defaults
+            </button>
           </div>
-
-          {/* Compact display */}
-          <div className="settings-row settings-row--inline">
-            <label htmlFor={`compact-${vaultId}`} className="settings-label">
-              Compact amounts
-            </label>
-            <input
-              id={`compact-${vaultId}`}
-              type="checkbox"
-              className="settings-checkbox"
-              checked={settings.compactDisplay}
-              onChange={(e) => handleUpdate('compactDisplay', e.target.checked)}
-            />
-          </div>
-
-          {/* Pinned */}
-          <div className="settings-row settings-row--inline">
-            <label htmlFor={`pinned-${vaultId}`} className="settings-label">
-              Pin to top
-            </label>
-            <input
-              id={`pinned-${vaultId}`}
-              type="checkbox"
-              className="settings-checkbox"
-              checked={settings.pinned}
-              onChange={(e) => handleUpdate('pinned', e.target.checked)}
-            />
-          </div>
-        </fieldset>
-
-        {/* Color tag */}
-        <fieldset className="settings-fieldset">
-          <legend className="settings-fieldset__legend">Colour Tag</legend>
-          <div className="color-tag-picker" role="group" aria-label="Vault colour tag">
-            {VAULT_COLOR_TAGS.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                className={`color-tag-btn color-tag-btn--${tag} ${settings.colorTag === tag ? 'color-tag-btn--selected' : ''}`}
-                onClick={() => handleUpdate('colorTag', tag as VaultColorTag)}
-                aria-pressed={settings.colorTag === tag}
-                aria-label={VAULT_COLOR_TAG_LABELS[tag]}
-                title={VAULT_COLOR_TAG_LABELS[tag]}
-              />
-            ))}
-          </div>
-        </fieldset>
-
-        {/* Note */}
-        <fieldset className="settings-fieldset">
-          <legend className="settings-fieldset__legend">Personal Note</legend>
-          <textarea
-            id={`note-${vaultId}`}
-            className="settings-textarea"
-            value={settings.note}
-            maxLength={300}
-            placeholder="Add a private reminder or note about this vault…"
-            rows={3}
-            aria-label="Personal note"
-            aria-describedby={`note-count-${vaultId}`}
-            onChange={(e) => handleUpdate('note', e.target.value)}
-          />
-          <span
-            id={`note-count-${vaultId}`}
-            className="settings-char-count"
-            aria-live="polite"
-          >
-            {settings.note.length}/300
-          </span>
-        </fieldset>
-
-        <div className="settings-actions">
-          <button
-            type="button"
-            className="btn-ghost btn-small"
-            onClick={handleReset}
-          >
-            Reset to defaults
-          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -8,6 +8,7 @@ interface FormFieldProps {
   validation?: ValidationResult;
   required?: boolean;
   helpText?: string;
+  showAnnouncement?: boolean;
 }
 
 export function FormField({ 
@@ -16,7 +17,8 @@ export function FormField({
   children, 
   validation, 
   required = false,
-  helpText 
+  helpText,
+  showAnnouncement = false
 }: FormFieldProps) {
   const hasError = validation && !validation.isValid;
   
@@ -40,6 +42,18 @@ export function FormField({
           {error}
         </span>
       ))}
+      
+      {showAnnouncement && hasError && validation?.errors.length > 0 && (
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          Error: {validation.errors.join('. ')}
+        </div>
+      )}
+      
+      {showAnnouncement && !hasError && validation?.isValid && (
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          Input is valid
+        </div>
+      )}
     </div>
   );
 }
