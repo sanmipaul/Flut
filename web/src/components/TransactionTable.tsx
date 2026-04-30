@@ -70,6 +70,14 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
           <div
             key={tx.id}
             onClick={() => onRowClick?.(tx)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onRowClick?.(tx);
+              }
+            }}
+            tabIndex={0}
+            aria-label={`View transaction ${tx.txId} details`}
             className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition cursor-pointer"
           >
             <div className="flex justify-between items-start mb-2">
