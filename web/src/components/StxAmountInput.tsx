@@ -17,6 +17,7 @@
 import React, { useState, useEffect } from 'react';
 import { parseStxInput, formatStx } from '../utils/formatStx';
 import { STX_SYMBOL } from '../utils/stxConstants';
+import { useLiveAnnouncer } from '../hooks/useLiveAnnouncer';
 
 export interface StxAmountInputProps {
   value: string;
@@ -43,7 +44,7 @@ const StxAmountInput: React.FC<StxAmountInputProps> = ({
 }) => {
   const [error, setError] = useState<string>('');
   const [touched, setTouched] = useState(false);
-  const [announcement, setAnnouncement] = useState('');
+  const { message: announcement, announce } = useLiveAnnouncer();
 
   useEffect(() => {
     if (!touched) return;
@@ -53,35 +54,36 @@ const StxAmountInput: React.FC<StxAmountInputProps> = ({
     if (value === '' || value === undefined) {
       setError('');
       onParsed?.(NaN);
-      setAnnouncement('');
       return;
     }
 
     if (isNaN(parsed)) {
       setError('Enter a valid number (e.g. 100, 1.5, 2k, 1M)');
       onParsed?.(NaN);
-      setAnnouncement('Error: Enter a valid number');
+      announce('Error: Enter a valid number', 'polite');
       return;
     }
 
     if (parsed < min) {
-      setError(`Minimum amount is ${formatStx(min, { decimals: 0 })}`);
+      const minAmount = formatStx(min, { decimals: 0 });
+      setError(`Minimum amount is ${minAmount}`);
       onParsed?.(NaN);
-      setAnnouncement(`Error: Minimum amount is ${formatStx(min, { decimals: 0 })}`);
+      announce(`Error: Minimum amount is ${minAmount}`, 'polite');
       return;
     }
 
     if (max !== undefined && parsed > max) {
-      setError(`Maximum amount is ${formatStx(max, { decimals: 0 })}`);
+      const maxAmount = formatStx(max, { decimals: 0 });
+      setError(`Maximum amount is ${maxAmount}`);
       onParsed?.(NaN);
-      setAnnouncement(`Error: Maximum amount is ${formatStx(max, { decimals: 0 })}`);
+      announce(`Error: Maximum amount is ${maxAmount}`, 'polite');
       return;
     }
 
     setError('');
     onParsed?.(parsed);
-    setAnnouncement(`Valid amount: ${formatStx(parsed, { decimals: 2 })} STX`);
-  }, [value, touched, min, max, onParsed]);
+    announce(`Valid amount: ${formatStx(parsed, { decimals: 2 })} STX`, 'polite');
+  }, [value, touched, min, max, onParsed, announce]);
 
   const inputId = id ?? 'stx-amount-input';
   const errorId = `${inputId}-error`;
