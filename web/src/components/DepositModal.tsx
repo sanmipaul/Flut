@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface DepositModalProps {
+export interface DepositModalProps {
   isOpen: boolean;
   vaultId: number;
   onDeposit: (vaultId: number, amount: number) => Promise<void>;
