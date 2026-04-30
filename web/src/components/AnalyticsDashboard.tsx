@@ -58,6 +58,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const isMobile = useIsMobile();
   const isSmallMobile = useIsSmallMobile();
   const isPortrait = useIsPortrait();
+  const chartColumns = isPortrait ? 1 : 2;
   const { stats, performance, filteredTransactions, currentFilter, selectedPeriod, applyPeriodFilter, updateFilter, clearFilters } = useAnalytics(
     transactions,
     vaultId,
@@ -307,7 +308,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           )}
 
           {/* Charts Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className={`grid grid-cols-1 ${chartColumns === 2 ? 'lg:grid-cols-2' : ''} gap-6`}>
             {timeSeriesData.length > 0 ? (
               <LineChart 
                 data={timeSeriesData} 
