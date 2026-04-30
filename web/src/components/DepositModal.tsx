@@ -40,10 +40,16 @@ export const DepositModal: React.FC<DepositModalProps> = ({
     }
   };
 
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && !loading) {
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
+    <div className="modal-overlay" onClick={handleOverlayClick} role="dialog" aria-modal="true" aria-labelledby="deposit-modal-title">
       <div className="modal-content">
         <h2>Deposit to Vault #{vaultId}</h2>
         <p className="deposit-hint">Add more STX to this vault. The lock period remains unchanged.</p>
