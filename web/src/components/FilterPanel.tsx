@@ -43,112 +43,79 @@ const getDefaultState = (): FilterPanelState => ({
     type: false,
     amount: false,
     status: false,
-  },
-});
+  });
 
-const loadPersistedState = (): FilterPanelState => {
-  if (typeof window === 'undefined') {
-    return getDefaultState();
-  }
-  const persisted = loadDualStorage<FilterPanelState>(FILTER_STORAGE_KEY);
-  return persisted ? { ...getDefaultState(), ...persisted } : getDefaultState();
-};
+  const [selectedTypes, setSelectedTypes] = useState<TransactionType[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [minAmount, setMinAmount] = useState<string>('');
+  const [maxAmount, setMaxAmount] = useState<string>('');
 
-const FilterSection: React.FC<{
-  title: string;
-  sectionKey: string;
-  children: React.ReactNode;
-}> = ({ title, sectionKey, children }) => {
-  const [isExpanded, setIsExpanded] = useState(sectionKey === 'dateRange');
-  return (
-    <div className="border-b border-gray-200 last:border-b-0">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition"
-      >
-        <span className="font-medium text-gray-900">{title}</span>
-        <span className={`text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-          ▼
-        </span>
-      </button>
-      {isExpanded && <div className="px-4 py-3 bg-gray-50 space-y-3">{children}</div>}
-    </div>
-  );
-};
-
-export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transactionTypes }) => {
-  const initialState = loadPersistedState();
-
-  const [selectedTypes, setSelectedTypes] = useState<TransactionType[]>(initialState.selectedTypes);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(initialState.selectedStatuses);
-  const [startDate, setStartDate] = useState<string>(initialState.startDate);
-  const [endDate, setEndDate] = useState<string>(initialState.endDate);
-  const [minAmount, setMinAmount] = useState<string>(initialState.minAmount);
-  const [maxAmount, setMaxAmount] = useState<string>(initialState.maxAmount);
-
-  // Persist state on change
+  // Use useEffect to ensure filter is applied after all state updates are complete
+  // This prevents race conditions and stale closure issues
   useEffect(() => {
-    const state: FilterPanelState = {
-      selectedTypes,
-      selectedStatuses,
-      startDate,
-      endDate,
-      minAmount,
-      maxAmount,
-      expandedSections: getDefaultState().expandedSections,
+    const filter: TransactionFilter = {
+      types: selectedTypes.length > 0 ? selectedTypes : undefined,
+      status: selectedStatuses.length > 0 ? selectedStatuses as ('pending' | 'confirmed' | 'failed')[] : undefined,
+      startDate: startDate ? new Date(startDate).getTime() : undefined,
+      endDate: endDate ? new Date(endDate).getTime() : undefined,
+      minAmount: minAmount ? parseFloat(minAmount) : undefined,
+      maxAmount: maxAmount ? parseFloat(maxAmount) : undefined,
     };
-    saveDualStorage(FILTER_STORAGE_KEY, state);
-  }, [selectedTypes, selectedStatuses, startDate, endDate, minAmount, maxAmount]);
+    onFilterChange(filter);
+  }, [selectedTypes, selectedStatuses, startDate, endDate, minAmount, maxAmount, onFilterChange]);
 
-  const applyFilter = useCallback(
-    (types: TransactionType[], statuses: string[], start: string, end: string, min: string, max: string) => {
-      const filter: TransactionFilter = {
-        types: types.length > 0 ? types : undefined,
-        status: statuses.length > 0 ? statuses as ('pending' | 'confirmed' | 'failed')[] : undefined,
-        startDate: start ? new Date(start).getTime() : undefined,
-        endDate: end ? new Date(end).getTime() : undefined,
-        minAmount: min ? parseFloat(min) : undefined,
-        maxAmount: max ? parseFloat(max) : undefined,
-      };
-      onFilterChange(filter);
-    },
-    [onFilterChange]
-  );
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
 
   const handleTypeToggle = (type: TransactionType) => {
-    const newTypes = selectedTypes.includes(type)
-      ? selectedTypes.filter((t) => t !== type)
-      : [...selectedTypes, type];
-    setSelectedTypes(newTypes);
-    applyFilter(newTypes, selectedStatuses, startDate, endDate, minAmount, maxAmount);
+    setSelectedTypes((prevTypes) =>
+      prevTypes.includes(type)
+        ? prevTypes.filter((t) => t !== type)
+        : [...prevTypes, type]
+    );
   };
 
   const handleStatusToggle = (status: string) => {
-    const newStatuses = selectedStatuses.includes(status)
-      ? selectedStatuses.filter((s) => s !== status)
-      : [...selectedStatuses, status];
-    setSelectedStatuses(newStatuses);
-    applyFilter(selectedTypes, newStatuses, startDate, endDate, minAmount, maxAmount);
+    setSelectedStatuses((prevStatuses) =>
+      prevStatuses.includes(status)
+        ? prevStatuses.filter((s) => s !== status)
+        : [...prevStatuses, status]
+    );
   };
 
   const handleDateChange = (type: 'start' | 'end', value: string) => {
+    const selectedDate = value ? new Date(value).getTime() : 0;
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    
+    // Prevent selecting future dates
+    if (selectedDate > today.getTime()) {
+      return;
+    }
+    
     if (type === 'start') {
       setStartDate(value);
-      applyFilter(selectedTypes, selectedStatuses, value, endDate, minAmount, maxAmount);
     } else {
       setEndDate(value);
-      applyFilter(selectedTypes, selectedStatuses, startDate, value, minAmount, maxAmount);
     }
   };
 
   const handleAmountChange = (type: 'min' | 'max', value: string) => {
-    if (type === 'min') {
-      setMinAmount(value);
-      applyFilter(selectedTypes, selectedStatuses, startDate, endDate, value, maxAmount);
-    } else {
-      setMaxAmount(value);
-      applyFilter(selectedTypes, selectedStatuses, startDate, endDate, minAmount, value);
+    // Validate input: only allow positive numbers or empty string
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      if (type === 'min') {
+        setMinAmount(value);
+      } else {
+        setMaxAmount(value);
+      }
     }
+    // If input is invalid (negative, non-numeric), ignore it
   };
 
   const resetFilters = () => {
@@ -202,12 +169,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
             type="date"
             value={startDate}
             onChange={(e) => handleDateChange('start', e.target.value)}
+            max={new Date().toISOString().split('T')[0]}
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
             type="date"
             value={endDate}
             onChange={(e) => handleDateChange('end', e.target.value)}
+            max={new Date().toISOString().split('T')[0]}
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -236,6 +205,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
             value={minAmount}
             onChange={(e) => handleAmountChange('min', e.target.value)}
             placeholder="Min amount"
+            inputMode="decimal"
+            min="0"
+            step="any"
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
@@ -243,6 +215,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
             value={maxAmount}
             onChange={(e) => handleAmountChange('max', e.target.value)}
             placeholder="Max amount"
+            inputMode="decimal"
+            min="0"
+            step="any"
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

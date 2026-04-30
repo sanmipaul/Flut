@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { VaultTransaction } from '../types/TransactionHistory';
 import { getTransactionTypeLabel, formatCurrency, formatPercentage } from '../utils/AnalyticsUtils';
 import { useIsMobile } from '../context/ResponsiveContext';

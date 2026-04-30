@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StxAmount from './StxAmount';
+import { formatPenaltyRate } from '../utils/EmergencyWithdrawalUtils';
 
 interface PenaltyWarningModalProps {
   isOpen: boolean;
@@ -25,6 +26,14 @@ export const PenaltyWarningModal: React.FC<PenaltyWarningModalProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [confirmed, setConfirmed] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setConfirmed(false);
+      setError('');
+      setLoading(false);
+    }
+  }, [isOpen]);
 
   const handleConfirm = async () => {
     if (!confirmed) {
@@ -67,7 +76,7 @@ export const PenaltyWarningModal: React.FC<PenaltyWarningModalProps> = ({
 
             <div className="calc-row penalty-row">
               <span className="calc-label">Penalty Rate:</span>
-              <span className="calc-value penalty-value">{penaltyRate}%</span>
+<span className="calc-value penalty-value">{formatPenaltyRate(penaltyRate)}</span>
             </div>
 
             <div className="calc-row penalty-amount">
@@ -111,6 +120,7 @@ export const PenaltyWarningModal: React.FC<PenaltyWarningModalProps> = ({
 
         <div className="modal-actions">
           <button
+            type="button"
             className="btn-secondary"
             onClick={onCancel}
             disabled={loading}
@@ -118,6 +128,7 @@ export const PenaltyWarningModal: React.FC<PenaltyWarningModalProps> = ({
             Cancel
           </button>
           <button
+            type="button"
             className="btn-danger"
             onClick={handleConfirm}
             disabled={loading || !confirmed}

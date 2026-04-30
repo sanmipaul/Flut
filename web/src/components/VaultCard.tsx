@@ -62,6 +62,8 @@ export const VaultCard: React.FC<VaultCardProps> = ({
         ${isMobile ? 'border border-gray-200' : ''}
         ${isLoading ? 'opacity-50 pointer-events-none' : ''}
       `}
+      role="article"
+      aria-label={`${vaultName}, ${statusDisplay[status as keyof typeof statusDisplay]}`}
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-3">

@@ -22,8 +22,8 @@ export const filterTransactions = (
 ): VaultTransaction[] => {
   return transactions.filter((tx) => {
     // Date range filter
-    if (filter.startDate && tx.timestamp < filter.startDate) return false;
-    if (filter.endDate && tx.timestamp > filter.endDate) return false;
+    if (filter.startDate !== undefined && tx.timestamp < filter.startDate) return false;
+    if (filter.endDate !== undefined && tx.timestamp > filter.endDate) return false;
 
     // Transaction type filter
     if (filter.types && filter.types.length > 0 && !filter.types.includes(tx.type)) {
@@ -36,8 +36,8 @@ export const filterTransactions = (
     }
 
     // Amount range filter
-    if (filter.minAmount && tx.amount < filter.minAmount) return false;
-    if (filter.maxAmount && tx.amount > filter.maxAmount) return false;
+    if (filter.minAmount !== undefined && tx.amount < filter.minAmount) return false;
+    if (filter.maxAmount !== undefined && tx.amount > filter.maxAmount) return false;
 
     // Initiated by filter
     if (filter.initiatedBy && tx.initiatedBy !== filter.initiatedBy) return false;
@@ -64,18 +64,36 @@ export const calculateTransactionStats = (
   const confirmedTxs = transactions.filter((tx) => tx.status === 'confirmed');
   const totalVolume = confirmedTxs.reduce((sum, tx) => sum + tx.amount, 0);
 
-  const transactionsByType: Record<TransactionType, number> = {} as any;
-  Object.values(TransactionType).forEach((type) => {
-    transactionsByType[type] = transactions.filter((tx) => tx.type === type).length;
-  });
+  const transactionsByType = Object.values(TransactionType).reduce((acc, type) => {
+    acc[type] = 0;
+    return acc;
+  }, {} as Record<TransactionType, number>);
+
+  const { oldestTransaction, newestTransaction } = transactions.reduce(
+    (acc, tx) => {
+      if (!acc.oldestTransaction || tx.timestamp < acc.oldestTransaction.timestamp) {
+        acc.oldestTransaction = tx;
+      }
+      if (!acc.newestTransaction || tx.timestamp > acc.newestTransaction.timestamp) {
+        acc.newestTransaction = tx;
+      }
+      acc.transactionsByType[tx.type] = (acc.transactionsByType[tx.type] || 0) + 1;
+      return acc;
+    },
+    {
+      oldestTransaction: null as VaultTransaction | null,
+      newestTransaction: null as VaultTransaction | null,
+      transactionsByType,
+    }
+  );
 
   return {
     totalTransactions: transactions.length,
     totalVolume,
     successRate: transactions.length > 0 ? (confirmedTxs.length / transactions.length) * 100 : 0,
     averageTransactionSize: confirmedTxs.length > 0 ? totalVolume / confirmedTxs.length : 0,
-    oldestTransaction: transactions.length > 0 ? transactions[transactions.length - 1] : null,
-    newestTransaction: transactions.length > 0 ? transactions[0] : null,
+    oldestTransaction,
+    newestTransaction,
     transactionsByType,
   };
 };
