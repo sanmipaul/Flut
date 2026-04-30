@@ -89,34 +89,39 @@ const StxAmountInput: React.FC<StxAmountInputProps> = ({
   const isValid = hasValue && !error;
 
   return (
-    <div className={`stx-amount-input ${className} ${error ? 'stx-amount-input--invalid' : ''} ${isValid ? 'stx-amount-input--valid' : ''}`.trim()}>
-      <div className="stx-amount-input__field">
-        <input
-          id={inputId}
-          type="text"
-          inputMode="decimal"
-          value={value}
-          onChange={(e) => {
-            setTouched(true);
-            onChange(e.target.value);
-          }}
-          onBlur={() => setTouched(true)}
-          disabled={disabled}
-          placeholder={placeholder}
-          aria-describedby={error ? errorId : undefined}
-          aria-invalid={!!error}
-          className={`stx-amount-input__text ${error ? 'stx-amount-input__text--error' : ''}`.trim()}
-        />
-        <span className="stx-amount-input__suffix" aria-hidden="true">
-          {STX_SYMBOL}
-        </span>
+    <>
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
       </div>
-      {error && (
-        <p id={errorId} className="stx-amount-input__error" role="alert">
-          {error}
-        </p>
-      )}
-    </div>
+      <div className={`stx-amount-input ${className} ${error ? 'stx-amount-input--invalid' : ''} ${isValid ? 'stx-amount-input--valid' : ''}`.trim()}>
+        <div className="stx-amount-input__field">
+          <input
+            id={inputId}
+            type="text"
+            inputMode="decimal"
+            value={value}
+            onChange={(e) => {
+              setTouched(true);
+              onChange(e.target.value);
+            }}
+            onBlur={() => setTouched(true)}
+            disabled={disabled}
+            placeholder={placeholder}
+            aria-describedby={error ? errorId : undefined}
+            aria-invalid={!!error}
+            className={`stx-amount-input__text ${error ? 'stx-amount-input__text--error' : ''}`.trim()}
+          />
+          <span className="stx-amount-input__suffix" aria-hidden="true">
+            {STX_SYMBOL}
+          </span>
+        </div>
+        {error && (
+          <p id={errorId} className="stx-amount-input__error" role="alert">
+            {error}
+          </p>
+        )}
+      </div>
+    </>
   );
 };
 
