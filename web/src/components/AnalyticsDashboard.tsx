@@ -17,6 +17,7 @@ import { BarChart } from './BarChart';
 import { PieChart } from './PieChart';
 // Importing activity heatmap component
 import { ActivityHeatmap } from './ActivityHeatmap';
+// Importing transaction detail modal component
 import { TransactionDetailModal } from './TransactionDetailModal';
 import { ErrorBoundary } from './ErrorBoundary';
 import { EmptyState } from './EmptyState';
