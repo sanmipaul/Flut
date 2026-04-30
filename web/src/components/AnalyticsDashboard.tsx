@@ -11,6 +11,7 @@ import { FilterPanel } from './FilterPanel';
 import { PeriodSelector } from './PeriodSelector';
 // Importing line chart component
 import { LineChart } from './LineChart';
+// Importing bar chart component
 import { BarChart } from './BarChart';
 import { PieChart } from './PieChart';
 import { ActivityHeatmap } from './ActivityHeatmap';
