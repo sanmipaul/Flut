@@ -210,6 +210,9 @@ export class VaultContractAPI {
       `u${amount}`,
     ];
 
+    // Expects (ok true) on success.
+    // Possible errors: ERR-VAULT-NOT-FOUND (u1), ERR-UNAUTHORIZED (u2),
+    // ERR-INVALID-AMOUNT (u5), ERR-ALREADY-WITHDRAWN (u4).
     console.log(`Calling ${functionName} with args:`, args);
     return true; // Placeholder
   }
