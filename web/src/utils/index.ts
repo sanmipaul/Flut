@@ -17,3 +17,12 @@ export {
   formatCycleCount,
   formatStxShort,
 } from './formatYield';
+export {
+  isStorageAvailable,
+  saveToStorage,
+  loadFromStorage,
+  removeFromStorage,
+  saveDualStorage,
+  loadDualStorage,
+  clearDualStorage,
+} from './storage';
