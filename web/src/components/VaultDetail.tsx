@@ -387,6 +387,13 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
 
       <VaultSettingsPanel vaultId={vaultId} onSettingsChange={onSettingsChange} />
 
+      <DepositModal
+        isOpen={showDepositModal}
+        vaultId={vault.vaultId}
+        onDeposit={handleDeposit}
+        onClose={() => setShowDepositModal(false)}
+      />
+
       {error && <div className="error-message">{error}</div>}
 
       {vault && (
