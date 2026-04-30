@@ -14,3 +14,7 @@ export { FormField } from './FormField';
 export type { FormFieldProps } from './FormField';
 
 export { LiveAnnouncer, type SSRSafeAnnouncementProps } from './LiveAnnouncer';
+export type { LiveAnnouncerProps } from './LiveAnnouncer';
+
+export { AnnouncementIndicator } from './AnnouncementIndicator';
+export type { AnnouncementIndicatorProps } from './AnnouncementIndicator';
