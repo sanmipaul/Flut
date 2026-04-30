@@ -16,6 +16,16 @@ export const DepositModal: React.FC<DepositModalProps> = ({
   const [amount, setAmount] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    } else {
+      setAmount('');
+      setError('');
+    }
+  }, [isOpen]);
 
   const isAmountValid = (val: string): boolean => {
     const n = parseFloat(val);
