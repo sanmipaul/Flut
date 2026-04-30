@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+// AnalyticsDashboard component for displaying vault analytics
 import { useAnalytics } from '../hooks/useAnalytics';
 import { TransactionTable } from './TransactionTable';
 import { PerformanceMetrics } from './PerformanceMetrics';
