@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { useAnalytics } from '../hooks/useAnalytics';
 // Importing transaction table component
 import { TransactionTable } from './TransactionTable';
+// Importing performance metrics component
 import { PerformanceMetrics } from './PerformanceMetrics';
 import { FilterPanel } from './FilterPanel';
 import { PeriodSelector } from './PeriodSelector';
