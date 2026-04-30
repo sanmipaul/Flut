@@ -17,6 +17,11 @@ export const DepositModal: React.FC<DepositModalProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
+  const isAmountValid = (val: string): boolean => {
+    const n = parseFloat(val);
+    return val.trim() !== '' && !isNaN(n) && n > 0;
+  };
+
   if (!isOpen) return null;
 
   return (
