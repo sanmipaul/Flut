@@ -47,6 +47,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   const [showBeneficiaryForm, setShowBeneficiaryForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [showPenaltyModal, setShowPenaltyModal] = useState<boolean>(false);
+  const [showDepositModal, setShowDepositModal] = useState<boolean>(false);
   const [copyAnnouncement, setCopyAnnouncement] = useState<string>('');
 
   const handleAddressCopied = (text: string, success: boolean) => {
