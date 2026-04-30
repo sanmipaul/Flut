@@ -176,8 +176,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <div className="space-y-4">
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={handleExportCSV}
-                className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                aria-label="Export filtered transactions as CSV"
+                className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                 style={{
                   minHeight: isSmallMobile ? 48 : 44,
                 }}
@@ -185,8 +187,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 Export CSV
               </button>
               <button
+                type="button"
                 onClick={handleExportJSON}
-                className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                aria-label="Export filtered transactions as JSON"
+                className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style={{
                   minHeight: isSmallMobile ? 48 : 44,
                 }}
