@@ -356,6 +356,20 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
         </section>
       )}
 
+      {!vault.isWithdrawn && onDeposit && (
+        <section className="deposit-section">
+          <button
+            className="btn-secondary"
+            onClick={() => setShowDepositModal(true)}
+            disabled={submitting}
+            aria-label={`Deposit funds to vault ${vault.vaultId}`}
+          >
+            Deposit Funds
+          </button>
+          <p className="deposit-hint">Add more STX to this vault without resetting the lock period.</p>
+        </section>
+      )}
+
       {!isUnlocked && !vault.isWithdrawn && (
         <section className="vault-actions emergency-section">
           <button
