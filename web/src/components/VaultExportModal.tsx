@@ -89,36 +89,49 @@ const VaultExportModal: React.FC<VaultExportModalProps> = ({ isOpen, vaults, onC
           <div className="export-modal__preview-toggle">
             <button
               type="button"
-              className="btn-ghost btn-small"
+              className="btn-ghost btn-small focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               onClick={() => setShowPreview((p) => !p)}
               aria-expanded={showPreview}
+              aria-controls="json-preview-section"
             >
               {showPreview ? 'Hide' : 'Preview'} JSON
             </button>
           </div>
 
           {showPreview && (
-            <pre className="export-modal__json-preview" aria-label="JSON preview">
+            <pre 
+              id="json-preview-section"
+              className="export-modal__json-preview" 
+              aria-label="JSON backup preview"
+              role="region"
+            >
               {serializeToJson(serializeVaultExport(vaults)).slice(0, 400)}
               {vaults.length > 0 ? '\n…' : ''}
             </pre>
           )}
 
           {exportError && (
-            <div className="export-modal__error" role="alert">
+            <div className="export-modal__error" role="alert" aria-live="assertive">
               {exportError}
             </div>
           )}
         </div>
 
         <div className="modal-actions">
-          <button className="btn-secondary" onClick={onClose} disabled={isExporting}>
+          <button 
+            className="btn-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" 
+            onClick={onClose} 
+            disabled={isExporting}
+            aria-label="Cancel backup export"
+          >
             Cancel
           </button>
           <button
-            className="btn-primary"
+            className="btn-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             onClick={handleDownload}
             disabled={isExporting || vaults.length === 0}
+            aria-label={`Download backup file${vaults.length === 0 ? ' (no vaults to export)' : ''}`}
+            aria-busy={isExporting}
           >
             {isExporting ? 'Preparing…' : '↓ Download Backup'}
           </button>
