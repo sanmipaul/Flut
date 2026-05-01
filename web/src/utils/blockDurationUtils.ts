@@ -19,3 +19,8 @@ export function isNaNBlockCount(n: number): boolean {
 export function isInfiniteBlockCount(n: number): boolean {
   return n === Infinity || n === -Infinity;
 }
+
+/** Convert blocks to approximate minutes (1 Stacks block ≈ 10 minutes). */
+export function blocksToApproxMinutes(blocks: number): number {
+  return Math.ceil(blocks * 10);
+}
