@@ -59,6 +59,15 @@
       ERR-NO-PENDING-TRANSFER)
     ERR-NOT-FOUND))
 
+(define-public (cancel-ownership-transfer (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (begin
+      (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
+      (asserts! (is-some (map-get? pending-owner {vault-id: vault-id})) ERR-NO-PENDING-TRANSFER)
+      (map-delete pending-owner {vault-id: vault-id})
+      (ok true))
+    ERR-NOT-FOUND))
+
 (define-public (withdraw (vault-id uint))
   (match (map-get? vaults {vault-id: vault-id})
     vault (begin
