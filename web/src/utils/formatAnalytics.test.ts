@@ -138,6 +138,10 @@ describe('formatBlockDuration — -Infinity input', () => {
   it('returns "—" for -Infinity', () => {
     expect(formatBlockDuration(-Infinity)).toBe('—');
   });
+
+  it('does not produce a string containing "-Infinity"', () => {
+    expect(formatBlockDuration(-Infinity)).not.toContain('Infinity');
+  });
 });
 
 describe('formatStxAmount — negative values', () => {
