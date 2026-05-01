@@ -91,3 +91,17 @@ describe('blocksToApproxHours', () => {
     expect(blocksToApproxHours(7)).toBe(2);
   });
 });
+
+describe('blocksToDays', () => {
+  it('returns 1 for exactly BLOCKS_PER_DAY blocks', () => {
+    expect(blocksToDays(BLOCKS_PER_DAY)).toBe(1);
+  });
+
+  it('returns 2 for 288 blocks', () => {
+    expect(blocksToDays(288)).toBe(2);
+  });
+
+  it('rounds up fractional days', () => {
+    expect(blocksToDays(145)).toBe(2);
+  });
+});
