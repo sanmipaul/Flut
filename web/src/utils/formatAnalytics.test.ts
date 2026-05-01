@@ -128,6 +128,10 @@ describe('formatBlockDuration — NaN input', () => {
   it('returns "—" for NaN', () => {
     expect(formatBlockDuration(NaN)).toBe('—');
   });
+
+  it('does not produce a string containing "NaN"', () => {
+    expect(formatBlockDuration(NaN)).not.toContain('NaN');
+  });
 });
 
 describe('formatBlockDuration — -Infinity input', () => {
