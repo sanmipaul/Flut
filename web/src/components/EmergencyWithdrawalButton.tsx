@@ -24,6 +24,8 @@ export const EmergencyWithdrawalButton: React.FC<EmergencyWithdrawalButtonProps>
       <button
         disabled
         className={`w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium cursor-not-allowed ${className}`}
+        aria-disabled="true"
+        title="Emergency withdrawal is not available for this vault"
       >
         Emergency Withdrawal Unavailable
       </button>
@@ -51,7 +53,9 @@ export const EmergencyWithdrawalButton: React.FC<EmergencyWithdrawalButtonProps>
       <button
         onClick={onClick}
         disabled={isLoading}
-        className={`w-full px-4 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition text-sm ${className}`}
+        className={`w-full px-4 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-700 ${className}`}
+        aria-label={`Emergency withdrawal with ${(penaltyRate * 100).toFixed(0)}% penalty`}
+        aria-busy={isLoading}
       >
         {buttonContent}
       </button>
@@ -62,7 +66,9 @@ export const EmergencyWithdrawalButton: React.FC<EmergencyWithdrawalButtonProps>
     <button
       onClick={onClick}
       disabled={isLoading}
-      className={`px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition ${className}`}
+      className={`px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-700 ${className}`}
+      aria-label={`Emergency withdrawal with ${(penaltyRate * 100).toFixed(0)}% penalty`}
+      aria-busy={isLoading}
     >
       {buttonContent}
     </button>
