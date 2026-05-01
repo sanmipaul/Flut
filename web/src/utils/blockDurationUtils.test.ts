@@ -39,3 +39,27 @@ describe('isValidBlockCount', () => {
     expect(isValidBlockCount(-Infinity)).toBe(false);
   });
 });
+
+describe('isNaNBlockCount', () => {
+  it('returns true for NaN', () => {
+    expect(isNaNBlockCount(NaN)).toBe(true);
+  });
+
+  it('returns false for a real number', () => {
+    expect(isNaNBlockCount(100)).toBe(false);
+  });
+});
+
+describe('isInfiniteBlockCount', () => {
+  it('returns true for Infinity', () => {
+    expect(isInfiniteBlockCount(Infinity)).toBe(true);
+  });
+
+  it('returns true for -Infinity', () => {
+    expect(isInfiniteBlockCount(-Infinity)).toBe(true);
+  });
+
+  it('returns false for a finite number', () => {
+    expect(isInfiniteBlockCount(144)).toBe(false);
+  });
+});
