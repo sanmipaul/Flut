@@ -39,3 +39,8 @@ export function blocksToDays(blocks: number): number {
 export function formatBlocksAsMinutes(blocks: number): string {
   return `~${blocksToApproxMinutes(blocks)} min`;
 }
+
+/** Format a block count as an hours string, e.g. "~2 hr". */
+export function formatBlocksAsHours(blocks: number): string {
+  return `~${blocksToApproxHours(blocks)} hr`;
+}
