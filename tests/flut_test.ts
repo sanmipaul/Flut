@@ -51,3 +51,15 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+Clarinet.test({
+  name: "initiate-ownership-transfer: fails for non-existent vault",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const newOwner = accounts.get('wallet_2')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(99), types.principal(newOwner.address)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u1)');
+  }
+});
