@@ -34,3 +34,8 @@ export function blocksToApproxHours(blocks: number): number {
 export function blocksToDays(blocks: number): number {
   return Math.ceil(blocks / BLOCKS_PER_DAY);
 }
+
+/** Format a block count as a minutes string, e.g. "~30 min". */
+export function formatBlocksAsMinutes(blocks: number): string {
+  return `~${blocksToApproxMinutes(blocks)} min`;
+}
