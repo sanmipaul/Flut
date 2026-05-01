@@ -113,3 +113,9 @@ describe('formatStxAmount — large values', () => {
     expect(formatStxAmount(1_000_000)).toContain('STX');
   });
 });
+
+describe('formatBlockDuration — Infinity input', () => {
+  it('returns "—" for Infinity', () => {
+    expect(formatBlockDuration(Infinity)).toBe('—');
+  });
+});
