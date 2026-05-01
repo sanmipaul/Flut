@@ -18,11 +18,12 @@
 (define-constant ERR-SPLIT-CLOSED (err u10))
 
 (define-private (is-member (user principal) (members (list 5 principal)))
-  (or (is-eq user (unwrap-panic (element-at members u0)))
-      (is-eq user (default-to user (element-at members u1)))
-      (is-eq user (default-to user (element-at members u2)))
-      (is-eq user (default-to user (element-at members u3)))
-      (is-eq user (default-to user (element-at members u4)))))
+  (or
+    (match (element-at members u0) slot (is-eq user slot) false)
+    (match (element-at members u1) slot (is-eq user slot) false)
+    (match (element-at members u2) slot (is-eq user slot) false)
+    (match (element-at members u3) slot (is-eq user slot) false)
+    (match (element-at members u4) slot (is-eq user slot) false)))
 
 (define-public (create-split (target uint) (members (list 5 principal)))
   (let ((id (var-get split-counter)))
