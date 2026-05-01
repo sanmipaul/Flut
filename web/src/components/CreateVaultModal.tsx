@@ -84,10 +84,30 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Create New Vault</h2>
+    <div 
+      className="modal-overlay"
+      role="presentation"
+      onClick={onClose}
+    >
+      <div 
+        className="modal-content"
+        role="dialog"
+        aria-labelledby="create-vault-title"
+        aria-describedby="create-vault-description"
+        onKeyDown={handleKeyDown}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 id="create-vault-title">Create New Vault</h2>
+        <p id="create-vault-description" className="sr-only">
+          Fill out the form below to create a new STX savings vault with a lock duration and optional beneficiary
+        </p>
 
         <div className="form-group">
           <label htmlFor="vault-amount">Amount (STX)</label>
@@ -111,7 +131,11 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
             placeholder="Enter lock duration in blocks"
             disabled={loading}
             min="1"
+            required
+            aria-required="true"
+            aria-describedby="lockDuration-hint"
           />
+          <small id="lockDuration-hint">Minimum 1 block (approximately 10 minutes per block)</small>
         </div>
 
         <div className="form-group checkbox">
@@ -155,13 +179,18 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
           </div>
         )}
 
-        {error && <div className="error-message">{error}</div>}
+        {error && (
+          <div className="error-message" role="alert" aria-live="assertive">
+            {error}
+          </div>
+        )}
 
         <div className="modal-actions">
           <button
             className="btn-secondary"
             onClick={onClose}
             disabled={loading}
+            aria-label="Cancel creating a new vault"
           >
             Cancel
           </button>
@@ -169,7 +198,8 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
             className="btn-primary"
             onClick={handleCreateVault}
             disabled={loading || (hasBeneficiary && !isBeneficiaryValid)}
-          title={hasBeneficiary && !isBeneficiaryValid ? 'Enter a valid Stacks address before creating the vault' : undefined}
+            title={hasBeneficiary && !isBeneficiaryValid ? 'Enter a valid Stacks address before creating the vault' : undefined}
+            aria-label="Create new vault with specified settings"
           >
             {loading ? 'Creating...' : 'Create Vault'}
           </button>
