@@ -636,3 +636,22 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+Clarinet.test({
+  name: "get-vault-summary: shows updated owner after accept-ownership-transfer",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const newOwner = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(newOwner.address)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'accept-ownership-transfer', [types.uint(0)], newOwner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-vault-summary', [types.uint(0)], newOwner.address)
+    ]);
+    assertEquals(block.receipts[0].result.includes(newOwner.address), true);
+  }
+});
