@@ -136,4 +136,8 @@ describe('formatStxAmount — negative values', () => {
   it('returns "0 STX" for negative integers', () => {
     expect(formatStxAmount(-5)).toBe('0 STX');
   });
+
+  it('returns "0 STX" for large negative amounts', () => {
+    expect(formatStxAmount(-1000)).toBe('0 STX');
+  });
 });
