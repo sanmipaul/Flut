@@ -4,3 +4,8 @@ export const BLOCKS_PER_WEEK = 1008;
 export const BLOCKS_PER_MONTH = 4320;
 
 export const INVALID_DURATION = '—';
+
+/** Returns true if n is a finite positive number. */
+export function isValidBlockCount(n: number): boolean {
+  return Number.isFinite(n) && n > 0;
+}
