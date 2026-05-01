@@ -29,3 +29,8 @@ export function blocksToApproxMinutes(blocks: number): number {
 export function blocksToApproxHours(blocks: number): number {
   return Math.ceil(blocks / BLOCKS_PER_HOUR);
 }
+
+/** Convert blocks to approximate days. */
+export function blocksToDays(blocks: number): number {
+  return Math.ceil(blocks / BLOCKS_PER_DAY);
+}
