@@ -112,3 +112,17 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u4)');
   }
 });
+
+Clarinet.test({
+  name: "get-pending-owner: returns none when no transfer has been initiated",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-pending-owner', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'none');
+  }
+});
