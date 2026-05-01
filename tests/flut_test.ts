@@ -93,3 +93,22 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u10)');
   }
 });
+
+Clarinet.test({
+  name: "initiate-ownership-transfer: fails on a withdrawn vault",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const newOwner = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], owner.address)
+    ]);
+    chain.mineEmptyBlockUntil(3);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(newOwner.address)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u4)');
+  }
+});
