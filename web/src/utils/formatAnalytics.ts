@@ -16,7 +16,11 @@ export function formatStxAmount(stx: number): string {
 /**
  * Convert a block count to a human-readable duration string.
  * Mirrors the logic in useLockProgress for consistency.
- * Returns '—' for 0, negative, NaN, or Infinity.
+ *
+ * Returns '—' for 0, negative, NaN, +Infinity, and -Infinity — all of which
+ * represent a block count that cannot be meaningfully displayed as a duration.
+ *
+ * @see safeFormatBlockDuration in blockDurationUtils for the implementation
  */
 export function formatBlockDuration(blocks: number): string {
   return safeFormatBlockDuration(blocks);
