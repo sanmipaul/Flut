@@ -199,3 +199,18 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u1)');
   }
 });
+
+Clarinet.test({
+  name: "accept-ownership-transfer: returns ERR-NO-PENDING-TRANSFER when no transfer initiated",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const stranger = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'accept-ownership-transfer', [types.uint(0)], stranger.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u11)');
+  }
+});
