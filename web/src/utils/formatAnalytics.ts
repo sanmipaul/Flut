@@ -5,6 +5,8 @@
  * All functions are pure and return localised strings.
  */
 
+import { safeFormatBlockDuration } from './blockDurationUtils';
+
 const BLOCKS_PER_DAY = 144;
 const BLOCKS_PER_HOUR = 6;
 
