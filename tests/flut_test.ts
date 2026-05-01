@@ -214,3 +214,20 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u11)');
   }
 });
+
+Clarinet.test({
+  name: "accept-ownership-transfer: returns ERR-UNAUTHORIZED if caller is not the pending new owner",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const newOwner = accounts.get('wallet_2')!;
+    const impersonator = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(newOwner.address)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'accept-ownership-transfer', [types.uint(0)], impersonator.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u2)');
+  }
+});
