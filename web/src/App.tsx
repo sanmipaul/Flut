@@ -155,6 +155,26 @@ const AppInner: React.FC = () => {
     }
   };
 
+  const handleDeposit = async (vaultId: number, amount: number) => {
+    try {
+      setLoading(true);
+      const updatedVaults = vaults.map((v) =>
+        v.vaultId === vaultId ? { ...v, amount: v.amount + amount } : v
+      );
+      setVaults(updatedVaults);
+
+      toast.success('Deposit successful!', {
+        description: `${amount} STX added to Vault #${vaultId}.`,
+      });
+    } catch (err) {
+      toast.error('Deposit failed', {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleFetchVault = async (vaultId: number): Promise<Vault> => {
     const vault = vaults.find((v) => v.vaultId === vaultId);
     if (!vault) throw new Error('Vault not found');
@@ -303,6 +323,7 @@ const AppInner: React.FC = () => {
               onSetBeneficiary={handleSetBeneficiary}
               onFetchVault={handleFetchVault}
               onEmergencyWithdraw={handleEmergencyWithdraw}
+              onDeposit={handleDeposit}
               penaltyRate={10}
               onSettingsChange={handleSettingsChange}
             />

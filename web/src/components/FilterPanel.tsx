@@ -1,14 +1,44 @@
-import React, { useState } from 'react';
+/**
+ * FilterPanel
+ *
+ * Sidebar filter panel for transaction analytics with persistent state.
+ * Supports filtering by date range, transaction type, amount range, and status.
+ * All filter state is persisted to localStorage and sessionStorage.
+ */
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { TransactionType, TransactionFilter } from '../types/TransactionHistory';
 import { getTransactionTypeLabel } from '../utils/AnalyticsUtils';
+import {
+  saveDualStorage,
+  loadDualStorage,
+  clearDualStorage,
+} from '../utils/storage';
+
+const FILTER_STORAGE_KEY = 'flut-filter-panel-state';
+
+interface FilterPanelState {
+  selectedTypes: TransactionType[];
+  selectedStatuses: string[];
+  startDate: string;
+  endDate: string;
+  minAmount: string;
+  maxAmount: string;
+  expandedSections: { [key: string]: boolean };
+}
 
 interface FilterPanelProps {
   onFilterChange: (filter: TransactionFilter) => void;
   transactionTypes: TransactionType[];
 }
 
-export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transactionTypes }) => {
-  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
+const getDefaultState = (): FilterPanelState => ({
+  selectedTypes: [],
+  selectedStatuses: [],
+  startDate: '',
+  endDate: '',
+  minAmount: '',
+  maxAmount: '',
+  expandedSections: {
     dateRange: true,
     type: false,
     amount: false,
@@ -98,38 +128,41 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
     onFilterChange({});
   };
 
-  const FilterSection: React.FC<{ title: string; sectionKey: string; children: React.ReactNode }> = ({
-    title,
-    sectionKey,
-    children,
-  }) => (
-    <div className="border-b border-gray-200 last:border-b-0">
-      <button
-        onClick={() => toggleSection(sectionKey)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition"
-      >
-        <span className="font-medium text-gray-900">{title}</span>
-        <span className={`text-gray-500 transition-transform ${expandedSections[sectionKey] ? 'rotate-180' : ''}`}>
-          ▼
-        </span>
-      </button>
-      {expandedSections[sectionKey] && <div className="px-4 py-3 bg-gray-50 space-y-3">{children}</div>}
-    </div>
-  );
+  const clearAllStorage = () => {
+    clearDualStorage(FILTER_STORAGE_KEY);
+    resetFilters();
+  };
+
+  const activeFilterCount = selectedTypes.length + selectedStatuses.length + (startDate ? 1 : 0) + (endDate ? 1 : 0) + (minAmount ? 1 : 0) + (maxAmount ? 1 : 0);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-fit sticky top-4">
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
-        <button
-          onClick={resetFilters}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-        >
-          Reset
-        </button>
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+          {activeFilterCount > 0 && (
+            <span className="text-xs text-blue-600 font-medium">
+              {activeFilterCount} active {activeFilterCount === 1 ? 'filter' : 'filters'}
+            </span>
+          )}
+        </div>
+        <div className="flex gap-1">
+          <button
+            onClick={clearAllStorage}
+            className="text-xs text-gray-500 hover:text-gray-700 font-medium px-2 py-1 rounded hover:bg-gray-100"
+            title="Clear saved filters"
+          >
+            Clear Storage
+          </button>
+          <button
+            onClick={resetFilters}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Reset
+          </button>
+        </div>
       </div>
 
-      {/* Date Range Filter */}
       <FilterSection title="Date Range" sectionKey="dateRange">
         <div className="space-y-2">
           <input
@@ -138,7 +171,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
             onChange={(e) => handleDateChange('start', e.target.value)}
             max={new Date().toISOString().split('T')[0]}
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Start date"
           />
           <input
             type="date"
@@ -146,12 +178,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
             onChange={(e) => handleDateChange('end', e.target.value)}
             max={new Date().toISOString().split('T')[0]}
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="End date"
           />
         </div>
       </FilterSection>
 
-      {/* Transaction Type Filter */}
       <FilterSection title="Transaction Type" sectionKey="type">
         <div className="space-y-2 max-h-48 overflow-y-auto">
           {transactionTypes.map((type) => (
@@ -168,7 +198,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
         </div>
       </FilterSection>
 
-      {/* Amount Range Filter */}
       <FilterSection title="Amount Range" sectionKey="amount">
         <div className="space-y-2">
           <input
@@ -194,7 +223,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onFilterChange, transa
         </div>
       </FilterSection>
 
-      {/* Status Filter */}
       <FilterSection title="Status" sectionKey="status">
         <div className="space-y-2">
           {['confirmed', 'pending', 'failed'].map((status) => (
