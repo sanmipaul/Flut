@@ -19,13 +19,10 @@ export function formatStxAmount(stx: number): string {
 /**
  * Convert a block count to a human-readable duration string.
  * Mirrors the logic in useLockProgress for consistency.
+ * Returns '—' for 0, negative, NaN, or Infinity.
  */
 export function formatBlockDuration(blocks: number): string {
-  if (blocks <= 0) return '—';
-  if (blocks < BLOCKS_PER_HOUR) return `~${Math.ceil(blocks * 10)} min`;
-  if (blocks < BLOCKS_PER_DAY) return `~${Math.ceil(blocks / BLOCKS_PER_HOUR)} hr`;
-  const days = Math.ceil(blocks / BLOCKS_PER_DAY);
-  return `~${days} day${days !== 1 ? 's' : ''}`;
+  return safeFormatBlockDuration(blocks);
 }
 
 /** Format a percentage value as "42%". */
