@@ -50,3 +50,14 @@ export function formatBlocksAsDays(blocks: number): string {
   const days = blocksToDays(blocks);
   return `~${days} day${days !== 1 ? 's' : ''}`;
 }
+
+/**
+ * Safely format a block count as a human-readable duration.
+ * Returns INVALID_DURATION for invalid inputs (0, negative, NaN, Infinity).
+ */
+export function safeFormatBlockDuration(blocks: number): string {
+  if (!isValidBlockCount(blocks)) return INVALID_DURATION;
+  if (blocks < BLOCKS_PER_HOUR) return formatBlocksAsMinutes(blocks);
+  if (blocks < BLOCKS_PER_DAY) return formatBlocksAsHours(blocks);
+  return formatBlocksAsDays(blocks);
+}
