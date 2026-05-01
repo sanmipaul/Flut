@@ -53,7 +53,14 @@ export function formatBlocksAsDays(blocks: number): string {
 
 /**
  * Safely format a block count as a human-readable duration.
- * Returns INVALID_DURATION for invalid inputs (0, negative, NaN, Infinity).
+ *
+ * Returns INVALID_DURATION ('—') for any input that is not a finite positive
+ * number: 0, negative, NaN, +Infinity, and -Infinity all yield '—'.
+ *
+ * This is a pure function — it never throws.
+ *
+ * @param blocks - Number of Stacks blocks
+ * @returns Human-readable duration string or '—'
  */
 export function safeFormatBlockDuration(blocks: number): string {
   if (!isValidBlockCount(blocks)) return INVALID_DURATION;
