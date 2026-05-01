@@ -105,3 +105,17 @@ describe('blocksToDays', () => {
     expect(blocksToDays(145)).toBe(2);
   });
 });
+
+describe('formatBlocksAsDays', () => {
+  it('uses singular "day" for exactly 1 day', () => {
+    expect(formatBlocksAsDays(144)).toBe('~1 day');
+  });
+
+  it('uses plural "days" for 2+ days', () => {
+    expect(formatBlocksAsDays(288)).toBe('~2 days');
+  });
+
+  it('includes ~ prefix', () => {
+    expect(formatBlocksAsDays(144)).toMatch(/^~/);
+  });
+});
