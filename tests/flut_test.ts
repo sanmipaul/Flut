@@ -616,3 +616,23 @@ Clarinet.test({
     assertEquals(block.receipts[0].result.includes('unlock-height: u300'), true);
   }
 });
+
+Clarinet.test({
+  name: "initiate-ownership-transfer: new owner can chain another transfer after accepting",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const secondOwner = accounts.get('wallet_2')!;
+    const thirdOwner = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(secondOwner.address)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'accept-ownership-transfer', [types.uint(0)], secondOwner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(thirdOwner.address)], secondOwner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
