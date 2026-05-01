@@ -79,3 +79,17 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u2)');
   }
 });
+
+Clarinet.test({
+  name: "initiate-ownership-transfer: rejects new-owner equal to current owner",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(owner.address)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u10)');
+  }
+});
