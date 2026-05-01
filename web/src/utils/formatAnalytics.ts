@@ -7,9 +7,6 @@
 
 import { safeFormatBlockDuration } from './blockDurationUtils';
 
-const BLOCKS_PER_DAY = 144;
-const BLOCKS_PER_HOUR = 6;
-
 /** Format a whole-STX number for display (locale-aware, no decimals for round numbers). */
 export function formatStxAmount(stx: number): string {
   if (!Number.isFinite(stx) || stx === 0) return '0 STX';
