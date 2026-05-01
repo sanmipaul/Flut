@@ -93,6 +93,12 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
   return (
     <>
       <div className="sr-only" aria-live="polite" aria-atomic="true">

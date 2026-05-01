@@ -192,6 +192,7 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
               id={`note-count-${vaultId}`}
               className="settings-char-count"
               aria-live="polite"
+              aria-atomic="true"
             >
               {settings.note.length}/300
             </span>
