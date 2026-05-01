@@ -48,6 +48,17 @@
       (ok true))
     ERR-NOT-FOUND))
 
+(define-public (accept-ownership-transfer (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (match (map-get? pending-owner {vault-id: vault-id})
+      pending (begin
+        (asserts! (is-eq tx-sender (get new-owner pending)) ERR-UNAUTHORIZED)
+        (map-set vaults {vault-id: vault-id} (merge vault {owner: tx-sender}))
+        (map-delete pending-owner {vault-id: vault-id})
+        (ok true))
+      ERR-NO-PENDING-TRANSFER)
+    ERR-NOT-FOUND))
+
 (define-public (withdraw (vault-id uint))
   (match (map-get? vaults {vault-id: vault-id})
     vault (begin
