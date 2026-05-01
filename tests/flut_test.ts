@@ -188,3 +188,14 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+Clarinet.test({
+  name: "accept-ownership-transfer: returns ERR-NOT-FOUND for non-existent vault",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'accept-ownership-transfer', [types.uint(99)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u1)');
+  }
+});
