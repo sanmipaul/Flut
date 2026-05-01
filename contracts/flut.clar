@@ -114,6 +114,9 @@
                    (> (get amount vault) u0)))
     ERR-NOT-FOUND))
 
+(define-read-only (get-pending-owner (vault-id uint))
+  (map-get? pending-owner {vault-id: vault-id}))
+
 (define-read-only (get-vault-summary (vault-id uint))
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok {
