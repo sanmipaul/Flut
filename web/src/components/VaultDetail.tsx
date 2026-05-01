@@ -273,12 +273,14 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
       )}
 
       {!vault.beneficiary && !vault.isWithdrawn && (
-        <section className="beneficiary-setup">
+        <section className="beneficiary-setup" aria-labelledby="beneficiary-heading">
+          <h3 id="beneficiary-heading">Set Beneficiary</h3>
           {!showBeneficiaryForm ? (
             <button
-              className="btn-secondary"
+              className="btn-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               onClick={() => setShowBeneficiaryForm(true)}
               disabled={submitting}
+              aria-label="Open form to set beneficiary address"
             >
               Set Beneficiary
             </button>
@@ -294,27 +296,30 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
                 required
               />
               {networkMismatch && (
-                <p className="warning-text" role="alert">
+                <p className="warning-text" role="alert" aria-live="assertive">
                   The beneficiary address is on a different network than this vault's creator. Please use a matching network address.
                 </p>
               )}
               <div className="beneficiary-form-actions">
                 <button
-                  className="btn-primary"
+                  className="btn-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700"
                   onClick={handleSetBeneficiary}
                   disabled={submitting || !canSetBeneficiary}
                   title={!canSetBeneficiary ? 'Enter a valid Stacks address' : undefined}
+                  aria-label={submitting ? 'Setting beneficiary address' : 'Set beneficiary address'}
+                  aria-busy={submitting}
                 >
                   {submitting ? 'Setting...' : 'Set'}
                 </button>
                 <button
-                  className="btn-secondary"
+                  className="btn-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                   onClick={() => {
                     setShowBeneficiaryForm(false);
                     setNewBeneficiary('');
                     setBeneficiaryValidation(null);
                   }}
                   disabled={submitting}
+                  aria-label="Cancel setting beneficiary"
                 >
                   Cancel
                 </button>
@@ -325,17 +330,20 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
       )}
 
       {isUnlocked && !vault.isWithdrawn && (
-        <section className="vault-actions">
+        <section className="vault-actions" aria-labelledby="withdrawal-heading">
+          <h3 id="withdrawal-heading">Withdrawal</h3>
           <button
-            className="btn-primary btn-large"
+            className="btn-primary btn-large focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-700"
             onClick={handleWithdraw}
             disabled={submitting || vault.isWithdrawn}
+            aria-label={`Withdraw ${(vault.amount / 1000000).toFixed(2)} STX from vault`}
+            aria-busy={submitting}
           >
             {submitting ? 'Withdrawing...' : 'Withdraw Funds'}
           </button>
           {vault.beneficiary && (
             <p className="info-text">
-              Clicking "Withdraw Funds" will transfer {vault.amount} STX to {vault.beneficiary}.
+              Clicking "Withdraw Funds" will transfer {(vault.amount / 1000000).toFixed(2)} STX to {vault.beneficiary}.
             </p>
           )}
         </section>
