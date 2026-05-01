@@ -63,3 +63,17 @@ describe('isInfiniteBlockCount', () => {
     expect(isInfiniteBlockCount(144)).toBe(false);
   });
 });
+
+describe('blocksToApproxMinutes', () => {
+  it('returns 10 for 1 block', () => {
+    expect(blocksToApproxMinutes(1)).toBe(10);
+  });
+
+  it('returns 30 for 3 blocks', () => {
+    expect(blocksToApproxMinutes(3)).toBe(30);
+  });
+
+  it('returns 50 for 5 blocks', () => {
+    expect(blocksToApproxMinutes(5)).toBe(50);
+  });
+});
