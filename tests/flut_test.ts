@@ -711,3 +711,27 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, 'true');
   }
 });
+
+Clarinet.test({
+  name: "get-vault-count: unchanged by ownership transfer operations",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const newOwner = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    const before = chain.mineBlock([
+      Tx.contractCall('flut', 'get-vault-count', [], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(newOwner.address)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'accept-ownership-transfer', [types.uint(0)], newOwner.address)
+    ]);
+    const after = chain.mineBlock([
+      Tx.contractCall('flut', 'get-vault-count', [], newOwner.address)
+    ]);
+    assertEquals(before.receipts[0].result, after.receipts[0].result);
+  }
+});
