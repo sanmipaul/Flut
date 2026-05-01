@@ -54,15 +54,32 @@ export const PenaltyWarningModal: React.FC<PenaltyWarningModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content penalty-warning">
+    <div 
+      className="modal-overlay"
+      role="presentation"
+      onClick={onCancel}
+    >
+      <div 
+        className="modal-content penalty-warning"
+        role="alertdialog"
+        aria-labelledby="penalty-modal-title"
+        aria-describedby="penalty-modal-description"
+        onKeyDown={handleKeyDown}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="warning-header">
-          <span className="warning-icon">⚠️</span>
-          <h2>Emergency Withdrawal Penalty</h2>
+          <span className="warning-icon" aria-hidden="true">⚠️</span>
+          <h2 id="penalty-modal-title">Emergency Withdrawal Penalty</h2>
         </div>
 
-        <div className="penalty-details">
+        <div id="penalty-modal-description" className="penalty-details">
           <p className="warning-text">
             You are about to withdraw from a locked vault before the unlock date. 
             A penalty fee will be deducted from your withdrawal.
@@ -109,13 +126,18 @@ export const PenaltyWarningModal: React.FC<PenaltyWarningModalProps> = ({
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
               disabled={loading}
+              aria-label="I understand the penalty and wish to proceed with emergency withdrawal"
             />
             <label htmlFor="penalty-confirm">
               I understand the penalty and wish to proceed with the emergency withdrawal
             </label>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div className="error-message" role="alert">
+              {error}
+            </div>
+          )}
         </div>
 
         <div className="modal-actions">
@@ -124,6 +146,7 @@ export const PenaltyWarningModal: React.FC<PenaltyWarningModalProps> = ({
             className="btn-secondary"
             onClick={onCancel}
             disabled={loading}
+            aria-label="Cancel emergency withdrawal"
           >
             Cancel
           </button>
@@ -132,6 +155,7 @@ export const PenaltyWarningModal: React.FC<PenaltyWarningModalProps> = ({
             className="btn-danger"
             onClick={handleConfirm}
             disabled={loading || !confirmed}
+            aria-label="Proceed with emergency withdrawal"
           >
             {loading ? 'Processing...' : 'Emergency Withdraw'}
           </button>
