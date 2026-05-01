@@ -735,3 +735,28 @@ Clarinet.test({
     assertEquals(before.receipts[0].result, after.receipts[0].result);
   }
 });
+
+Clarinet.test({
+  name: "full lifecycle: create, initiate, accept, deposit, withdraw as new owner",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const newOwner = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(newOwner.address)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'accept-ownership-transfer', [types.uint(0)], newOwner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], newOwner.address)
+    ]);
+    chain.mineEmptyBlockUntil(10);
+    const withdraw = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw', [types.uint(0)], newOwner.address)
+    ]);
+    assertEquals(withdraw.receipts[0].result, '(ok true)');
+  }
+});
