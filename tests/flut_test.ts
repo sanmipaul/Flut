@@ -142,3 +142,17 @@ Clarinet.test({
     assertEquals(block.receipts[0].result.includes(newOwner.address), true);
   }
 });
+
+Clarinet.test({
+  name: "has-pending-transfer: returns false before any transfer is initiated",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'has-pending-transfer', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'false');
+  }
+});
