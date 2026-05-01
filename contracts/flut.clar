@@ -117,6 +117,9 @@
 (define-read-only (get-pending-owner (vault-id uint))
   (map-get? pending-owner {vault-id: vault-id}))
 
+(define-read-only (has-pending-transfer (vault-id uint))
+  (is-some (map-get? pending-owner {vault-id: vault-id})))
+
 (define-read-only (get-vault-summary (vault-id uint))
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok {
