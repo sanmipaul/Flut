@@ -119,3 +119,37 @@ describe('formatBlocksAsDays', () => {
     expect(formatBlocksAsDays(144)).toMatch(/^~/);
   });
 });
+
+describe('safeFormatBlockDuration', () => {
+  it('returns INVALID_DURATION for Infinity', () => {
+    expect(safeFormatBlockDuration(Infinity)).toBe(INVALID_DURATION);
+  });
+
+  it('returns INVALID_DURATION for NaN', () => {
+    expect(safeFormatBlockDuration(NaN)).toBe(INVALID_DURATION);
+  });
+
+  it('returns INVALID_DURATION for -Infinity', () => {
+    expect(safeFormatBlockDuration(-Infinity)).toBe(INVALID_DURATION);
+  });
+
+  it('returns INVALID_DURATION for 0', () => {
+    expect(safeFormatBlockDuration(0)).toBe(INVALID_DURATION);
+  });
+
+  it('returns INVALID_DURATION for negative blocks', () => {
+    expect(safeFormatBlockDuration(-5)).toBe(INVALID_DURATION);
+  });
+
+  it('returns minutes string for 1 block', () => {
+    expect(safeFormatBlockDuration(1)).toContain('min');
+  });
+
+  it('returns hours string for 12 blocks', () => {
+    expect(safeFormatBlockDuration(12)).toContain('hr');
+  });
+
+  it('returns days string for 144 blocks', () => {
+    expect(safeFormatBlockDuration(144)).toContain('day');
+  });
+});
