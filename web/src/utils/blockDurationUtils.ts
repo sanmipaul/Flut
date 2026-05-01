@@ -14,3 +14,8 @@ export function isValidBlockCount(n: number): boolean {
 export function isNaNBlockCount(n: number): boolean {
   return Number.isNaN(n);
 }
+
+/** Returns true if n is positive or negative Infinity. */
+export function isInfiniteBlockCount(n: number): boolean {
+  return n === Infinity || n === -Infinity;
+}
