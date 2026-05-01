@@ -77,3 +77,17 @@ describe('blocksToApproxMinutes', () => {
     expect(blocksToApproxMinutes(5)).toBe(50);
   });
 });
+
+describe('blocksToApproxHours', () => {
+  it('returns 1 for exactly BLOCKS_PER_HOUR blocks', () => {
+    expect(blocksToApproxHours(BLOCKS_PER_HOUR)).toBe(1);
+  });
+
+  it('returns 2 for 12 blocks', () => {
+    expect(blocksToApproxHours(12)).toBe(2);
+  });
+
+  it('rounds up fractional hours', () => {
+    expect(blocksToApproxHours(7)).toBe(2);
+  });
+});
