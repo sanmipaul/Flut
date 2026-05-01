@@ -156,3 +156,19 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, 'false');
   }
 });
+
+Clarinet.test({
+  name: "has-pending-transfer: returns true after initiate-ownership-transfer",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const newOwner = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(newOwner.address)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'has-pending-transfer', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'true');
+  }
+});
