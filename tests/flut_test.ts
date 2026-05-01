@@ -671,3 +671,24 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+Clarinet.test({
+  name: "has-pending-transfer: multiple vaults track pending transfers independently",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const newOwner = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'create-vault', [types.uint(2000), types.uint(300)], owner.address),
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(newOwner.address)], owner.address)
+    ]);
+    const vault0 = chain.mineBlock([
+      Tx.contractCall('flut', 'has-pending-transfer', [types.uint(0)], owner.address)
+    ]);
+    const vault1 = chain.mineBlock([
+      Tx.contractCall('flut', 'has-pending-transfer', [types.uint(1)], owner.address)
+    ]);
+    assertEquals(vault0.receipts[0].result, 'true');
+    assertEquals(vault1.receipts[0].result, 'false');
+  }
+});
