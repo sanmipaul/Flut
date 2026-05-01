@@ -125,3 +125,9 @@ describe('formatBlockDuration — NaN input', () => {
     expect(formatBlockDuration(NaN)).toBe('—');
   });
 });
+
+describe('formatBlockDuration — -Infinity input', () => {
+  it('returns "—" for -Infinity', () => {
+    expect(formatBlockDuration(-Infinity)).toBe('—');
+  });
+});
