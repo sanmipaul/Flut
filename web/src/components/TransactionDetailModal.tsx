@@ -49,10 +49,15 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
       <div className={`p-4 rounded-lg border-2 ${getTypeColor(transaction.type)}`}>
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{getTransactionTypeLabel(transaction.type)}</h2>
-            <p className="text-sm text-gray-600 mt-1">{transaction.id}</p>
+            <h2 className="text-2xl font-bold text-gray-900" id="tx-type">
+              {getTransactionTypeLabel(transaction.type)}
+            </h2>
+            <p className="text-sm text-gray-600 mt-1" id="tx-id">{transaction.id}</p>
           </div>
-          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadgeColor(transaction.status)}`}>
+          <span 
+            className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadgeColor(transaction.status)}`}
+            aria-label={`Transaction status: ${transaction.status}`}
+          >
             {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
           </span>
         </div>
@@ -118,7 +123,8 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
       {/* Close Button */}
       <button
         onClick={onClose}
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700"
+        aria-label="Close transaction details modal"
       >
         Close
       </button>
@@ -128,11 +134,20 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
   // Mobile drawer style
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end">
-        <div className="bg-white w-full max-h-[90vh] rounded-t-2xl overflow-y-auto p-6">
+      <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end" role="presentation">
+        <div 
+          className="bg-white w-full max-h-[90vh] rounded-t-2xl overflow-y-auto p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="mobile-tx-header"
+        >
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-xl font-bold text-gray-900">Transaction Details</h1>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
+            <h1 id="mobile-tx-header" className="text-xl font-bold text-gray-900">Transaction Details</h1>
+            <button 
+              onClick={onClose} 
+              className="text-gray-500 hover:text-gray-700 text-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded"
+              aria-label="Close transaction details"
+            >
               ×
             </button>
           </div>
@@ -144,13 +159,19 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
 
   // Desktop modal style
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4" role="presentation">
+      <div 
+        className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="desktop-tx-header"
+      >
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Transaction Details</h1>
+          <h1 id="desktop-tx-header" className="text-2xl font-bold text-gray-900">Transaction Details</h1>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition text-2xl font-light"
+            className="text-gray-500 hover:text-gray-700 transition text-2xl font-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded"
+            aria-label="Close transaction details"
           >
             ×
           </button>
