@@ -58,10 +58,11 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
   return (
     <div className="vault-settings-panel" ref={panelRef}>
       <button
-        className="vault-settings-panel__toggle"
+        className="vault-settings-panel__toggle focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
         aria-controls={`vault-settings-${vaultId}`}
+        aria-label={`${isOpen ? 'Close' : 'Open'} vault settings panel`}
       >
         <span className="vault-settings-panel__toggle-label">Vault Settings</span>
         <span
@@ -77,9 +78,11 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
         className={`vault-settings-panel__body ${isOpen ? 'vault-settings-panel__body--open' : ''}`}
         data-testid={`vault-settings-body-${vaultId}`}
         hidden={!isOpen}
+        role="region"
+        aria-labelledby={`vault-settings-${vaultId}-label`}
       >
         <fieldset className="settings-fieldset">
-          <legend className="settings-fieldset__legend">Display</legend>
+          <legend id={`vault-settings-${vaultId}-label`} className="settings-fieldset__legend">Display</legend>
 
           {/* Nickname */}
           <div className="settings-row">
@@ -89,7 +92,7 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
             <input
               id={`nickname-${vaultId}`}
               type="text"
-              className="settings-input"
+              className="settings-input focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               value={settings.nickname}
               maxLength={40}
               placeholder="e.g. Emergency Fund"
@@ -100,8 +103,9 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
               id={`nickname-count-${vaultId}`}
               className="settings-char-count"
               aria-live="polite"
+              aria-atomic="true"
             >
-              {settings.nickname.length}/40
+              {settings.nickname.length} of 40 characters
             </span>
           </div>
 
@@ -113,9 +117,10 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
             <input
               id={`compact-${vaultId}`}
               type="checkbox"
-              className="settings-checkbox"
+              className="settings-checkbox focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               checked={settings.compactDisplay}
               onChange={(e) => handleUpdate('compactDisplay', e.target.checked)}
+              aria-label="Use compact display for amounts (e.g., 1.5M instead of 1500000)"
             />
           </div>
 
@@ -127,9 +132,10 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
             <input
               id={`pinned-${vaultId}`}
               type="checkbox"
-              className="settings-checkbox"
+              className="settings-checkbox focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               checked={settings.pinned}
               onChange={(e) => handleUpdate('pinned', e.target.checked)}
+              aria-label="Pin this vault to the top of the sidebar list"
             />
           </div>
         </fieldset>
@@ -157,12 +163,12 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
           <legend className="settings-fieldset__legend">Personal Note</legend>
           <textarea
             id={`note-${vaultId}`}
-            className="settings-textarea"
+            className="settings-textarea focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             value={settings.note}
             maxLength={300}
             placeholder="Add a private reminder or note about this vault…"
             rows={3}
-            aria-label="Personal note"
+            aria-label="Personal note about this vault"
             aria-describedby={`note-count-${vaultId}`}
             onChange={(e) => handleUpdate('note', e.target.value)}
           />
@@ -170,8 +176,9 @@ const VaultSettingsPanel: React.FC<VaultSettingsPanelProps> = ({
             id={`note-count-${vaultId}`}
             className="settings-char-count"
             aria-live="polite"
+            aria-atomic="true"
           >
-            {settings.note.length}/300
+            {settings.note.length} of 300 characters
           </span>
         </fieldset>
 
