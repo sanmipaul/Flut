@@ -1,6 +1,10 @@
+/** One Stacks block is mined approximately every 10 minutes. */
 export const BLOCKS_PER_HOUR = 6;
+/** 6 blocks/hr × 24 hr = 144 blocks/day. */
 export const BLOCKS_PER_DAY = 144;
+/** 144 × 7 = 1008 blocks/week. */
 export const BLOCKS_PER_WEEK = 1008;
+/** 144 × 30 = 4320 blocks/month (30-day approximation). */
 export const BLOCKS_PER_MONTH = 4320;
 
 export const INVALID_DURATION = '—';
