@@ -44,3 +44,9 @@ export function formatBlocksAsMinutes(blocks: number): string {
 export function formatBlocksAsHours(blocks: number): string {
   return `~${blocksToApproxHours(blocks)} hr`;
 }
+
+/** Format a block count as a days string with pluralization, e.g. "~3 days". */
+export function formatBlocksAsDays(blocks: number): string {
+  const days = blocksToDays(blocks);
+  return `~${days} day${days !== 1 ? 's' : ''}`;
+}
