@@ -24,3 +24,8 @@ export function isInfiniteBlockCount(n: number): boolean {
 export function blocksToApproxMinutes(blocks: number): number {
   return Math.ceil(blocks * 10);
 }
+
+/** Convert blocks to approximate hours. */
+export function blocksToApproxHours(blocks: number): number {
+  return Math.ceil(blocks / BLOCKS_PER_HOUR);
+}
