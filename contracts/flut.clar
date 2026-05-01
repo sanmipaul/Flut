@@ -12,6 +12,8 @@
 (define-constant ERR-EMPTY-VAULT (err u7))
 (define-constant ERR-HEIGHT-TOO-FAR (err u8))
 (define-constant ERR-VAULT-CLOSED (err u9))
+(define-constant ERR-SAME-OWNER (err u10))
+(define-constant ERR-NO-PENDING-TRANSFER (err u11))
 (define-constant MAX-LOCK-BLOCKS u52560)
 
 (define-public (create-vault (amount uint) (unlock-height uint))
@@ -43,6 +45,26 @@
       (asserts! (not (is-eq new-owner tx-sender)) ERR-SAME-OWNER)
       (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
       (map-set pending-owner {vault-id: vault-id} {new-owner: new-owner})
+      (ok true))
+    ERR-NOT-FOUND))
+
+(define-public (accept-ownership-transfer (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (match (map-get? pending-owner {vault-id: vault-id})
+      pending (begin
+        (asserts! (is-eq tx-sender (get new-owner pending)) ERR-UNAUTHORIZED)
+        (map-set vaults {vault-id: vault-id} (merge vault {owner: tx-sender}))
+        (map-delete pending-owner {vault-id: vault-id})
+        (ok true))
+      ERR-NO-PENDING-TRANSFER)
+    ERR-NOT-FOUND))
+
+(define-public (cancel-ownership-transfer (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (begin
+      (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
+      (asserts! (is-some (map-get? pending-owner {vault-id: vault-id})) ERR-NO-PENDING-TRANSFER)
+      (map-delete pending-owner {vault-id: vault-id})
       (ok true))
     ERR-NOT-FOUND))
 
@@ -111,6 +133,12 @@
                    (not (get withdrawn vault))
                    (> (get amount vault) u0)))
     ERR-NOT-FOUND))
+
+(define-read-only (get-pending-owner (vault-id uint))
+  (map-get? pending-owner {vault-id: vault-id}))
+
+(define-read-only (has-pending-transfer (vault-id uint))
+  (is-some (map-get? pending-owner {vault-id: vault-id})))
 
 (define-read-only (get-vault-summary (vault-id uint))
   (match (map-get? vaults {vault-id: vault-id})
