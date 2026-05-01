@@ -9,3 +9,8 @@ export const INVALID_DURATION = '—';
 export function isValidBlockCount(n: number): boolean {
   return Number.isFinite(n) && n > 0;
 }
+
+/** Returns true if n is NaN. */
+export function isNaNBlockCount(n: number): boolean {
+  return Number.isNaN(n);
+}
