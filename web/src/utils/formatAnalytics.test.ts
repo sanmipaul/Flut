@@ -82,6 +82,24 @@ describe('formatVaultCount', () => {
   });
 });
 
+describe('formatBlockDuration — regression suite', () => {
+  it('original positive behaviour still works for 3 blocks', () => {
+    expect(formatBlockDuration(3)).toContain('min');
+  });
+
+  it('original positive behaviour still works for 12 blocks', () => {
+    expect(formatBlockDuration(12)).toContain('hr');
+  });
+
+  it('original positive behaviour still works for 144 blocks', () => {
+    expect(formatBlockDuration(144)).toBe('~1 day');
+  });
+
+  it('original positive behaviour still works for 288 blocks', () => {
+    expect(formatBlockDuration(288)).toBe('~2 days');
+  });
+});
+
 describe('formatBlockDuration — boundary values', () => {
   it('exactly 6 blocks returns hours', () => {
     expect(formatBlockDuration(6)).toContain('hr');
