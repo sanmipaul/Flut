@@ -89,26 +89,82 @@ export const CreateVaultDrawer: React.FC<CreateVaultDrawerProps> = ({
       <div className="fixed inset-0 z-50">
         <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
         <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg max-h-96 overflow-y-auto animate-slide-up">
-          <div className="sticky top-0 flex justify-between items-center p-4 border-b bg-white rounded-t-2xl">
-            <h2 className="text-xl font-bold text-gray-900">Create New Vault</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl leading-none">×</button>
+        <div className="sticky top-0 flex justify-between items-center p-4 border-b bg-white rounded-t-2xl">
+            <h2 className="text-xl font-bold text-gray-900" id="drawer-title">Create New Vault</h2>
+            <button 
+              onClick={onClose} 
+              className="text-gray-500 hover:text-gray-700 text-2xl leading-none focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded"
+              aria-label="Close create vault drawer"
+            >
+              ×
+            </button>
           </div>
-          <form onSubmit={handleSubmit} className="p-4 space-y-4">
-            {error && <div className="p-3 bg-red-100 border border-red-400 text-red-800 rounded">{error}</div>}
+          <form onSubmit={handleSubmit} className="p-4 space-y-4" aria-labelledby="drawer-title">
+            {error && (
+              <div className="p-3 bg-red-100 border border-red-400 text-red-800 rounded" role="alert">
+                {error}
+              </div>
+            )}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Amount (STX)</label>
-              <input type="number" step="0.000001" min="0" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })} className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.amount ? 'border-red-500' : 'border-gray-300'}`} disabled={isLoading} />
-              {validationErrors.amount && <p className="text-red-600 text-xs mt-1">{validationErrors.amount}</p>}
+              <label htmlFor="drawer-amount" className="block text-sm font-medium text-gray-700 mb-1">Amount (STX)</label>
+              <input 
+                id="drawer-amount"
+                type="number" 
+                step="0.000001" 
+                min="0" 
+                value={formData.amount} 
+                onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })} 
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.amount ? 'border-red-500' : 'border-gray-300'}`} 
+                disabled={isLoading}
+                required
+                aria-required="true"
+                aria-invalid={!!validationErrors.amount}
+                aria-describedby={validationErrors.amount ? 'drawer-amount-error' : undefined}
+              />
+              {validationErrors.amount && (
+                <p id="drawer-amount-error" className="text-red-600 text-xs mt-1" role="alert">
+                  {validationErrors.amount}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Unlock Date</label>
-              <input type="datetime-local" value={formData.unlockDate} onChange={(e) => setFormData({ ...formData, unlockDate: e.target.value })} className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.unlockDate ? 'border-red-500' : 'border-gray-300'}`} disabled={isLoading} />
-              {validationErrors.unlockDate && <p className="text-red-600 text-xs mt-1">{validationErrors.unlockDate}</p>}
+              <label htmlFor="drawer-unlock-date" className="block text-sm font-medium text-gray-700 mb-1">Unlock Date</label>
+              <input 
+                id="drawer-unlock-date"
+                type="datetime-local" 
+                value={formData.unlockDate} 
+                onChange={(e) => setFormData({ ...formData, unlockDate: e.target.value })} 
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.unlockDate ? 'border-red-500' : 'border-gray-300'}`} 
+                disabled={isLoading}
+                required
+                aria-required="true"
+                aria-invalid={!!validationErrors.unlockDate}
+                aria-describedby={validationErrors.unlockDate ? 'drawer-unlock-date-error' : undefined}
+              />
+              {validationErrors.unlockDate && (
+                <p id="drawer-unlock-date-error" className="text-red-600 text-xs mt-1" role="alert">
+                  {validationErrors.unlockDate}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Beneficiary (Optional)</label>
-              <input type="text" value={formData.beneficiary} onChange={(e) => setFormData({ ...formData, beneficiary: e.target.value })} placeholder="Enter beneficiary address" className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.beneficiary ? 'border-red-500' : 'border-gray-300'}`} disabled={isLoading} />
-              {validationErrors.beneficiary && <p className="text-red-600 text-xs mt-1">{validationErrors.beneficiary}</p>}
+              <label htmlFor="drawer-beneficiary" className="block text-sm font-medium text-gray-700 mb-1">Beneficiary (Optional)</label>
+              <input 
+                id="drawer-beneficiary"
+                type="text" 
+                value={formData.beneficiary} 
+                onChange={(e) => setFormData({ ...formData, beneficiary: e.target.value })} 
+                placeholder="Enter beneficiary address" 
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.beneficiary ? 'border-red-500' : 'border-gray-300'}`} 
+                disabled={isLoading}
+                aria-invalid={!!validationErrors.beneficiary}
+                aria-describedby={validationErrors.beneficiary ? 'drawer-beneficiary-error' : undefined}
+              />
+              {validationErrors.beneficiary && (
+                <p id="drawer-beneficiary-error" className="text-red-600 text-xs mt-1" role="alert">
+                  {validationErrors.beneficiary}
+                </p>
+              )}
             </div>
             <div className="flex gap-2 pt-4 border-t">
               <button type="button" onClick={onClose} disabled={isLoading} className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:bg-gray-200 disabled:cursor-not-allowed transition">Cancel</button>
