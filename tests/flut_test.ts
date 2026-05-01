@@ -63,3 +63,19 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u1)');
   }
 });
+
+Clarinet.test({
+  name: "initiate-ownership-transfer: fails if caller is not vault owner",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const attacker = accounts.get('wallet_2')!;
+    const newOwner = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(newOwner.address)], attacker.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u2)');
+  }
+});
