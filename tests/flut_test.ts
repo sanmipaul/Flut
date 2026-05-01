@@ -462,3 +462,23 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u2)');
   }
 });
+
+Clarinet.test({
+  name: "initiate-ownership-transfer: second initiation overwrites first pending transfer",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const firstPending = accounts.get('wallet_2')!;
+    const secondPending = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(firstPending.address)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(secondPending.address)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-pending-owner', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result.includes(secondPending.address), true);
+  }
+});
