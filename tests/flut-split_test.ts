@@ -471,3 +471,17 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u7)');
   }
 });
+
+Clarinet.test({
+  name: "split-exists: returns true after create-split",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([types.principal(creator.address)])], creator.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'split-exists', [types.uint(0)], creator.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'true');
+  }
+});
