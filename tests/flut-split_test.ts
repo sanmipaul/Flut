@@ -435,3 +435,14 @@ Clarinet.test({
     assertEquals(c3.receipts[0].result, '(ok u200)');
   }
 });
+
+Clarinet.test({
+  name: "contribute: returns ERR-NOT-FOUND for non-existent split",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'contribute', [types.uint(99), types.uint(500)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u1)');
+  }
+});
