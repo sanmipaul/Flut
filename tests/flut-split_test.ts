@@ -625,3 +625,26 @@ Clarinet.test({
     assertEquals(block.receipts[0].result.includes(creator.address), true);
   }
 });
+
+Clarinet.test({
+  name: "get-member-share-amount: returns exact contribution for each member",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const w1 = accounts.get('wallet_1')!;
+    const w2 = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(1000), types.list([
+        types.principal(w1.address), types.principal(w2.address)
+      ])], w1.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(650)], w1.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(350)], w2.address)
+    ]);
+    const s1 = chain.mineBlock([
+      Tx.contractCall('flut-split', 'get-member-share-amount', [types.uint(0), types.principal(w1.address)], w1.address)
+    ]);
+    const s2 = chain.mineBlock([
+      Tx.contractCall('flut-split', 'get-member-share-amount', [types.uint(0), types.principal(w2.address)], w2.address)
+    ]);
+    assertEquals(s1.receipts[0].result, '(ok u650)');
+    assertEquals(s2.receipts[0].result, '(ok u350)');
+  }
+});
