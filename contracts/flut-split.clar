@@ -126,6 +126,11 @@
     split (ok (is-member user (get members split)))
     ERR-NOT-FOUND))
 
+(define-read-only (get-member-at-index (split-id uint) (index uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (element-at (get members split) index))
+    ERR-NOT-FOUND))
+
 (define-read-only (get-split-member-count (split-id uint))
   (match (map-get? splits {split-id: split-id})
     split (ok (len (get members split)))
