@@ -737,3 +737,14 @@ Clarinet.test({
     assertEquals(result.includes('target-met: false'), true);
   }
 });
+
+Clarinet.test({
+  name: "claim-share: returns ERR-NOT-FOUND for non-existent split",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'claim-share', [types.uint(99)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u1)');
+  }
+});
