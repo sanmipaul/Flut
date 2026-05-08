@@ -407,3 +407,31 @@ Clarinet.test({
     assertEquals(claim2.receipts[0].result, '(ok u400)');
   }
 });
+
+Clarinet.test({
+  name: "full lifecycle: 5-member split all contribute and claim",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const w1 = accounts.get('wallet_1')!;
+    const w2 = accounts.get('wallet_2')!;
+    const w3 = accounts.get('wallet_3')!;
+    const w4 = accounts.get('wallet_4')!;
+    const w5 = accounts.get('wallet_5')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(1000), types.list([
+        types.principal(w1.address), types.principal(w2.address), types.principal(w3.address),
+        types.principal(w4.address), types.principal(w5.address)
+      ])], w1.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(200)], w1.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(200)], w2.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(200)], w3.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(200)], w4.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(200)], w5.address)
+    ]);
+    const c1 = chain.mineBlock([Tx.contractCall('flut-split', 'claim-share', [types.uint(0)], w1.address)]);
+    const c2 = chain.mineBlock([Tx.contractCall('flut-split', 'claim-share', [types.uint(0)], w2.address)]);
+    const c3 = chain.mineBlock([Tx.contractCall('flut-split', 'claim-share', [types.uint(0)], w3.address)]);
+    assertEquals(c1.receipts[0].result, '(ok u200)');
+    assertEquals(c2.receipts[0].result, '(ok u200)');
+    assertEquals(c3.receipts[0].result, '(ok u200)');
+  }
+});
