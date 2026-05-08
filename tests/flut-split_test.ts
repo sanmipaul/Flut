@@ -357,3 +357,19 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+Clarinet.test({
+  name: "can-claim-share: returns false for non-member even when target is met",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    const stranger = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([types.principal(creator.address)])], creator.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(500)], creator.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'can-claim-share', [types.uint(0), types.principal(stranger.address)], stranger.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
