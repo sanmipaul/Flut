@@ -384,3 +384,26 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u11)');
   }
 });
+
+Clarinet.test({
+  name: "full lifecycle: 2-member split contribute and claim",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const w1 = accounts.get('wallet_1')!;
+    const w2 = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(1000), types.list([
+        types.principal(w1.address), types.principal(w2.address)
+      ])], w1.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(600)], w1.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(400)], w2.address)
+    ]);
+    const claim1 = chain.mineBlock([
+      Tx.contractCall('flut-split', 'claim-share', [types.uint(0)], w1.address)
+    ]);
+    const claim2 = chain.mineBlock([
+      Tx.contractCall('flut-split', 'claim-share', [types.uint(0)], w2.address)
+    ]);
+    assertEquals(claim1.receipts[0].result, '(ok u600)');
+    assertEquals(claim2.receipts[0].result, '(ok u400)');
+  }
+});
