@@ -58,3 +58,18 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u4)');
   }
 });
+
+Clarinet.test({
+  name: "contribute: non-member cannot contribute to a 1-member split",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    const stranger = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(1000), types.list([types.principal(creator.address)])], creator.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(500)], stranger.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u2)');
+  }
+});
