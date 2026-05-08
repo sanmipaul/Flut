@@ -496,3 +496,18 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, 'false');
   }
 });
+
+Clarinet.test({
+  name: "get-split-count: increments after each create-split",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([types.principal(creator.address)])], creator.address),
+      Tx.contractCall('flut-split', 'create-split', [types.uint(800), types.list([types.principal(creator.address)])], creator.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'get-split-count', [], creator.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u2)');
+  }
+});
