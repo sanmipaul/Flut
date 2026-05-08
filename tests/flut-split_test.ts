@@ -705,3 +705,17 @@ Clarinet.test({
     assertEquals(block.receipts[0].result.includes(w2.address), true);
   }
 });
+
+Clarinet.test({
+  name: "get-member-at-index: returns none for out-of-range index",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([types.principal(creator.address)])], creator.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'get-member-at-index', [types.uint(0), types.uint(3)], creator.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok none)');
+  }
+});
