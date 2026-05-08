@@ -648,3 +648,25 @@ Clarinet.test({
     assertEquals(s2.receipts[0].result, '(ok u350)');
   }
 });
+
+Clarinet.test({
+  name: "has-claimed: returns false before claim and true after claim",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([types.principal(creator.address)])], creator.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(500)], creator.address)
+    ]);
+    const before = chain.mineBlock([
+      Tx.contractCall('flut-split', 'has-claimed', [types.uint(0), types.principal(creator.address)], creator.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'claim-share', [types.uint(0)], creator.address)
+    ]);
+    const after = chain.mineBlock([
+      Tx.contractCall('flut-split', 'has-claimed', [types.uint(0), types.principal(creator.address)], creator.address)
+    ]);
+    assertEquals(before.receipts[0].result, 'false');
+    assertEquals(after.receipts[0].result, 'true');
+  }
+});
