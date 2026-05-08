@@ -608,3 +608,20 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u700)');
   }
 });
+
+Clarinet.test({
+  name: "get-split-creator: returns the address of the split creator",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    const member2 = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(1000), types.list([
+        types.principal(creator.address), types.principal(member2.address)
+      ])], creator.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'get-split-creator', [types.uint(0)], creator.address)
+    ]);
+    assertEquals(block.receipts[0].result.includes(creator.address), true);
+  }
+});
