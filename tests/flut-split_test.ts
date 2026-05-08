@@ -688,3 +688,20 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u3)');
   }
 });
+
+Clarinet.test({
+  name: "get-member-at-index: returns correct member at given index",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const w1 = accounts.get('wallet_1')!;
+    const w2 = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(1000), types.list([
+        types.principal(w1.address), types.principal(w2.address)
+      ])], w1.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'get-member-at-index', [types.uint(0), types.uint(1)], w1.address)
+    ]);
+    assertEquals(block.receipts[0].result.includes(w2.address), true);
+  }
+});
