@@ -812,3 +812,26 @@ Clarinet.test({
     assertEquals(block.receipts[1].result, '(ok u1)');
   }
 });
+
+Clarinet.test({
+  name: "is-split-member: returns true for all 5 members in a full split",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const w1 = accounts.get('wallet_1')!;
+    const w2 = accounts.get('wallet_2')!;
+    const w3 = accounts.get('wallet_3')!;
+    const w4 = accounts.get('wallet_4')!;
+    const w5 = accounts.get('wallet_5')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(1000), types.list([
+        types.principal(w1.address), types.principal(w2.address), types.principal(w3.address),
+        types.principal(w4.address), types.principal(w5.address)
+      ])], w1.address)
+    ]);
+    const checks = chain.mineBlock([
+      Tx.contractCall('flut-split', 'is-split-member', [types.uint(0), types.principal(w3.address)], w3.address),
+      Tx.contractCall('flut-split', 'is-split-member', [types.uint(0), types.principal(w5.address)], w5.address)
+    ]);
+    assertEquals(checks.receipts[0].result, '(ok true)');
+    assertEquals(checks.receipts[1].result, '(ok true)');
+  }
+});
