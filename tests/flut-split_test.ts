@@ -373,3 +373,14 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok false)');
   }
 });
+
+Clarinet.test({
+  name: "create-split: fails with empty members list",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([])], creator.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u11)');
+  }
+});
