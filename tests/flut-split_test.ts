@@ -785,3 +785,17 @@ Clarinet.test({
     assertEquals(result.includes(w2.address), true);
   }
 });
+
+Clarinet.test({
+  name: "get-split-target: returns correct target amount",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(7500), types.list([types.principal(creator.address)])], creator.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'get-split-target', [types.uint(0)], creator.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u7500)');
+  }
+});
