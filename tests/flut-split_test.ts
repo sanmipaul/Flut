@@ -526,3 +526,18 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok false)');
   }
 });
+
+Clarinet.test({
+  name: "is-target-met: returns true after target is reached",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([types.principal(creator.address)])], creator.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(500)], creator.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'is-target-met', [types.uint(0)], creator.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
