@@ -30,6 +30,7 @@
 (define-public (create-split (target uint) (members (list 5 principal)))
   (let ((id (var-get split-counter)))
     (asserts! (> target u0) ERR-ZERO-TARGET)
+    (asserts! (is-some (element-at members u0)) ERR-EMPTY-MEMBERS)
     (map-set splits {split-id: id} {creator: tx-sender, target: target, saved: u0, paid-out: false, members: members})
     (var-set split-counter (+ id u1))
     (ok id)))
