@@ -460,3 +460,14 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u6)');
   }
 });
+
+Clarinet.test({
+  name: "create-split: returns ERR-ZERO-TARGET for zero target amount",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(0), types.list([types.principal(creator.address)])], creator.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u7)');
+  }
+});
