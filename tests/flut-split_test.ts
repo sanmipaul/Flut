@@ -307,3 +307,18 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+Clarinet.test({
+  name: "is-split-member: returns false for stranger on a 1-member split",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    const stranger = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([types.principal(creator.address)])], creator.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'is-split-member', [types.uint(0), types.principal(stranger.address)], stranger.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
