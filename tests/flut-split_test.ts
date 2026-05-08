@@ -485,3 +485,14 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, 'true');
   }
 });
+
+Clarinet.test({
+  name: "split-exists: returns false for unknown split id",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'split-exists', [types.uint(99)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'false');
+  }
+});
