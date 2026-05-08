@@ -766,3 +766,22 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u9)');
   }
 });
+
+Clarinet.test({
+  name: "get-split-members: returns correct members list",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const w1 = accounts.get('wallet_1')!;
+    const w2 = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(1000), types.list([
+        types.principal(w1.address), types.principal(w2.address)
+      ])], w1.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'get-split-members', [types.uint(0)], w1.address)
+    ]);
+    const result = block.receipts[0].result;
+    assertEquals(result.includes(w1.address), true);
+    assertEquals(result.includes(w2.address), true);
+  }
+});
