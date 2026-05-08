@@ -571,3 +571,22 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u0)');
   }
 });
+
+Clarinet.test({
+  name: "get-split-saved: accurately tracks total contributions",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const w1 = accounts.get('wallet_1')!;
+    const w2 = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(2000), types.list([
+        types.principal(w1.address), types.principal(w2.address)
+      ])], w1.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(700)], w1.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(300)], w2.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'get-split-saved', [types.uint(0)], w1.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u1000)');
+  }
+});
