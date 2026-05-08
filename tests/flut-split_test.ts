@@ -799,3 +799,16 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u7500)');
   }
 });
+
+Clarinet.test({
+  name: "create-split: returns incrementing split ids starting from zero",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([types.principal(creator.address)])], creator.address),
+      Tx.contractCall('flut-split', 'create-split', [types.uint(800), types.list([types.principal(creator.address)])], creator.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+    assertEquals(block.receipts[1].result, '(ok u1)');
+  }
+});
