@@ -670,3 +670,21 @@ Clarinet.test({
     assertEquals(after.receipts[0].result, 'true');
   }
 });
+
+Clarinet.test({
+  name: "get-split-member-count: returns correct number of members",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const w1 = accounts.get('wallet_1')!;
+    const w2 = accounts.get('wallet_2')!;
+    const w3 = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(1000), types.list([
+        types.principal(w1.address), types.principal(w2.address), types.principal(w3.address)
+      ])], w1.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'get-split-member-count', [types.uint(0)], w1.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u3)');
+  }
+});
