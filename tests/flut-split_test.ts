@@ -131,3 +131,19 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u2)');
   }
 });
+
+Clarinet.test({
+  name: "claim-share: non-member cannot claim on a 1-member split",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    const stranger = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([types.principal(creator.address)])], creator.address),
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(500)], creator.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'claim-share', [types.uint(0)], stranger.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u2)');
+  }
+});
