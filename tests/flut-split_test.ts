@@ -248,3 +248,21 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+Clarinet.test({
+  name: "contribute: member at index 2 can contribute",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const w1 = accounts.get('wallet_1')!;
+    const w2 = accounts.get('wallet_2')!;
+    const w3 = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(1000), types.list([
+        types.principal(w1.address), types.principal(w2.address), types.principal(w3.address)
+      ])], w1.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'contribute', [types.uint(0), types.uint(300)], w3.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
