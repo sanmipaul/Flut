@@ -103,3 +103,22 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u3)');
   }
 });
+
+Clarinet.test({
+  name: "cancel-goal: returns ERR-GOAL-CLOSED when goal is already finalized",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const contributor = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Car'), types.uint(500)], owner.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(500)], contributor.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'withdraw-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u7)');
+  }
+});
