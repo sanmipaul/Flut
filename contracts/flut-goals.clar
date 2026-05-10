@@ -139,6 +139,11 @@
     goal (ok (get saved goal))
     ERR-NOT-FOUND))
 
+(define-read-only (is-goal-cancelled (goal-id uint))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (ok (get cancelled goal))
+    ERR-NOT-FOUND))
+
 (define-read-only (get-goal-target (goal-id uint))
   (match (map-get? goals {goal-id: goal-id})
     goal (ok (get target goal))
