@@ -170,3 +170,21 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+Clarinet.test({
+  name: "contribute: returns ERR-GOAL-CANCELLED when goal has been cancelled",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const contributor = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Pool'), types.uint(1000)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(200)], contributor.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u8)');
+  }
+});
