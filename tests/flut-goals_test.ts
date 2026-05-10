@@ -546,3 +546,22 @@ Clarinet.test({
     assertEquals(block.receipts[0].result.includes('Vacation Fund'), true);
   }
 });
+
+Clarinet.test({
+  name: "get-goal-saved: saved amount is preserved after cancellation (not auto-zeroed)",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const contributor = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Pool'), types.uint(2000)], owner.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(400)], contributor.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'get-goal-saved', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u400)');
+  }
+});
