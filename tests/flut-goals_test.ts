@@ -47,3 +47,17 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u5)');
   }
 });
+
+Clarinet.test({
+  name: "cancel-goal: succeeds for goal owner on an unreached goal",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Savings'), types.uint(1000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
