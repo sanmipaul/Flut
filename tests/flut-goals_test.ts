@@ -508,3 +508,24 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok false)');
   }
 });
+
+Clarinet.test({
+  name: "get-goal-count: unchanged after goal is cancelled",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('A'), types.uint(500)], owner.address),
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('B'), types.uint(800)], owner.address)
+    ]);
+    const before = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'get-goal-count', [], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const after = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'get-goal-count', [], owner.address)
+    ]);
+    assertEquals(before.receipts[0].result, after.receipts[0].result);
+  }
+});
