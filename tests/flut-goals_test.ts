@@ -712,3 +712,14 @@ Clarinet.test({
     assertEquals(r3.receipts[0].result, '(ok u300)');
   }
 });
+
+Clarinet.test({
+  name: "is-goal-cancelled: returns ERR-NOT-FOUND for non-existent goal",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'is-goal-cancelled', [types.uint(99)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u1)');
+  }
+});
