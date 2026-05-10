@@ -360,3 +360,18 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u750)');
   }
 });
+
+Clarinet.test({
+  name: "get-contribution-amount: returns zero for address that never contributed",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const stranger = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Pool'), types.uint(1000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'get-contribution-amount', [types.uint(0), types.principal(stranger.address)], stranger.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+  }
+});
