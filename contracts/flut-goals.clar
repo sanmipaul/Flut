@@ -18,7 +18,7 @@
 (define-public (create-goal (label (string-ascii 60)) (target uint))
   (let ((id (var-get goal-counter)))
     (asserts! (> target u0) ERR-ZERO-TARGET)
-    (map-set goals {goal-id: id} {owner: tx-sender, label: label, target: target, saved: u0, reached: false, finalized: false})
+    (map-set goals {goal-id: id} {owner: tx-sender, label: label, target: target, saved: u0, reached: false, finalized: false, cancelled: false})
     (var-set goal-counter (+ id u1))
     (ok id)))
 
