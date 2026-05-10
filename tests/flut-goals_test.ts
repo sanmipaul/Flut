@@ -328,3 +328,19 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok false)');
   }
 });
+
+Clarinet.test({
+  name: "can-refund: returns false for contributor if goal is not cancelled",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const contributor = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Fund'), types.uint(1000)], owner.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(300)], contributor.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'can-refund', [types.uint(0), types.principal(contributor.address)], contributor.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
