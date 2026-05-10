@@ -723,3 +723,20 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u1)');
   }
 });
+
+Clarinet.test({
+  name: "can-withdraw-goal: returns false for owner after goal is cancelled",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Goal'), types.uint(1000)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'can-withdraw-goal', [types.uint(0), types.principal(owner.address)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
