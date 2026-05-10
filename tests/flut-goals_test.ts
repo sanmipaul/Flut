@@ -269,3 +269,25 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u1)');
   }
 });
+
+Clarinet.test({
+  name: "refund-contribution: returns ERR-NOTHING-TO-REFUND on second refund attempt",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const contributor = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Trip'), types.uint(2000)], owner.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(400)], contributor.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'refund-contribution', [types.uint(0)], contributor.address)
+    ]);
+    const second = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'refund-contribution', [types.uint(0)], contributor.address)
+    ]);
+    assertEquals(second.receipts[0].result, '(err u10)');
+  }
+});
