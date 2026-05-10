@@ -122,3 +122,20 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u7)');
   }
 });
+
+Clarinet.test({
+  name: "cancel-goal: returns ERR-GOAL-CANCELLED when already cancelled",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Test'), types.uint(1000)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u8)');
+  }
+});
