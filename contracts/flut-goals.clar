@@ -49,6 +49,18 @@
       (ok true))
     ERR-NOT-FOUND))
 
+(define-public (refund-contribution (goal-id uint))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (begin
+      (asserts! (get cancelled goal) ERR-NOT-CANCELLED)
+      (let ((amount (default-to u0 (get amount (map-get? goal-contributions {goal-id: goal-id, contributor: tx-sender}))))
+            (caller tx-sender))
+        (asserts! (> amount u0) ERR-NOTHING-TO-REFUND)
+        (try! (as-contract (stx-transfer? amount tx-sender caller)))
+        (map-set goal-contributions {goal-id: goal-id, contributor: tx-sender} {amount: u0})
+        (ok amount)))
+    ERR-NOT-FOUND))
+
 (define-public (withdraw-goal (goal-id uint))
   (match (map-get? goals {goal-id: goal-id})
     goal (begin
