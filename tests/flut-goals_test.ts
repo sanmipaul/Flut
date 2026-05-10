@@ -413,3 +413,28 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u1234)');
   }
 });
+
+Clarinet.test({
+  name: "refund-contribution: multiple contributors can each refund independently after cancel",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const c1 = accounts.get('wallet_2')!;
+    const c2 = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Fund'), types.uint(5000)], owner.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(800)], c1.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(600)], c2.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const r1 = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'refund-contribution', [types.uint(0)], c1.address)
+    ]);
+    const r2 = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'refund-contribution', [types.uint(0)], c2.address)
+    ]);
+    assertEquals(r1.receipts[0].result, '(ok u800)');
+    assertEquals(r2.receipts[0].result, '(ok u600)');
+  }
+});
