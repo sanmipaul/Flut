@@ -474,3 +474,20 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok false)');
   }
 });
+
+Clarinet.test({
+  name: "can-contribute: returns false after goal is cancelled",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Drive'), types.uint(1000)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'can-contribute', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
