@@ -529,3 +529,20 @@ Clarinet.test({
     assertEquals(before.receipts[0].result, after.receipts[0].result);
   }
 });
+
+Clarinet.test({
+  name: "get-goal-label: goal label is preserved after cancellation",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Vacation Fund'), types.uint(1000)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'get-goal-label', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result.includes('Vacation Fund'), true);
+  }
+});
