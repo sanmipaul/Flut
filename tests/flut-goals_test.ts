@@ -565,3 +565,25 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u400)');
   }
 });
+
+Clarinet.test({
+  name: "get-contribution-amount: zeroed to u0 after contributor claims refund",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const contributor = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Pool'), types.uint(2000)], owner.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(500)], contributor.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'refund-contribution', [types.uint(0)], contributor.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'get-contribution-amount', [types.uint(0), types.principal(contributor.address)], contributor.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+  }
+});
