@@ -27,6 +27,7 @@
     goal (begin
       (asserts! (> amount u0) ERR-ZERO-AMOUNT)
       (asserts! (not (get finalized goal)) ERR-GOAL-CLOSED)
+      (asserts! (not (get cancelled goal)) ERR-GOAL-CANCELLED)
       (asserts! (not (get reached goal)) ERR-ALREADY-REACHED)
       (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
       (let ((new-saved (+ (get saved goal) amount))
