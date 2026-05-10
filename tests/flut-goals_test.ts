@@ -456,3 +456,21 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u500)');
   }
 });
+
+Clarinet.test({
+  name: "cancel-goal: cancellation of one goal does not affect other goals",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Goal A'), types.uint(1000)], owner.address),
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Goal B'), types.uint(2000)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'is-goal-cancelled', [types.uint(1)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
