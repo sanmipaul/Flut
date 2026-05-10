@@ -1,7 +1,9 @@
 ;; Flut Split - Shared Vault for Group Savings
-;; A group of up to 5 members each contribute; any member can trigger payout once target is hit.
+;; Each member independently calls claim-share to withdraw their exact contribution once the group target is met.
+;; Replaces the broken single-recipient payout that sent all funds to one address chosen by the creator.
 (define-map splits {split-id: uint} {creator: principal, target: uint, saved: uint, paid-out: bool, members: (list 5 principal)})
 (define-map contributions {split-id: uint, member: principal} {amount: uint})
+(define-map claimed {split-id: uint, member: principal} {done: bool})
 (define-data-var split-counter uint u0)
 
 (define-constant ERR-NOT-FOUND (err u1))
@@ -9,16 +11,26 @@
 (define-constant ERR-PAID-OUT (err u3))
 (define-constant ERR-TARGET-NOT-MET (err u4))
 (define-constant ERR-UNAUTHORIZED (err u5))
+(define-constant ERR-ZERO-AMOUNT (err u6))
+(define-constant ERR-ZERO-TARGET (err u7))
+(define-constant ERR-ALREADY-CLAIMED (err u8))
+(define-constant ERR-NOTHING-TO-CLAIM (err u9))
+(define-constant ERR-SPLIT-CLOSED (err u10))
+(define-constant ERR-EMPTY-MEMBERS (err u11))
+(define-constant ERR-EMPTY-MEMBERS (err u11))
 
 (define-private (is-member (user principal) (members (list 5 principal)))
-  (or (is-eq user (unwrap-panic (element-at members u0)))
-      (is-eq user (default-to user (element-at members u1)))
-      (is-eq user (default-to user (element-at members u2)))
-      (is-eq user (default-to user (element-at members u3)))
-      (is-eq user (default-to user (element-at members u4)))))
+  (or
+    (match (element-at members u0) slot (is-eq user slot) false)
+    (match (element-at members u1) slot (is-eq user slot) false)
+    (match (element-at members u2) slot (is-eq user slot) false)
+    (match (element-at members u3) slot (is-eq user slot) false)
+    (match (element-at members u4) slot (is-eq user slot) false)))
 
 (define-public (create-split (target uint) (members (list 5 principal)))
   (let ((id (var-get split-counter)))
+    (asserts! (> target u0) ERR-ZERO-TARGET)
+    (asserts! (is-some (element-at members u0)) ERR-EMPTY-MEMBERS)
     (map-set splits {split-id: id} {creator: tx-sender, target: target, saved: u0, paid-out: false, members: members})
     (var-set split-counter (+ id u1))
     (ok id)))
@@ -26,6 +38,7 @@
 (define-public (contribute (split-id uint) (amount uint))
   (match (map-get? splits {split-id: split-id})
     split (begin
+      (asserts! (> amount u0) ERR-ZERO-AMOUNT)
       (asserts! (is-member tx-sender (get members split)) ERR-NOT-MEMBER)
       (asserts! (not (get paid-out split)) ERR-PAID-OUT)
       (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
@@ -35,15 +48,18 @@
       (ok true))
     ERR-NOT-FOUND))
 
-(define-public (payout (split-id uint) (recipient principal))
+(define-public (claim-share (split-id uint))
   (match (map-get? splits {split-id: split-id})
     split (begin
-      (asserts! (is-eq (get creator split) tx-sender) ERR-UNAUTHORIZED)
-      (asserts! (not (get paid-out split)) ERR-PAID-OUT)
+      (asserts! (is-member tx-sender (get members split)) ERR-NOT-MEMBER)
       (asserts! (>= (get saved split) (get target split)) ERR-TARGET-NOT-MET)
-      (try! (as-contract (stx-transfer? (get saved split) tx-sender recipient)))
-      (map-set splits {split-id: split-id} (merge split {paid-out: true}))
-      (ok true))
+      (asserts! (not (default-to false (get done (map-get? claimed {split-id: split-id, member: tx-sender})))) ERR-ALREADY-CLAIMED)
+      (let ((share (default-to u0 (get amount (map-get? contributions {split-id: split-id, member: tx-sender}))))
+            (caller tx-sender))
+        (asserts! (> share u0) ERR-NOTHING-TO-CLAIM)
+        (try! (as-contract (stx-transfer? share tx-sender caller)))
+        (map-set claimed {split-id: split-id, member: tx-sender} {done: true})
+        (ok share)))
     ERR-NOT-FOUND))
 
 (define-read-only (get-split (split-id uint))
@@ -51,3 +67,85 @@
 
 (define-read-only (get-contribution (split-id uint) (member principal))
   (map-get? contributions {split-id: split-id, member: member}))
+
+(define-read-only (has-claimed (split-id uint) (member principal))
+  (default-to false (get done (map-get? claimed {split-id: split-id, member: member}))))
+
+(define-read-only (get-split-count)
+  (ok (var-get split-counter)))
+
+(define-read-only (split-exists (split-id uint))
+  (is-some (map-get? splits {split-id: split-id})))
+
+(define-read-only (is-target-met (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (>= (get saved split) (get target split)))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-split-saved (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (get saved split))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-split-target (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (get target split))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-split-remaining (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (if (>= (get saved split) (get target split))
+                  u0
+                  (- (get target split) (get saved split))))
+    ERR-NOT-FOUND))
+
+(define-read-only (can-claim-share (split-id uint) (caller principal))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (and
+      (is-member caller (get members split))
+      (>= (get saved split) (get target split))
+      (not (default-to false (get done (map-get? claimed {split-id: split-id, member: caller}))))
+      (> (default-to u0 (get amount (map-get? contributions {split-id: split-id, member: caller}))) u0)))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-split-creator (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (get creator split))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-member-share-amount (split-id uint) (member principal))
+  (ok (default-to u0 (get amount (map-get? contributions {split-id: split-id, member: member})))))
+
+(define-read-only (get-split-members (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (get members split))
+    ERR-NOT-FOUND))
+
+(define-read-only (is-split-member (split-id uint) (user principal))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (is-member user (get members split)))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-member-at-index (split-id uint) (index uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (element-at (get members split) index))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-split-member-count (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (len (get members split)))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-split-summary (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok {
+      creator: (get creator split),
+      target: (get target split),
+      saved: (get saved split),
+      paid-out: (get paid-out split),
+      target-met: (>= (get saved split) (get target split)),
+      remaining: (if (>= (get saved split) (get target split))
+                     u0
+                     (- (get target split) (get saved split)))
+    })
+    ERR-NOT-FOUND))

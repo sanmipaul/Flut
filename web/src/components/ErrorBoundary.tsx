@@ -92,9 +92,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       const { maxRetries = 3 } = this.props;
 
       return (
-        <div className={`error-boundary ${this.props.className || ''}`}>
+        <div 
+          className={`error-boundary ${this.props.className || ''}`}
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
           <div className="error-boundary-content">
-            <div className="error-icon">
+            <div className="error-icon" aria-hidden="true">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="12" y1="8" x2="12" y2="12"/>
@@ -102,15 +107,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               </svg>
             </div>
             
-            <h2 className="error-title">Something went wrong</h2>
-            <p className="error-message">
+            <h2 id="error-title" className="error-title">Something went wrong</h2>
+            <p id="error-message" className="error-message">
               We're sorry, but something unexpected happened. Please try again.
             </p>
 
             {error && (
               <details className="error-details">
                 <summary className="error-summary">Error Details</summary>
-                <pre className="error-stack">
+                <pre className="error-stack" aria-label="Technical error details">
                   {error.toString()}
                   {errorInfo?.componentStack}
                 </pre>
@@ -121,10 +126,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               {retryCount < maxRetries && (
                 <button
                   onClick={this.handleRetry}
-                  className="error-action-button retry"
+                  className="error-action-button retry focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   type="button"
+                  aria-label={`Try again to recover from error (${maxRetries - retryCount} attempts remaining)`}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="23 4 23 10 17 10"/>
                     <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
                   </svg>
@@ -134,10 +140,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               
               <button
                 onClick={this.handleReset}
-                className="error-action-button reset"
+                className="error-action-button reset focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 type="button"
+                aria-label="Reset application state and return to home"
               >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"/>
                     <line x1="12" y1="8" x2="12" y2="12"/>
                     <line x1="12" y1="16" x2="12.01" y2="16"/>

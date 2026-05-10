@@ -78,14 +78,14 @@ const VaultImportModal: React.FC<VaultImportModalProps> = ({
             <>
               <div
                 className={`drop-zone ${isDragOver ? 'drop-zone--active' : ''}`}
-                role="button"
-                tabIndex={0}
+                role="region"
                 aria-label="Drop zone: drag and drop a backup file or click to select"
                 onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
                 onDragLeave={() => setIsDragOver(false)}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
+                tabIndex={0}
               >
                 <span className="drop-zone__icon" aria-hidden="true">📂</span>
                 <p className="drop-zone__label">
@@ -104,13 +104,13 @@ const VaultImportModal: React.FC<VaultImportModalProps> = ({
               </div>
 
               {importState === 'error' && (
-                <div className="import-modal__error" role="alert">
+                <div className="import-modal__error" role="alert" aria-live="assertive">
                   <strong>Import failed:</strong> {importError}
                 </div>
               )}
             </>
           ) : importState === 'reading' || importState === 'validating' ? (
-            <div className="import-modal__loading" aria-live="polite">
+            <div className="import-modal__loading" role="status" aria-live="polite" aria-busy="true">
               <span className="import-modal__spinner" aria-hidden="true">⏳</span>
               <p>{importState === 'reading' ? 'Reading file…' : 'Validating backup…'}</p>
             </div>
@@ -149,11 +149,19 @@ const VaultImportModal: React.FC<VaultImportModalProps> = ({
         </div>
 
         <div className="modal-actions">
-          <button className="btn-secondary" onClick={handleClose}>
+          <button 
+            className="btn-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" 
+            onClick={handleClose}
+            aria-label={importState === 'success' ? 'Close import modal and complete import' : 'Cancel import'}
+          >
             {importState === 'success' ? 'Done' : 'Cancel'}
           </button>
           {importState === 'success' && (
-            <button className="btn-primary" onClick={handleConfirm}>
+            <button 
+              className="btn-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
+              onClick={handleConfirm}
+              aria-label="Apply vault settings and close modal"
+            >
               Apply &amp; Close
             </button>
           )}

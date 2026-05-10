@@ -62,6 +62,8 @@ export const VaultCard: React.FC<VaultCardProps> = ({
         ${isMobile ? 'border border-gray-200' : ''}
         ${isLoading ? 'opacity-50 pointer-events-none' : ''}
       `}
+      role="article"
+      aria-label={`${vaultName}, ${statusDisplay[status as keyof typeof statusDisplay]}`}
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-3">
@@ -69,7 +71,7 @@ export const VaultCard: React.FC<VaultCardProps> = ({
           <h3 className={`font-semibold ${isMobile ? 'text-lg' : 'text-xl'} text-gray-900`}>
             {vaultName}
           </h3>
-          <p className={`text-gray-600 ${isMobile ? 'text-xs' : 'text-sm'} truncate`}>
+          <p className={`text-gray-600 ${isMobile ? 'text-xs' : 'text-sm'} truncate`} id={`vault-id-${vaultId}`}>
             ID: {vaultId}
           </p>
         </div>
@@ -94,6 +96,8 @@ export const VaultCard: React.FC<VaultCardProps> = ({
         <p className={`text-gray-600 ${isMobile ? 'text-xs' : 'text-sm'}`}>Amount</p>
         <p
           className={`font-bold text-blue-600 ${isMobile ? 'text-lg' : 'text-2xl'}`}
+          role="heading"
+          aria-level={2}
         >
           {(amount / 1000000).toFixed(2)} STX
         </p>
@@ -103,14 +107,14 @@ export const VaultCard: React.FC<VaultCardProps> = ({
       <div className={`mb-4 ${isMobile ? 'text-sm' : ''}`}>
         <p className={`text-gray-600 ${isMobile ? 'text-xs' : 'text-sm'}`}>Unlock Date</p>
         <p className={`text-gray-900 font-medium ${isMobile ? 'text-sm' : ''}`}>
-          {new Date(unlockDate).toLocaleDateString()}
+          {new Date(unlockDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
       </div>
 
       {/* Owner Display */}
       <div className={`mb-4 ${isMobile ? 'text-sm' : ''}`}>
         <p className={`text-gray-600 ${isMobile ? 'text-xs' : 'text-sm'}`}>Owner</p>
-        <p className={`text-gray-900 font-mono truncate ${isMobile ? 'text-xs' : 'text-sm'}`}>
+        <p className={`text-gray-900 font-mono truncate ${isMobile ? 'text-xs' : 'text-sm'}`} title={owner}>
           {owner.substring(0, 10)}...{owner.substring(owner.length - 8)}
         </p>
       </div>
@@ -120,6 +124,7 @@ export const VaultCard: React.FC<VaultCardProps> = ({
         <button
           onClick={onViewDetails}
           disabled={isLoading}
+          aria-label={`View details for ${vaultName}`}
           className={`
             flex-1
             px-3 py-2
@@ -130,6 +135,10 @@ export const VaultCard: React.FC<VaultCardProps> = ({
             disabled:bg-gray-400
             disabled:cursor-not-allowed
             transition
+            focus:outline-none
+            focus:ring-2
+            focus:ring-offset-2
+            focus:ring-blue-700
             ${isMobile ? 'text-sm' : ''}
           `}
         >
@@ -139,6 +148,7 @@ export const VaultCard: React.FC<VaultCardProps> = ({
           <button
             onClick={onWithdraw}
             disabled={isLoading}
+            aria-label={`Withdraw funds from ${vaultName}`}
             className={`
               flex-1
               px-3 py-2
@@ -149,6 +159,10 @@ export const VaultCard: React.FC<VaultCardProps> = ({
               disabled:bg-gray-400
               disabled:cursor-not-allowed
               transition
+              focus:outline-none
+              focus:ring-2
+              focus:ring-offset-2
+              focus:ring-green-700
               ${isMobile ? 'text-sm' : ''}
             `}
           >

@@ -95,4 +95,37 @@ describe('StxAmountInput', () => {
     fireEvent.change(input, { target: { value: 'bad' } });
     expect(input.getAttribute('aria-invalid')).toBe('true');
   });
+
+  it('includes aria-live region for screen reader announcements', () => {
+    render(<Controlled />);
+    const srRegion = screen.getByRole('status', { hidden: true });
+    expect(srRegion).toBeDefined();
+    expect(srRegion).toHaveAttribute('aria-live', 'polite');
+    expect(srRegion).toHaveAttribute('aria-atomic', 'true');
+  });
+
+  it('has sr-only class for visually hidden announcement region', () => {
+    render(<Controlled />);
+    const srRegion = screen.getByRole('status', { hidden: true });
+    expect(srRegion).toHaveClass('sr-only');
+  });
+
+  it('announces validation error when input is invalid', () => {
+    render(<Controlled />);
+    const input = screen.getByRole('textbox');
+    fireEvent.change(input, { target: { value: 'invalid' } });
+    // Need to trigger touch for validation to run
+    fireEvent.blur(input);
+    const srRegion = screen.getByRole('status', { hidden: true });
+    // After blur, error state is set
+    expect(screen.getByRole('alert')).toBeDefined();
+  });
+
+  it('sets aria-describedby when there is an error', () => {
+    render(<Controlled />);
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'bad' } });
+    expect(input.getAttribute('aria-describedby')).toBe('test-input-error');
+  });
 });
+

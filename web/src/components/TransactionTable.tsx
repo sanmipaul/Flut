@@ -18,8 +18,16 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'type'>('date');
   const [sortDesc, setSortDesc] = useState(true);
 
+  const sortValue = (value: number | string, other: number | string) => {
+    if (typeof value === 'string' && typeof other === 'string') {
+      return value.localeCompare(other);
+    }
+    return (value as number) - (other as number);
+  };
+
   const sorted = [...transactions].sort((a, b) => {
-    let aVal: any, bVal: any;
+    let aVal: number | string = 0;
+    let bVal: number | string = 0;
     switch (sortBy) {
       case 'date':
         aVal = a.timestamp;
@@ -34,7 +42,8 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
         bVal = b.type;
         break;
     }
-    return sortDesc ? bVal - aVal : aVal - bVal;
+    const comparison = sortValue(aVal, bVal);
+    return sortDesc ? -comparison : comparison;
   });
 
   const getStatusColor = (status: string) => {
@@ -61,6 +70,14 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
           <div
             key={tx.id}
             onClick={() => onRowClick?.(tx)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onRowClick?.(tx);
+              }
+            }}
+            tabIndex={0}
+            aria-label={`View transaction ${tx.txId} details`}
             className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition cursor-pointer"
           >
             <div className="flex justify-between items-start mb-2">
@@ -82,16 +99,34 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <table className="w-full">
+      <table className="w-full" role="table" aria-label="Vault transaction history">
         <thead className="bg-gray-100 border-b">
           <tr>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200" onClick={() => { setSortBy('type'); setSortDesc(!sortDesc); }}>
+            <th
+              className="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200"
+              onClick={() => { setSortBy('type'); setSortDesc(!sortDesc); }}
+              tabIndex={0}
+              aria-sort={sortBy === 'type' ? (sortDesc ? 'descending' : 'ascending') : 'none'}
+              aria-label="Sort transactions by type"
+            >
               Type
             </th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200" onClick={() => { setSortBy('date'); setSortDesc(!sortDesc); }}>
+            <th
+              className="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200"
+              onClick={() => { setSortBy('date'); setSortDesc(!sortDesc); }}
+              tabIndex={0}
+              aria-sort={sortBy === 'date' ? (sortDesc ? 'descending' : 'ascending') : 'none'}
+              aria-label="Sort transactions by date"
+            >
               Date
             </th>
-            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200" onClick={() => { setSortBy('amount'); setSortDesc(!sortDesc); }}>
+            <th
+              className="px-6 py-3 text-right text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200"
+              onClick={() => { setSortBy('amount'); setSortDesc(!sortDesc); }}
+              tabIndex={0}
+              aria-sort={sortBy === 'amount' ? (sortDesc ? 'descending' : 'ascending') : 'none'}
+              aria-label="Sort transactions by amount"
+            >
               Amount
             </th>
             <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>

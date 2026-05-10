@@ -22,6 +22,7 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
   const [stackingPool, setStackingPool] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [announcement, setAnnouncement] = useState<string>('');
 
   const handleBeneficiaryChange = (value: string, validation: AddressValidationResult) => {
     setBeneficiaryAddress(value);
@@ -40,24 +41,28 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
 
       if (!amount || isNaN(amountNum) || amountNum <= 0) {
         setError('Please enter a valid amount');
+        setAnnouncement('Error: Please enter a valid amount');
         setLoading(false);
         return;
       }
 
       if (!lockDuration || durationNum <= 0) {
         setError('Please enter a valid lock duration in blocks');
+        setAnnouncement('Error: Please enter a valid lock duration');
         setLoading(false);
         return;
       }
 
       if (hasBeneficiary && !beneficiaryAddress.trim()) {
         setError('Please enter a beneficiary address');
+        setAnnouncement('Error: Please enter a beneficiary address');
         setLoading(false);
         return;
       }
 
       if (hasBeneficiary && beneficiaryValidation && !beneficiaryValidation.isValid) {
         setError('Beneficiary address is not a valid Stacks address');
+        setAnnouncement('Error: Beneficiary address is not valid');
         setLoading(false);
         return;
       }
@@ -65,6 +70,8 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
       const beneficiary = hasBeneficiary ? beneficiaryValidation?.normalised || beneficiaryAddress.trim() : undefined;
 
       await onCreateVault(amountNum, durationNum, beneficiary, enableStacking, pool);
+
+      setAnnouncement('Vault created successfully');
 
       // Reset form
       setAmount('');
@@ -76,7 +83,9 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
       setStackingPool('');
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create vault');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create vault';
+      setError(errorMessage);
+      setAnnouncement(`Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -84,98 +93,109 @@ export const CreateVaultModal: React.FC<CreateVaultModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Create New Vault</h2>
+    <>
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </div>
+      <div className="modal-overlay">
+        <div className="modal-content">
+          <h2>Create New Vault</h2>
 
-        <div className="form-group">
-          <label htmlFor="vault-amount">Amount (STX)</label>
-          <StxAmountInput
-            id="vault-amount"
-            value={amount}
-            onChange={setAmount}
-            onParsed={setParsedAmount}
-            min={0.000001}
-            disabled={loading}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="lockDuration">Lock Duration (Blocks)</label>
-          <input
-            id="lockDuration"
-            type="number"
-            value={lockDuration}
-            onChange={(e) => setLockDuration(e.target.value)}
-            placeholder="Enter lock duration in blocks"
-            disabled={loading}
-            min="1"
-          />
-        </div>
-
-        <div className="form-group checkbox">
-          <input
-            id="hasBeneficiary"
-            type="checkbox"
-            checked={hasBeneficiary}
-            onChange={(e) => {
-              setHasBeneficiary(e.target.checked);
-              if (!e.target.checked) {
-                setBeneficiaryAddress('');
-                setBeneficiaryValidation(null);
-              }
-            }}
-            disabled={loading}
-          />
-          <label htmlFor="hasBeneficiary">Add a Beneficiary Address?</label>
-        </div>
-
-        {hasBeneficiary && (
           <div className="form-group">
-            <label htmlFor="beneficiary">Beneficiary Address</label>
-            <div className="input-with-copy">
-              <input
-                id="beneficiary"
-                type="text"
-                value={beneficiaryAddress}
-                onChange={(e) => setBeneficiaryAddress(e.target.value)}
-                placeholder="SP... or ST..."
-                disabled={loading}
-              />
-              {beneficiaryAddress.trim() && (
-                <CopyButton
-                  text={beneficiaryAddress.trim()}
-                  label="Copy beneficiary address"
-                  size="sm"
-                />
-              )}
-            </div>
-            <small>The address that will receive funds when the vault unlocks</small>
+            <label htmlFor="vault-amount">Amount (STX)</label>
+            <StxAmountInput
+              id="vault-amount"
+              value={amount}
+              onChange={setAmount}
+              onParsed={setParsedAmount}
+              min={0.000001}
+              disabled={loading}
+            />
           </div>
-        )}
 
-        {error && <div className="error-message">{error}</div>}
+          <div className="form-group">
+            <label htmlFor="lockDuration">Lock Duration (Blocks)</label>
+            <input
+              id="lockDuration"
+              type="number"
+              value={lockDuration}
+              onChange={(e) => setLockDuration(e.target.value)}
+              placeholder="Enter lock duration in blocks"
+              disabled={loading}
+              min="1"
+            />
+          </div>
 
-        <div className="modal-actions">
-          <button
-            className="btn-secondary"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Cancel
-          </button>
-          <button
-            className="btn-primary"
-            onClick={handleCreateVault}
-            disabled={loading || (hasBeneficiary && !isBeneficiaryValid)}
-          title={hasBeneficiary && !isBeneficiaryValid ? 'Enter a valid Stacks address before creating the vault' : undefined}
-          >
-            {loading ? 'Creating...' : 'Create Vault'}
-          </button>
+          <div className="form-group checkbox">
+            <input
+              id="hasBeneficiary"
+              type="checkbox"
+              checked={hasBeneficiary}
+              onChange={(e) => {
+                setHasBeneficiary(e.target.checked);
+                if (!e.target.checked) {
+                  setBeneficiaryAddress('');
+                  setBeneficiaryValidation(null);
+                }
+              }}
+              disabled={loading}
+            />
+            <label htmlFor="hasBeneficiary">Add a Beneficiary Address?</label>
+          </div>
+
+          {hasBeneficiary && (
+            <div className="form-group">
+              <label htmlFor="beneficiary">Beneficiary Address</label>
+              <div className="input-with-copy">
+                <input
+                  id="beneficiary"
+                  type="text"
+                  value={beneficiaryAddress}
+                  onChange={(e) => setBeneficiaryAddress(e.target.value)}
+                  placeholder="SP... or ST..."
+                  disabled={loading}
+                />
+                {beneficiaryAddress.trim() && (
+                  <CopyButton
+                    text={beneficiaryAddress.trim()}
+                    label="Copy beneficiary address"
+                    size="sm"
+                  />
+                )}
+              </div>
+              <small>The address that will receive funds when the vault unlocks</small>
+            </div>
+          )}
+
+          {error && <div className="error-message">{error}</div>}
+
+          <div className="modal-actions">
+            <button
+              className="btn-secondary"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn-primary"
+              onClick={handleCreateVault}
+              disabled={loading || (hasBeneficiary && !isBeneficiaryValid)}
+              title={hasBeneficiary && !isBeneficiaryValid ? 'Enter a valid Stacks address before creating the vault' : undefined}
+            >
+              {loading ? 'Creating...' : 'Create Vault'}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

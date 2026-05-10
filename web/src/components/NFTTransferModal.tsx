@@ -56,19 +56,41 @@ const NFTTransferModal: React.FC<NFTTransferModalProps> = ({
     return null;
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content nft-transfer-modal">
+    <div 
+      className="modal-overlay"
+      role="presentation"
+      onClick={onCancel}
+    >
+      <div 
+        className="modal-content nft-transfer-modal"
+        role="dialog"
+        aria-labelledby="nft-modal-title"
+        aria-describedby="nft-modal-description"
+        onKeyDown={handleKeyDown}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
-          <h3>Transfer NFT Receipt</h3>
-          <button className="modal-close" onClick={onCancel} disabled={loading}>
+          <h3 id="nft-modal-title">Transfer NFT Receipt</h3>
+          <button 
+            className="modal-close focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded" 
+            onClick={onCancel} 
+            disabled={loading}
+            aria-label="Close NFT transfer modal"
+          >
             ✕
           </button>
         </div>
 
         <div className="modal-body">
           <div className="info-section">
-            <p className="modal-description">
+            <p id="nft-modal-description" className="modal-description">
               Transfer your vault NFT receipt to another address. The receipt represents ownership of the vault.
             </p>
           </div>
@@ -76,12 +98,14 @@ const NFTTransferModal: React.FC<NFTTransferModalProps> = ({
           <div className="transfer-details">
             <div className="detail-item">
               <label>NFT Token ID:</label>
-              <code className="token-id">{tokenId}</code>
+              <code className="token-id" aria-label={`Token ID: ${tokenId}`}>{tokenId}</code>
             </div>
 
             <div className="detail-item">
               <label>Current Owner:</label>
-              <code className="address">{currentOwner.slice(0, 10)}...{currentOwner.slice(-8)}</code>
+              <code className="address" title={currentOwner}>
+                {currentOwner.slice(0, 10)}...{currentOwner.slice(-8)}
+              </code>
             </div>
           </div>
 
@@ -97,17 +121,25 @@ const NFTTransferModal: React.FC<NFTTransferModalProps> = ({
               }}
               placeholder="SP... or ST..."
               disabled={loading}
-              className="form-input"
+              className="form-input focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              required
+              aria-required="true"
+              aria-invalid={!!error}
+              aria-describedby={error ? 'recipient-error' : 'recipient-hint'}
             />
-            <small className="input-hint">
+            <small id="recipient-hint" className="input-hint">
               Enter a valid Stacks address starting with SP or ST
             </small>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div id="recipient-error" className="error-message" role="alert">
+              {error}
+            </div>
+          )}
 
-          <div className="warning-section">
-            <div className="warning-icon">⚠️</div>
+          <div className="warning-section" role="note">
+            <div className="warning-icon" aria-hidden="true">⚠️</div>
             <div className="warning-content">
               <strong>Important:</strong> Once transferred, the NFT receipt will belong to the new address. You will no longer be able to withdraw from the vault.
             </div>
@@ -116,16 +148,19 @@ const NFTTransferModal: React.FC<NFTTransferModalProps> = ({
 
         <div className="modal-footer">
           <button
-            className="btn-secondary"
+            className="btn-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             onClick={onCancel}
             disabled={loading}
+            aria-label="Cancel NFT transfer"
           >
             Cancel
           </button>
           <button
-            className="btn-primary"
+            className="btn-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700"
             onClick={handleTransfer}
             disabled={loading || !recipient.trim()}
+            aria-label={loading ? 'Transferring NFT' : 'Transfer NFT receipt to recipient'}
+            aria-busy={loading}
           >
             {loading ? 'Transferring...' : 'Transfer NFT'}
           </button>

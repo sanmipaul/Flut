@@ -17,6 +17,7 @@ interface WalletContextValue extends WalletState {
   disconnect: () => void;
   refreshBalance: () => void;
   truncatedAddress: string | null;
+  isReconnecting: boolean;
 }
 
 const WalletContext = createContext<WalletContextValue | null>(null);
@@ -30,6 +31,16 @@ interface BalanceResult {
 }
 
 const BALANCE_FETCH_TIMEOUT_MS = 10_000;
+const BALANCE_POLL_MS = 30_000;
+const SESSION_CHECK_MS = 60_000;
+
+function isSessionValid(): boolean {
+  try {
+    return userSession.isUserSignedIn();
+  } catch {
+    return false;
+  }
+}
 
 async function fetchStxBalance(address: string): Promise<BalanceResult> {
   const controller = new AbortController();
@@ -56,8 +67,6 @@ async function fetchStxBalance(address: string): Promise<BalanceResult> {
   }
 }
 
-const BALANCE_POLL_MS = 30_000;
-
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<WalletState>({
     connected: false,
@@ -65,17 +74,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     stxBalance: null,
     loading: false,
     balanceFetchError: false,
+    sessionExpired: false,
+    lastConnectedAt: null,
   });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  function startPolling(address: string) {
-    if (pollRef.current) clearInterval(pollRef.current);
-    pollRef.current = setInterval(() => {
-      fetchStxBalance(address).then(({ balance, error }) =>
-        setState((s) => ({ ...s, stxBalance: balance, balanceFetchError: error })),
-      );
-    }, BALANCE_POLL_MS);
-  }
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  const mountedRef = useRef(true);
+  const sessionCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   function stopPolling() {
     if (pollRef.current) {
@@ -84,21 +89,72 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  function stopSessionCheck() {
+    if (sessionCheckRef.current) {
+      clearInterval(sessionCheckRef.current);
+      sessionCheckRef.current = null;
+    }
+  }
+
+  function handleSessionExpiry() {
+    console.warn('[WalletContext] Session expired — disconnecting');
+    stopPolling();
+    stopSessionCheck();
+    userSession.signUserOut();
+    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false, sessionExpired: true, lastConnectedAt: null });
+  }
+
+  function startPolling(address: string) {
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(() => {
+      if (!isSessionValid()) return;
+      fetchStxBalance(address).then(({ balance, error }) =>
+        setState((s) => ({ ...s, stxBalance: balance, balanceFetchError: error })),
+      );
+    }, BALANCE_POLL_MS);
+  }
+
+  function startSessionCheck() {
+    if (sessionCheckRef.current) clearInterval(sessionCheckRef.current);
+    sessionCheckRef.current = setInterval(() => {
+      if (!isSessionValid()) {
+        handleSessionExpiry();
+      }
+    }, SESSION_CHECK_MS);
+  }
+
   // Rehydrate session on mount
   useEffect(() => {
-    if (userSession.isUserSignedIn()) {
+    if (isSessionValid()) {
       const userData = userSession.loadUserData();
       const address =
         NETWORK.constructor.name === 'StacksMainnet'
           ? userData.profile.stxAddress.mainnet
           : userData.profile.stxAddress.testnet;
-      setState((s) => ({ ...s, connected: true, address, loading: true }));
+      setState((s) => ({ ...s, connected: true, address, loading: true, lastConnectedAt: Date.now() }));
       fetchStxBalance(address).then(({ balance, error }) => {
         setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error }));
         startPolling(address);
+        startSessionCheck();
       });
     }
-    return () => stopPolling();
+    return () => {
+      stopPolling();
+      stopSessionCheck();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
+  // Re-validate session when the tab becomes visible again
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible' && !isSessionValid()) {
+        handleSessionExpiry();
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -113,25 +169,28 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           NETWORK.constructor.name === 'StacksMainnet'
             ? userData.profile.stxAddress.mainnet
             : userData.profile.stxAddress.testnet;
-        setState((s) => ({ ...s, connected: true, address, loading: true }));
+        setState((s) => ({ ...s, connected: true, address, loading: true, sessionExpired: false, lastConnectedAt: Date.now() }));
         fetchStxBalance(address).then(({ balance, error }) => {
           setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error }));
           startPolling(address);
+          startSessionCheck();
         });
       },
       onCancel: () => {},
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const disconnect = useCallback(() => {
     stopPolling();
+    stopSessionCheck();
     userSession.signUserOut();
-    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false });
+    setState({ connected: false, address: null, stxBalance: null, loading: false, balanceFetchError: false, sessionExpired: true, lastConnectedAt: null });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const refreshBalance = useCallback(() => {
-    if (!state.address) return;
+    if (!state.address || !state.connected) return;
     setState((s) => ({ ...s, loading: true }));
     fetchStxBalance(state.address).then(({ balance, error }) =>
       setState((s) => ({ ...s, stxBalance: balance, loading: false, balanceFetchError: error })),
@@ -141,7 +200,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const truncatedAddress = state.address ? truncateAddress(state.address) : null;
 
   return (
-    <WalletContext.Provider value={{ ...state, connect, disconnect, refreshBalance, truncatedAddress }}>
+    <WalletContext.Provider value={{ ...state, connect, disconnect, refreshBalance, truncatedAddress, isReconnecting }}>
       {children}
     </WalletContext.Provider>
   );

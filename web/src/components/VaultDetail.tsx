@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import CopyButton from './CopyButton';
+import EmergencyWithdrawalButton from './EmergencyWithdrawalButton';
 import PenaltyWarningModal from './PenaltyWarningModal';
+import DepositModal from './DepositModal';
 import VaultCountdown from './VaultCountdown';
 import StackingYieldCard from './StackingYieldCard';
+import { AddressValidationResult, areAddressesOnSameNetwork } from '../utils/StacksAddressUtils';
+import { formatPenaltyRate } from '../utils/EmergencyWithdrawalUtils';
 
 interface Vault {
   vaultId: number;
@@ -22,6 +27,7 @@ interface VaultDetailProps {
   onSetBeneficiary: (vaultId: number, beneficiary: string) => Promise<void>;
   onFetchVault: (vaultId: number) => Promise<Vault>;
   onEmergencyWithdraw?: (vaultId: number) => Promise<void>;
+  onDeposit?: (vaultId: number, amount: number) => Promise<void>;
   penaltyRate?: number;
   /** Called when the user changes any vault setting, so the parent can refresh its sidebar */
   onSettingsChange?: () => void;
@@ -33,6 +39,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   onSetBeneficiary,
   onFetchVault,
   onEmergencyWithdraw,
+  onDeposit,
   penaltyRate = 10,
   onSettingsChange,
 }) => {
@@ -44,6 +51,7 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
   const [showBeneficiaryForm, setShowBeneficiaryForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [showPenaltyModal, setShowPenaltyModal] = useState<boolean>(false);
+  const [showDepositModal, setShowDepositModal] = useState<boolean>(false);
   const [copyAnnouncement, setCopyAnnouncement] = useState<string>('');
 
   const handleAddressCopied = (text: string, success: boolean) => {
@@ -96,6 +104,21 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
     }
   };
 
+  const handleDeposit = async (id: number, amount: number) => {
+    try {
+      setSubmitting(true);
+      if (onDeposit) {
+        await onDeposit(id, amount);
+      }
+      const updated = await onFetchVault(vaultId);
+      setVault(updated);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Deposit failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSetBeneficiary = async () => {
     if (!vault || !newBeneficiary.trim()) return;
     if (beneficiaryValidation && !beneficiaryValidation.isValid) {
@@ -130,15 +153,15 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
     !networkMismatch;
 
   if (loading) {
-    return <div className="vault-detail loading">Loading vault details...</div>;
+    return <div className="vault-detail loading" role="status" aria-live="polite">Loading vault details...</div>;
   }
 
   if (error && !vault) {
-    return <div className="vault-detail error">Error: {error}</div>;
+    return <div className="vault-detail error" role="alert" aria-live="assertive">Error: {error}</div>;
   }
 
   if (!vault) {
-    return <div className="vault-detail not-found">Vault not found</div>;
+    return <div className="vault-detail not-found" role="status">Vault not found</div>;
   }
 
   const colorTagClass = settings.colorTag !== 'none'
@@ -269,12 +292,14 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
       )}
 
       {!vault.beneficiary && !vault.isWithdrawn && (
-        <section className="beneficiary-setup">
+        <section className="beneficiary-setup" aria-labelledby="beneficiary-heading">
+          <h3 id="beneficiary-heading">Set Beneficiary</h3>
           {!showBeneficiaryForm ? (
             <button
-              className="btn-secondary"
+              className="btn-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               onClick={() => setShowBeneficiaryForm(true)}
               disabled={submitting}
+              aria-label="Open form to set beneficiary address"
             >
               Set Beneficiary
             </button>
@@ -290,27 +315,30 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
                 required
               />
               {networkMismatch && (
-                <p className="warning-text" role="alert">
+                <p className="warning-text" role="alert" aria-live="assertive">
                   The beneficiary address is on a different network than this vault's creator. Please use a matching network address.
                 </p>
               )}
               <div className="beneficiary-form-actions">
                 <button
-                  className="btn-primary"
+                  className="btn-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700"
                   onClick={handleSetBeneficiary}
                   disabled={submitting || !canSetBeneficiary}
                   title={!canSetBeneficiary ? 'Enter a valid Stacks address' : undefined}
+                  aria-label={submitting ? 'Setting beneficiary address' : 'Set beneficiary address'}
+                  aria-busy={submitting}
                 >
                   {submitting ? 'Setting...' : 'Set'}
                 </button>
                 <button
-                  className="btn-secondary"
+                  className="btn-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                   onClick={() => {
                     setShowBeneficiaryForm(false);
                     setNewBeneficiary('');
                     setBeneficiaryValidation(null);
                   }}
                   disabled={submitting}
+                  aria-label="Cancel setting beneficiary"
                 >
                   Cancel
                 </button>
@@ -321,38 +349,66 @@ export const VaultDetail: React.FC<VaultDetailProps> = ({
       )}
 
       {isUnlocked && !vault.isWithdrawn && (
-        <section className="vault-actions">
+        <section className="vault-actions" aria-labelledby="withdrawal-heading">
+          <h3 id="withdrawal-heading">Withdrawal</h3>
           <button
-            className="btn-primary btn-large"
+            className="btn-primary btn-large focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-700"
             onClick={handleWithdraw}
             disabled={submitting || vault.isWithdrawn}
+            aria-label={`Withdraw ${(vault.amount / 1000000).toFixed(2)} STX from vault`}
+            aria-busy={submitting}
           >
             {submitting ? 'Withdrawing...' : 'Withdraw Funds'}
           </button>
           {vault.beneficiary && (
             <p className="info-text">
-              Clicking "Withdraw Funds" will transfer {vault.amount} STX to {vault.beneficiary}.
+              Clicking "Withdraw Funds" will transfer {(vault.amount / 1000000).toFixed(2)} STX to {vault.beneficiary}.
             </p>
           )}
         </section>
       )}
 
+      {!vault.isWithdrawn && onDeposit && (
+        <section className="deposit-section">
+          <div className="deposit-section__header">
+            <h3>Add Funds</h3>
+          </div>
+          <button
+            className="btn-secondary"
+            onClick={() => setShowDepositModal(true)}
+            disabled={submitting}
+            aria-label={`Deposit funds to vault ${vault.vaultId}`}
+          >
+            Deposit Funds
+          </button>
+          <p className="deposit-hint">Add more STX to this vault without resetting the lock period.</p>
+        </section>
+      )}
+
       {!isUnlocked && !vault.isWithdrawn && (
         <section className="vault-actions emergency-section">
-          <button
-            className="btn-danger"
+          <EmergencyWithdrawalButton
             onClick={() => setShowPenaltyModal(true)}
-            disabled={submitting}
-          >
-            Emergency Withdraw
-          </button>
+            isAvailable={!submitting && !!onEmergencyWithdraw}
+            isLoading={submitting}
+            penaltyRate={penaltyRate}
+            className="w-full"
+          />
           <p className="warning-text">
-            Withdraw before unlock date with a {penaltyRate}% penalty fee
+            Withdraw before unlock date with a {formatPenaltyRate(penaltyRate)} penalty fee
           </p>
         </section>
       )}
 
       <VaultSettingsPanel vaultId={vaultId} onSettingsChange={onSettingsChange} />
+
+      <DepositModal
+        isOpen={showDepositModal}
+        vaultId={vault.vaultId}
+        currentAmount={vault.amount}
+        onDeposit={handleDeposit}
+        onClose={() => setShowDepositModal(false)}
+      />
 
       {error && <div className="error-message">{error}</div>}
 
