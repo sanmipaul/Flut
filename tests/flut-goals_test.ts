@@ -643,3 +643,28 @@ Clarinet.test({
     assertEquals(block.receipts[0].result.includes(owner.address), true);
   }
 });
+
+Clarinet.test({
+  name: "refund-contribution: partial contributions before cancel are fully refundable",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const contributor = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Large Goal'), types.uint(10000)], owner.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(100)], contributor.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(200)], contributor.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(150)], contributor.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'refund-contribution', [types.uint(0)], contributor.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u450)');
+  }
+});
