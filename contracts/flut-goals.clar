@@ -1,6 +1,7 @@
 ;; Flut Goals - Savings Goal Tracker
 ;; Users set a target amount for a vault; anyone can contribute toward it.
-(define-map goals {goal-id: uint} {owner: principal, label: (string-ascii 60), target: uint, saved: uint, reached: bool, finalized: bool})
+(define-map goals {goal-id: uint} {owner: principal, label: (string-ascii 60), target: uint, saved: uint, reached: bool, finalized: bool, cancelled: bool})
+(define-map goal-contributions {goal-id: uint, contributor: principal} {amount: uint})
 (define-data-var goal-counter uint u0)
 
 (define-constant ERR-NOT-FOUND (err u1))
