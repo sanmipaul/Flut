@@ -626,3 +626,20 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, 'true');
   }
 });
+
+Clarinet.test({
+  name: "get-goal-owner: returns correct owner after goal cancellation",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Fund'), types.uint(1000)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'get-goal-owner', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result.includes(owner.address), true);
+  }
+});
