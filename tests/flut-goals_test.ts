@@ -139,3 +139,17 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u8)');
   }
 });
+
+Clarinet.test({
+  name: "is-goal-cancelled: returns false before cancel-goal is called",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Holiday'), types.uint(500)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'is-goal-cancelled', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
