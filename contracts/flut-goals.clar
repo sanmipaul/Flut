@@ -13,6 +13,7 @@
 (define-constant ERR-GOAL-CLOSED (err u7))
 (define-constant ERR-GOAL-CANCELLED (err u8))
 (define-constant ERR-NOT-CANCELLED (err u9))
+(define-constant ERR-NOTHING-TO-REFUND (err u10))
 
 (define-public (create-goal (label (string-ascii 60)) (target uint))
   (let ((id (var-get goal-counter)))
