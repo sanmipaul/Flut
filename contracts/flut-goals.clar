@@ -38,6 +38,17 @@
         (ok reached)))
     ERR-NOT-FOUND))
 
+(define-public (cancel-goal (goal-id uint))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (begin
+      (asserts! (is-eq (get owner goal) tx-sender) ERR-UNAUTHORIZED)
+      (asserts! (not (get reached goal)) ERR-ALREADY-REACHED)
+      (asserts! (not (get finalized goal)) ERR-GOAL-CLOSED)
+      (asserts! (not (get cancelled goal)) ERR-GOAL-CANCELLED)
+      (map-set goals {goal-id: goal-id} (merge goal {cancelled: true}))
+      (ok true))
+    ERR-NOT-FOUND))
+
 (define-public (withdraw-goal (goal-id uint))
   (match (map-get? goals {goal-id: goal-id})
     goal (begin
