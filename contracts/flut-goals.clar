@@ -139,6 +139,13 @@
     goal (ok (get saved goal))
     ERR-NOT-FOUND))
 
+(define-read-only (can-refund (goal-id uint) (contributor principal))
+  (match (map-get? goals {goal-id: goal-id})
+    goal (ok (and
+      (get cancelled goal)
+      (> (default-to u0 (get amount (map-get? goal-contributions {goal-id: goal-id, contributor: contributor}))) u0)))
+    ERR-NOT-FOUND))
+
 (define-read-only (get-contribution-amount (goal-id uint) (contributor principal))
   (ok (default-to u0 (get amount (map-get? goal-contributions {goal-id: goal-id, contributor: contributor})))))
 
