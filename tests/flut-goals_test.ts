@@ -687,3 +687,28 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok false)');
   }
 });
+
+Clarinet.test({
+  name: "full lifecycle: contribute, cancel, then all contributors refund",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const c1 = accounts.get('wallet_2')!;
+    const c2 = accounts.get('wallet_3')!;
+    const c3 = accounts.get('wallet_4')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Festival'), types.uint(5000)], owner.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(500)], c1.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(700)], c2.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(300)], c3.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const r1 = chain.mineBlock([Tx.contractCall('flut-goals', 'refund-contribution', [types.uint(0)], c1.address)]);
+    const r2 = chain.mineBlock([Tx.contractCall('flut-goals', 'refund-contribution', [types.uint(0)], c2.address)]);
+    const r3 = chain.mineBlock([Tx.contractCall('flut-goals', 'refund-contribution', [types.uint(0)], c3.address)]);
+    assertEquals(r1.receipts[0].result, '(ok u500)');
+    assertEquals(r2.receipts[0].result, '(ok u700)');
+    assertEquals(r3.receipts[0].result, '(ok u300)');
+  }
+});
