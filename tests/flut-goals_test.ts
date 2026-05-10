@@ -240,3 +240,21 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u9)');
   }
 });
+
+Clarinet.test({
+  name: "refund-contribution: returns ERR-NOTHING-TO-REFUND for non-contributor",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const stranger = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Boat'), types.uint(2000)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'refund-contribution', [types.uint(0)], stranger.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u10)');
+  }
+});
