@@ -668,3 +668,22 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u450)');
   }
 });
+
+Clarinet.test({
+  name: "is-goal-reached: remains false after goal is cancelled without reaching target",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const contributor = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Goal'), types.uint(1000)], owner.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(300)], contributor.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'is-goal-reached', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
