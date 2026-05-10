@@ -375,3 +375,22 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u0)');
   }
 });
+
+Clarinet.test({
+  name: "get-contribution-amount: accumulates correctly across multiple contribute calls",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const contributor = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Pool'), types.uint(3000)], owner.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(300)], contributor.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(500)], contributor.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'get-contribution-amount', [types.uint(0), types.principal(contributor.address)], contributor.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u800)');
+  }
+});
