@@ -61,3 +61,18 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+Clarinet.test({
+  name: "cancel-goal: returns ERR-UNAUTHORIZED for non-owner caller",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const attacker = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Fund'), types.uint(1000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], attacker.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u2)');
+  }
+});
