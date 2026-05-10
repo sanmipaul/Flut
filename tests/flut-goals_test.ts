@@ -188,3 +188,20 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u8)');
   }
 });
+
+Clarinet.test({
+  name: "withdraw-goal: returns ERR-NOT-REACHED on a cancelled goal",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Pool'), types.uint(1000)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'withdraw-goal', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u4)');
+  }
+});
