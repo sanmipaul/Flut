@@ -87,3 +87,19 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u1)');
   }
 });
+
+Clarinet.test({
+  name: "cancel-goal: returns ERR-ALREADY-REACHED when goal target is already met",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const contributor = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-goals', 'create-goal', [types.ascii('Trip'), types.uint(500)], owner.address),
+      Tx.contractCall('flut-goals', 'contribute', [types.uint(0), types.uint(500)], contributor.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-goals', 'cancel-goal', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u3)');
+  }
+});
