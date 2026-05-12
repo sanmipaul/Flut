@@ -76,6 +76,15 @@
       (ok true))
     ERR-NOT-FOUND))
 
+(define-public (set-emergency-withdrawal-enabled (vault-id uint) (enabled bool))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (begin
+      (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
+      (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
+      (map-set vaults {vault-id: vault-id} (merge vault {is-emergency-withdrawal-enabled: enabled}))
+      (ok true))
+    ERR-NOT-FOUND))
+
 (define-read-only (get-vault (vault-id uint))
   (map-get? vaults {vault-id: vault-id}))
 
