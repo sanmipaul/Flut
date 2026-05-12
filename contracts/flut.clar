@@ -137,6 +137,20 @@
         ERR-BENEFICIARY-NOT-FOUND))
     ERR-NOT-FOUND))
 
+(define-public (update-beneficiary-shares (vault-id uint) (beneficiary principal) (new-shares uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (begin
+      (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
+      (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
+      (asserts! (<= new-shares u10000) ERR-INVALID-SHARES)
+      (match (map-get? vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary})
+        beneficiary-data
+          (begin
+            (map-set vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary} (merge beneficiary-data {shares: new-shares}))
+            (ok true))
+        ERR-BENEFICIARY-NOT-FOUND))
+    ERR-NOT-FOUND))
+
 (define-public (set-emergency-withdrawal-enabled (vault-id uint) (enabled bool))
   (match (map-get? vaults {vault-id: vault-id})
     vault (begin
