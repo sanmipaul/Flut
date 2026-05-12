@@ -23,6 +23,10 @@
 (define-constant ERR-WITHDRAWAL-NOT-ALLOWED (err u17))
 (define-constant ERR-EMERGENCY-WITHDRAWAL-DISABLED (err u18))
 (define-constant ERR-INVALID-PENALTY-RATE (err u19))
+(define-constant ERR-INVALID-SHARES (err u20))
+(define-constant ERR-BENEFICIARY-SAME-AS-CREATOR (err u21))
+(define-constant ERR-BENEFICIARY-EXISTS (err u22))
+(define-constant ERR-BENEFICIARY-NOT-FOUND (err u23))
 (define-constant MAX-LOCK-BLOCKS u52560)
 (define-constant DEPOSIT-COOLDOWN-BLOCKS u144)
 (define-constant MAX-SINGLE-DEPOSIT u1000000000000) ;; 1M STX in micro-STX
@@ -105,6 +109,17 @@
         (try! (as-contract (stx-transfer? net-amount tx-sender tx-sender)))
         (map-set vaults {vault-id: vault-id} (merge vault {amount: u0, withdrawn: true}))
         (ok true)))
+    ERR-NOT-FOUND))
+
+(define-public (add-beneficiary (vault-id uint) (beneficiary principal) (shares uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (begin
+      (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
+      (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
+      (asserts! (<= shares u10000) ERR-INVALID-SHARES)
+      (asserts! (not (is-eq beneficiary tx-sender)) ERR-BENEFICIARY-SAME-AS-CREATOR)
+      (map-set vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary} {shares: shares, withdrawn-amount: u0})
+      (ok true))
     ERR-NOT-FOUND))
 
 (define-public (set-emergency-withdrawal-enabled (vault-id uint) (enabled bool))
