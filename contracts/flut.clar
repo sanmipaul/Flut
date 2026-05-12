@@ -16,6 +16,8 @@
 (define-constant ERR-DEPOSIT-COOLDOWN-ACTIVE (err u11))
 (define-constant ERR-DEPOSIT-AMOUNT-EXCEEDED (err u12))
 (define-constant ERR-VAULT-AMOUNT-EXCEEDED (err u13))
+(define-constant ERR-INSUFFICIENT-BALANCE (err u14))
+(define-constant ERR-INVALID-WITHDRAWAL-AMOUNT (err u15))
 (define-constant MAX-LOCK-BLOCKS u52560)
 
 (define-public (create-vault (amount uint) (unlock-height uint))
