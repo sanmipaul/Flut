@@ -23,7 +23,9 @@
 (define-constant ERR-WITHDRAWAL-NOT-ALLOWED (err u17))
 (define-constant ERR-EMERGENCY-WITHDRAWAL-DISABLED (err u18))
 (define-constant MAX-LOCK-BLOCKS u52560)
-(define-constant DEPOSIT-COOLDOWN-BLOCKS u144) ;; 1 day in blocks (144 blocks/day)
+(define-constant DEPOSIT-COOLDOWN-BLOCKS u144)
+(define-constant MAX-SINGLE-DEPOSIT u1000000000000) ;; 1M STX in micro-STX
+(define-constant MAX-VAULT-BALANCE u5000000000000) ;; 5M STX in micro-STX
 
 (define-public (create-vault (amount uint) (unlock-height uint))
   (let ((id (var-get vault-counter)))
