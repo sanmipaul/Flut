@@ -45,8 +45,10 @@
       (asserts! (not (get withdrawn vault)) ERR-VAULT-CLOSED)
       (asserts! (>= (- block-height (get last-deposit-height vault)) DEPOSIT-COOLDOWN-BLOCKS) ERR-DEPOSIT-COOLDOWN-ACTIVE)
       (asserts! (<= amount MAX-SINGLE-DEPOSIT) ERR-DEPOSIT-AMOUNT-EXCEEDED)
-      (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
-      (map-set vaults {vault-id: vault-id} (merge vault {amount: (+ (get amount vault) amount), last-deposit-height: block-height, total-deposited: (+ (get total-deposited vault) amount)}))
+      (let ((new-balance (+ (get amount vault) amount)))
+        (asserts! (<= new-balance MAX-VAULT-BALANCE) ERR-VAULT-AMOUNT-EXCEEDED)
+        (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
+        (map-set vaults {vault-id: vault-id} (merge vault {amount: new-balance, last-deposit-height: block-height, total-deposited: (+ (get total-deposited vault) amount)})))
       (ok true))
     ERR-NOT-FOUND))
 
