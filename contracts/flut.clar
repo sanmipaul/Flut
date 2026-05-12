@@ -172,3 +172,8 @@
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok (get emergency-withdrawal-penalty-bps vault))
     ERR-NOT-FOUND))
+
+(define-read-only (get-last-deposit-height (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (get last-deposit-height vault))
+    ERR-NOT-FOUND))
