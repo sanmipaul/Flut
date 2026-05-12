@@ -344,4 +344,6 @@
     false))
 
 (define-read-only (get-beneficiary-count (vault-id uint))
-  (ok u0)) ;; Placeholder: actual count would require iteration; for demo use zero
+  (match (map-get? vault-beneficiary-count {vault-id: vault-id})
+    count-data (ok (get count count-data))
+    (ok u0)))
