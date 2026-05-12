@@ -20,6 +20,7 @@
 (define-constant ERR-INVALID-WITHDRAWAL-AMOUNT (err u15))
 (define-constant ERR-RECIPIENT-CANNOT-WITHDRAW (err u16))
 (define-constant ERR-WITHDRAWAL-NOT-ALLOWED (err u17))
+(define-constant ERR-EMERGENCY-WITHDRAWAL-DISABLED (err u18))
 (define-constant MAX-LOCK-BLOCKS u52560)
 
 (define-public (create-vault (amount uint) (unlock-height uint))
