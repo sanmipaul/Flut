@@ -10,6 +10,12 @@ export interface Vault {
   stackingPool: string | null;
   /** Optional local label stored in localStorage */
   label?: string;
+  /** Enhanced vault management fields */
+  isEmergencyWithdrawalEnabled?: boolean;
+  emergencyWithdrawalPenaltyBps?: number;
+  lastDepositHeight?: number;
+  totalDeposited?: number;
+  depositCooldownBlocks?: number;
 }
 
 export type VaultStatus = 'locked' | 'unlocked' | 'withdrawn';
