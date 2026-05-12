@@ -324,3 +324,6 @@
 
 (define-read-only (get-max-single-deposit)
   (ok MAX-SINGLE-DEPOSIT))
+
+(define-read-only (get-max-vault-balance)
+  (ok MAX-VAULT-BALANCE))
