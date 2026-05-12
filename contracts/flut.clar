@@ -41,6 +41,7 @@
       (asserts! (> amount u0) ERR-ZERO-AMOUNT)
       (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
       (asserts! (not (get withdrawn vault)) ERR-VAULT-CLOSED)
+      (asserts! (>= (- block-height (get last-deposit-height vault)) DEPOSIT-COOLDOWN-BLOCKS) ERR-DEPOSIT-COOLDOWN-ACTIVE)
       (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
       (map-set vaults {vault-id: vault-id} (merge vault {amount: (+ (get amount vault) amount), last-deposit-height: block-height, total-deposited: (+ (get total-deposited vault) amount)}))
       (ok true))
