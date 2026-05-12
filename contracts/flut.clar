@@ -314,3 +314,10 @@
   (match (map-get? vault-total-shares {vault-id: vault-id})
     total-data (ok (get total total-data))
     ERR-NOT-FOUND))
+
+(define-read-only (get-remaining-cooldown (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (if (>= (- block-height (get last-deposit-height vault)) DEPOSIT-COOLDOWN-BLOCKS)
+                  u0
+                  (- DEPOSIT-COOLDOWN-BLOCKS (- block-height (get last-deposit-height vault)))))
+    ERR-NOT-FOUND))
