@@ -51,6 +51,9 @@ This project was built as part of the [Stacks Builder Rewards](https://app.talen
 - 🛡️ **Partial withdrawals supported** (specify amount or withdraw full balance)
 - 🛑 **Withdrawal safety checks** with authorization, amount validation, and audit logs
 - ⚠️ **Emergency withdrawal toggle** controlled by owner with penalty and tracking
+- 🛡️ **Deposit cooldown** — mandatory waiting period between deposits (configurable)
+- 🛡️ **Vault balance caps** — maximum per-deposit and total vault limits enforced in-contract
+- 🛡️ **Multi-beneficiary vaults** — allocate shares to multiple recipients; each can withdraw their portion after unlock
 - ✅ **Multiple vaults per wallet** — save for different goals
 - ✅ **Vault labeling** — name your vaults (e.g. "House Fund", "Emergency STX")
 - ✅ **Public leaderboard** — see top savers in the ecosystem
