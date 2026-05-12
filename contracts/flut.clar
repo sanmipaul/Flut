@@ -168,6 +168,32 @@
         ERR-BENEFICIARY-NOT-FOUND))
     ERR-NOT-FOUND))
 
+(define-public (withdraw-as-beneficiary (vault-id uint) (amount uint))
+  (let
+    (
+      (vault (unwrap! (map-get? vaults {vault-id: vault-id}) ERR-NOT-FOUND))
+      (beneficiary-data (unwrap! (map-get? vault-beneficiaries {vault-id: vault-id, beneficiary: tx-sender}) ERR-BENEFICIARY-NOT-FOUND))
+    )
+    (asserts! (>= block-height (get unlock-height vault)) ERR-LOCKED)
+    (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
+    (asserts! (> amount u0) ERR-INVALID-WITHDRAWAL-AMOUNT)
+    ;; Calculate max withdrawable based on shares and current balance
+    (let
+      (
+        (total-shares (get total (unwrap! (map-get? vault-total-shares {vault-id: vault-id}) ERR-NOT-FOUND)))
+        (beneficiary-shares (get shares beneficiary-data))
+        (already-withdrawn (get withdrawn-amount beneficiary-data))
+        (max-allowed (/ (* (get amount vault) beneficiary-shares) total-shares))
+        (max-withdraw (- max-allowed already-withdrawn))
+      )
+      (asserts! (<= amount max-withdraw) ERR-INSUFFICIENT-BALANCE)
+      (try! (as-contract (stx-transfer? amount tx-sender tx-sender)))
+      ;; Update vault balance
+      (map-set vaults {vault-id: vault-id} (merge vault {amount: (- (get amount vault) amount)}))
+      ;; Update beneficiary withdrawn amount
+      (map-set vault-beneficiaries {vault-id: vault-id, beneficiary: tx-sender} (merge beneficiary-data {withdrawn-amount: (+ already-withdrawn amount)}))
+      (ok true))))
+
 (define-public (set-emergency-withdrawal-enabled (vault-id uint) (enabled bool))
   (match (map-get? vaults {vault-id: vault-id})
     vault (begin
