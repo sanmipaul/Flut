@@ -247,3 +247,8 @@
   (match (map-get? vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary})
     beneficiary-data (ok (get shares beneficiary-data))
     ERR-BENEFICIARY-NOT-FOUND))
+
+(define-read-only (get-beneficiary-withdrawn-amount (vault-id uint) (beneficiary principal))
+  (match (map-get? vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary})
+    beneficiary-data (ok (get withdrawn-amount beneficiary-data))
+    ERR-BENEFICIARY-NOT-FOUND))
