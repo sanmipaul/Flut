@@ -43,6 +43,7 @@
     (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
     (map-set vaults {vault-id: id} {owner: tx-sender, amount: amount, unlock-height: unlock-height, withdrawn: false, last-deposit-height: block-height, total-deposited: amount, is-emergency-withdrawal-enabled: false, emergency-withdrawal-penalty-bps: u0})
     (map-set vault-total-shares {vault-id: id} {total: u0})
+    (map-set vault-beneficiary-count {vault-id: id} {count: u0})
     (var-set vault-counter (+ id u1))
     (ok id)))
 
