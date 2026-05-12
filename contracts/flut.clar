@@ -92,6 +92,21 @@
       )
     ERR-NOT-FOUND))
 
+(define-public (emergency-withdraw (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (begin
+      (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
+      (asserts! (get is-emergency-withdrawal-enabled vault) ERR-EMERGENCY-WITHDRAWAL-DISABLED)
+      (asserts! (> (get amount vault) u0) ERR-EMPTY-VAULT)
+      (let ((balance (get amount vault))
+            (penalty-bps (get emergency-withdrawal-penalty-bps vault))
+            (penalty-amount (/ (* balance penalty-bps) u10000))
+            (net-amount (- balance penalty-amount)))
+        (try! (as-contract (stx-transfer? net-amount tx-sender tx-sender)))
+        (map-set vaults {vault-id: vault-id} (merge vault {amount: u0, withdrawn: true}))
+        (ok true)))
+    ERR-NOT-FOUND))
+
 (define-public (set-emergency-withdrawal-enabled (vault-id uint) (enabled bool))
   (match (map-get? vaults {vault-id: vault-id})
     vault (begin
