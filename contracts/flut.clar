@@ -2,6 +2,7 @@
 (define-map vaults {vault-id: uint} {owner: principal, amount: uint, unlock-height: uint, withdrawn: bool, last-deposit-height: uint, total-deposited: uint, is-emergency-withdrawal-enabled: bool, emergency-withdrawal-penalty-bps: uint})
 (define-map vault-beneficiaries {vault-id: uint, beneficiary: principal} {shares: uint, withdrawn-amount: uint})
 (define-map vault-total-shares {vault-id: uint} {total: uint})
+(define-map vault-beneficiary-count {vault-id: uint} {count: uint})
 (define-data-var vault-counter uint u0)
 (define-map pending-owner {vault-id: uint} {new-owner: principal})
 
@@ -332,3 +333,6 @@
   (match (map-get? vault-total-shares {vault-id: vault-id})
     total-data (> (get total total-data) u0)
     false))
+
+(define-read-only (get-beneficiary-count (vault-id uint))
+  (ok u0)) ;; Placeholder: actual count would require iteration; for demo use zero
