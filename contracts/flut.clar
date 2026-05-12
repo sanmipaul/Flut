@@ -156,7 +156,13 @@
       (match (map-get? vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary})
         beneficiary-data
           (begin
-            (map-set vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary} (merge beneficiary-data {shares: new-shares}))
+            (let ((old-shares (get shares beneficiary-data))
+                  (total-entry (unwrap! (map-get? vault-total-shares {vault-id: vault-id}) ERR-NOT-FOUND))
+                  (current-total (get total total-entry))
+                  (new-total (+ (- current-total old-shares) new-shares)))
+              (asserts! (<= new-total u10000) ERR-VAULT-AMOUNT-EXCEEDED)
+              (map-set vault-total-shares {vault-id: vault-id} {total: new-total})
+              (map-set vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary} (merge beneficiary-data {shares: new-shares})))
             (ok true))
         ERR-BENEFICIARY-NOT-FOUND))
     ERR-NOT-FOUND))
