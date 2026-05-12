@@ -289,6 +289,13 @@
                    (<= amount (get amount vault))))
     ERR-NOT-FOUND))
 
+(define-read-only (can-emergency-withdraw (vault-id uint) (caller principal))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (and (is-eq (get owner vault) caller)
+                   (get is-emergency-withdrawal-enabled vault)
+                   (> (get amount vault) u0)))
+    ERR-NOT-FOUND))
+
 (define-read-only (get-vault-summary (vault-id uint))
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok {
