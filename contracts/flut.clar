@@ -22,6 +22,7 @@
 (define-constant ERR-RECIPIENT-CANNOT-WITHDRAW (err u16))
 (define-constant ERR-WITHDRAWAL-NOT-ALLOWED (err u17))
 (define-constant ERR-EMERGENCY-WITHDRAWAL-DISABLED (err u18))
+(define-constant ERR-INVALID-PENALTY-RATE (err u19))
 (define-constant MAX-LOCK-BLOCKS u52560)
 (define-constant DEPOSIT-COOLDOWN-BLOCKS u144)
 (define-constant MAX-SINGLE-DEPOSIT u1000000000000) ;; 1M STX in micro-STX
@@ -82,6 +83,16 @@
       (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
       (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
       (map-set vaults {vault-id: vault-id} (merge vault {is-emergency-withdrawal-enabled: enabled}))
+      (ok true))
+    ERR-NOT-FOUND))
+
+(define-public (set-emergency-withdrawal-penalty (vault-id uint) (penalty-bps uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (begin
+      (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
+      (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
+      (asserts! (<= penalty-bps u1000) ERR-INVALID-PENALTY-RATE) ;; max 10%
+      (map-set vaults {vault-id: vault-id} (merge vault {emergency-withdrawal-penalty-bps: penalty-bps}))
       (ok true))
     ERR-NOT-FOUND))
 
