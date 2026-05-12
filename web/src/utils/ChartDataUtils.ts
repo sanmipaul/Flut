@@ -17,38 +17,25 @@ import {
 
 
 /**
- * Transform transactions into time series data
+ * Transform transactions into time series data.
+ *
+ * Groups confirmed transactions by the user's local calendar, not UTC.
+ * A transaction at 23:30 local is bucketed into the correct local day
+ * even when the UTC equivalent falls in the next calendar day.
+ *
+ * Invalid timestamps are silently skipped.
  */
 export const generateTimeSeriesData = (
   transactions: VaultTransaction[],
   interval: 'hourly' | 'daily' | 'weekly' | 'monthly'
 ): ChartDataPoint[] => {
   const data: Map<string, number> = new Map();
-  const now = Date.now();
 
   transactions.forEach((tx) => {
     if (tx.status !== 'confirmed') return;
+    if (!isValidTimestamp(tx.timestamp)) return;
 
-    const date = new Date(tx.timestamp);
-    let key: string;
-
-    switch (interval) {
-      case 'hourly':
-        key = date.toISOString().slice(0, 13);
-        break;
-      case 'daily':
-        key = date.toISOString().slice(0, 10);
-        break;
-      case 'weekly':
-        const weekStart = new Date(date);
-        weekStart.setDate(date.getDate() - date.getDay());
-        key = weekStart.toISOString().slice(0, 10);
-        break;
-      case 'monthly':
-        key = date.toISOString().slice(0, 7);
-        break;
-    }
-
+    const key = getIntervalKey(new Date(tx.timestamp), interval);
     data.set(key, (data.get(key) || 0) + tx.amount);
   });
 
@@ -58,27 +45,34 @@ export const generateTimeSeriesData = (
 };
 
 /**
- * Generate cumulative volume data
+ * Generate cumulative volume data.
+ *
+ * Only includes confirmed transactions with valid timestamps. Date labels use
+ * the local "YYYY-MM-DD" format via `toLocalISODate` so output is consistent
+ * regardless of browser locale or timezone offset.
  */
 export const generateCumulativeVolumeData = (
   transactions: VaultTransaction[]
 ): ChartDataPoint[] => {
   const sorted = [...transactions]
-    .filter((tx) => tx.status === 'confirmed')
+    .filter((tx) => tx.status === 'confirmed' && isValidTimestamp(tx.timestamp))
     .sort((a, b) => a.timestamp - b.timestamp);
 
   let cumulative = 0;
   return sorted.map((tx) => {
     cumulative += tx.amount;
     return {
-      label: new Date(tx.timestamp).toLocaleDateString(),
+      label: toLocalISODate(tx.timestamp),
       value: cumulative,
     };
   });
 };
 
 /**
- * Generate transaction count over time
+ * Generate transaction count over time.
+ *
+ * Counts all transactions (regardless of status) grouped by local calendar
+ * using timezone-aware date keys. Invalid timestamps are silently skipped.
  */
 export const generateTransactionCountData = (
   transactions: VaultTransaction[],
@@ -87,26 +81,8 @@ export const generateTransactionCountData = (
   const data: Map<string, number> = new Map();
 
   transactions.forEach((tx) => {
-    const date = new Date(tx.timestamp);
-    let key: string;
-
-    switch (interval) {
-      case 'hourly':
-        key = date.toISOString().slice(0, 13);
-        break;
-      case 'daily':
-        key = date.toISOString().slice(0, 10);
-        break;
-      case 'weekly':
-        const weekStart = new Date(date);
-        weekStart.setDate(date.getDate() - date.getDay());
-        key = weekStart.toISOString().slice(0, 10);
-        break;
-      case 'monthly':
-        key = date.toISOString().slice(0, 7);
-        break;
-    }
-
+    if (!isValidTimestamp(tx.timestamp)) return;
+    const key = getIntervalKey(new Date(tx.timestamp), interval);
     data.set(key, (data.get(key) || 0) + 1);
   });
 

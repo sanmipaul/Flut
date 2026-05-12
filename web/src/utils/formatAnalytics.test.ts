@@ -82,6 +82,24 @@ describe('formatVaultCount', () => {
   });
 });
 
+describe('formatBlockDuration — regression suite', () => {
+  it('original positive behaviour still works for 3 blocks', () => {
+    expect(formatBlockDuration(3)).toContain('min');
+  });
+
+  it('original positive behaviour still works for 12 blocks', () => {
+    expect(formatBlockDuration(12)).toContain('hr');
+  });
+
+  it('original positive behaviour still works for 144 blocks', () => {
+    expect(formatBlockDuration(144)).toBe('~1 day');
+  });
+
+  it('original positive behaviour still works for 288 blocks', () => {
+    expect(formatBlockDuration(288)).toBe('~2 days');
+  });
+});
+
 describe('formatBlockDuration — boundary values', () => {
   it('exactly 6 blocks returns hours', () => {
     expect(formatBlockDuration(6)).toContain('hr');
@@ -111,5 +129,45 @@ describe('formatStxAmount — large values', () => {
 
   it('contains "STX" suffix for large amount', () => {
     expect(formatStxAmount(1_000_000)).toContain('STX');
+  });
+});
+
+describe('formatBlockDuration — Infinity input', () => {
+  it('returns "—" for Infinity', () => {
+    expect(formatBlockDuration(Infinity)).toBe('—');
+  });
+
+  it('does not produce a string containing "Infinity"', () => {
+    expect(formatBlockDuration(Infinity)).not.toContain('Infinity');
+  });
+});
+
+describe('formatBlockDuration — NaN input', () => {
+  it('returns "—" for NaN', () => {
+    expect(formatBlockDuration(NaN)).toBe('—');
+  });
+
+  it('does not produce a string containing "NaN"', () => {
+    expect(formatBlockDuration(NaN)).not.toContain('NaN');
+  });
+});
+
+describe('formatBlockDuration — -Infinity input', () => {
+  it('returns "—" for -Infinity', () => {
+    expect(formatBlockDuration(-Infinity)).toBe('—');
+  });
+
+  it('does not produce a string containing "-Infinity"', () => {
+    expect(formatBlockDuration(-Infinity)).not.toContain('Infinity');
+  });
+});
+
+describe('formatStxAmount — negative values', () => {
+  it('returns "0 STX" for negative integers', () => {
+    expect(formatStxAmount(-5)).toBe('0 STX');
+  });
+
+  it('returns "0 STX" for large negative amounts', () => {
+    expect(formatStxAmount(-1000)).toBe('0 STX');
   });
 });
