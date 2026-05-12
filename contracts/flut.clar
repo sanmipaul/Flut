@@ -138,6 +138,11 @@
           (begin
             (asserts! (is-eq (get withdrawn-amount beneficiary-data) u0) ERR-BENEFICIARY-HAS-WITHDRAWN)
             (map-delete vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary})
+            ;; Decrement total shares
+            (match (map-get? vault-total-shares {vault-id: vault-id})
+              total-data
+                (map-set vault-total-shares {vault-id: vault-id} {total: (- (get total total-data) (get shares beneficiary-data))})
+              ERR-NOT-FOUND)
             (ok true))
         ERR-BENEFICIARY-NOT-FOUND))
     ERR-NOT-FOUND))
