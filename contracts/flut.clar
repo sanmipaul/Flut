@@ -121,6 +121,9 @@
       (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
       (asserts! (<= shares u10000) ERR-INVALID-SHARES)
       (asserts! (not (is-eq beneficiary tx-sender)) ERR-BENEFICIARY-SAME-AS-CREATOR)
+      (let ((current-total (get total (unwrap! (map-get? vault-total-shares {vault-id: vault-id}) ERR-NOT-FOUND))))
+        (asserts! (<= (+ current-total shares) u10000) ERR-VAULT-AMOUNT-EXCEEDED) ;; reuse error or could use ERR-TOTAL-SHARES-EXCEEDED
+        (map-set vault-total-shares {vault-id: vault-id} {total: (+ current-total shares)}))
       (map-set vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary} {shares: shares, withdrawn-amount: u0})
       (ok true))
     ERR-NOT-FOUND))
