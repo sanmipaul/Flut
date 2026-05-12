@@ -1,5 +1,6 @@
 ;; Flut - STX Savings Vault
 (define-map vaults {vault-id: uint} {owner: principal, amount: uint, unlock-height: uint, withdrawn: bool, last-deposit-height: uint, total-deposited: uint, is-emergency-withdrawal-enabled: bool, emergency-withdrawal-penalty-bps: uint})
+(define-map vault-beneficiaries {vault-id: uint, beneficiary: principal} {shares: uint, withdrawn-amount: uint})
 (define-data-var vault-counter uint u0)
 (define-map pending-owner {vault-id: uint} {new-owner: principal})
 
@@ -29,7 +30,7 @@
     (asserts! (> unlock-height block-height) ERR-INVALID-HEIGHT)
     (asserts! (<= (- unlock-height block-height) MAX-LOCK-BLOCKS) ERR-HEIGHT-TOO-FAR)
     (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
-    (map-set vaults {vault-id: id} {owner: tx-sender, amount: amount, unlock-height: unlock-height, withdrawn: false})
+    (map-set vaults {vault-id: id} {owner: tx-sender, amount: amount, unlock-height: unlock-height, withdrawn: false, last-deposit-height: block-height, total-deposited: amount, is-emergency-withdrawal-enabled: false, emergency-withdrawal-penalty-bps: u0})
     (var-set vault-counter (+ id u1))
     (ok id)))
 
