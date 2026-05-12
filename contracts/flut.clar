@@ -327,3 +327,8 @@
 
 (define-read-only (get-max-vault-balance)
   (ok MAX-VAULT-BALANCE))
+
+(define-read-only (has-beneficiaries (vault-id uint))
+  (match (map-get? vault-total-shares {vault-id: vault-id})
+    total-data (> (get total total-data) u0)
+    false))
