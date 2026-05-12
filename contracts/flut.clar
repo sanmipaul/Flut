@@ -162,3 +162,8 @@
                             (- (get unlock-height vault) block-height))
     })
     ERR-NOT-FOUND))
+
+(define-read-only (is-emergency-withdrawal-enabled (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (get is-emergency-withdrawal-enabled vault))
+    ERR-NOT-FOUND))
