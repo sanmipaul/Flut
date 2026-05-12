@@ -13,6 +13,9 @@
 (define-constant ERR-HEIGHT-TOO-FAR (err u8))
 (define-constant ERR-VAULT-CLOSED (err u9))
 (define-constant ERR-SAME-OWNER (err u10))
+(define-constant ERR-DEPOSIT-COOLDOWN-ACTIVE (err u11))
+(define-constant ERR-DEPOSIT-AMOUNT-EXCEEDED (err u12))
+(define-constant ERR-VAULT-AMOUNT-EXCEEDED (err u13))
 (define-constant MAX-LOCK-BLOCKS u52560)
 
 (define-public (create-vault (amount uint) (unlock-height uint))
