@@ -18,6 +18,8 @@
 (define-constant ERR-VAULT-AMOUNT-EXCEEDED (err u13))
 (define-constant ERR-INSUFFICIENT-BALANCE (err u14))
 (define-constant ERR-INVALID-WITHDRAWAL-AMOUNT (err u15))
+(define-constant ERR-RECIPIENT-CANNOT-WITHDRAW (err u16))
+(define-constant ERR-WITHDRAWAL-NOT-ALLOWED (err u17))
 (define-constant MAX-LOCK-BLOCKS u52560)
 
 (define-public (create-vault (amount uint) (unlock-height uint))
