@@ -242,3 +242,8 @@
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok (get total-deposited vault))
     ERR-NOT-FOUND))
+
+(define-read-only (get-beneficiary-shares (vault-id uint) (beneficiary principal))
+  (match (map-get? vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary})
+    beneficiary-data (ok (get shares beneficiary-data))
+    ERR-BENEFICIARY-NOT-FOUND))
