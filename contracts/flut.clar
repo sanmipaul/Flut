@@ -177,3 +177,8 @@
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok (get last-deposit-height vault))
     ERR-NOT-FOUND))
+
+(define-read-only (get-total-deposited (vault-id uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (get total-deposited vault))
+    ERR-NOT-FOUND))
