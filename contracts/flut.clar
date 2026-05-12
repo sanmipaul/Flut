@@ -321,3 +321,6 @@
                   u0
                   (- DEPOSIT-COOLDOWN-BLOCKS (- block-height (get last-deposit-height vault)))))
     ERR-NOT-FOUND))
+
+(define-read-only (get-max-single-deposit)
+  (ok MAX-SINGLE-DEPOSIT))
