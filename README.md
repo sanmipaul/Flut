@@ -233,30 +233,30 @@ these codes correspond to the rows below.
 
 | Code | Constant | Meaning |
 |------|----------|---------|
-| `u1`   | `ERR-VAULT-NOT-FOUND`        | Vault does not exist |
-| `u2`   | `ERR-UNAUTHORIZED`           | Caller is not vault owner |
-| `u3`   | `ERR-NOT-UNLOCKED`           | Vault is still locked |
-| `u4`   | `ERR-ALREADY-WITHDRAWN`      | Vault balance already withdrawn |
-| `u5`   | `ERR-INVALID-AMOUNT`         | Amount must be > 0 and <= balance |
-| `u6`   | `ERR-INVALID-HEIGHT`         | Unlock height must be > current height |
-| `u7`   | `ERR-INVALID-PENALTY-RATE`   | Penalty rate out of bounds |
-| `u8`   | `ERR-NOT-PENALTY-OWNER`      | Only penalty owner may update destination |
-| `u9`   | `ERR-STACKING-NO-POOL`       | Stacking enabled but no pool provided |
-| `u10`  | `ERR-STACKING-NOT-ENABLED`   | Attempted stacking operation on non-stacking vault |
-| `u11`  | `ERR-INVALID-SHARES`         | Beneficiary shares must sum to 10000 |
-| `u12`  | `ERR-TOO-MANY-BENEFICIARIES` | Exceeded maximum allowed beneficiaries |
-| `u13`  | `ERR-BENEFICIARY-EXISTS`     | Beneficiary already set for vault |
-| `u14`  | `ERR-INVALID-BENEFICIARY`    | Provided beneficiary address is invalid |
-| `u15`  | `ERR-BENEFICIARY-SAME-AS-CREATOR` | Creator cannot be a beneficiary |
-| `u16`  | `ERR-TOO-MANY-VAULTS`        | User reached vault creation limit |
-| `u17`  | `ERR-DEPOSIT-COOLDOWN-ACTIVE`| Must wait between deposits |
-| `u18`  | `ERR-DEPOSIT-AMOUNT-EXCEEDED`| Single deposit exceeds maximum |
-| `u19`  | `ERR-VAULT-AMOUNT-EXCEEDED`  | Vault total balance exceeds cap |
-| `u20`  | `ERR-INSUFFICIENT-BALANCE`   | Withdrawal amount exceeds balance |
-| `u21`  | `ERR-INVALID-WITHDRAWAL-AMOUNT` | Withdrawal amount zero/invalid |
-| `u22`  | `ERR-RECIPIENT-CANNOT-WITHDRAW` | Recipient not allowed to withdraw yet |
-| `u23`  | `ERR-WITHDRAWAL-NOT-ALLOWED` | Withdrawals disabled for vault |
-| `u24`  | `ERR-EMERGENCY-WITHDRAWAL-DISABLED` | Emergency withdrawals globally disabled |
+| `u1` | `ERR-NOT-FOUND` | Vault does not exist |
+| `u2` | `ERR-UNAUTHORIZED` | Caller is not vault owner |
+| `u3` | `ERR-LOCKED` | Vault is still locked |
+| `u4` | `ERR-WITHDRAWN` | Vault balance already withdrawn |
+| `u5` | `ERR-INVALID-HEIGHT` | Unlock height must be > current block height |
+| `u6` | `ERR-ZERO-AMOUNT` | Amount must be greater than zero |
+| `u7` | `ERR-EMPTY-VAULT` | Vault balance is zero |
+| `u8` | `ERR-HEIGHT-TOO-FAR` | Unlock height exceeds maximum lock period |
+| `u9` | `ERR-VAULT-CLOSED` | Vault is closed for further deposits |
+| `u10` | `ERR-SAME-OWNER` | New owner cannot be same as current owner |
+| `u11` | `ERR-DEPOSIT-COOLDOWN-ACTIVE` | Must wait between deposits |
+| `u12` | `ERR-DEPOSIT-AMOUNT-EXCEEDED` | Single deposit exceeds maximum allowed |
+| `u13` | `ERR-VAULT-AMOUNT-EXCEEDED` | Vault total balance would exceed cap |
+| `u14` | `ERR-INSUFFICIENT-BALANCE` | Withdrawal amount exceeds available balance |
+| `u15` | `ERR-INVALID-WITHDRAWAL-AMOUNT` | Withdrawal amount must be > 0 |
+| `u16` | `ERR-RECIPIENT-CANNOT-WITHDRAW` | Beneficiary not yet eligible to withdraw |
+| `u17` | `ERR-WITHDRAWAL-NOT-ALLOWED` | Withdrawals are disabled for this vault |
+| `u18` | `ERR-EMERGENCY-WITHDRAWAL-DISABLED` | Emergency withdrawals are disabled |
+| `u19` | `ERR-INVALID-PENALTY-RATE` | Penalty rate out of bounds |
+| `u20` | `ERR-INVALID-SHARES` | Shares value must be ≤ 10000 |
+| `u21` | `ERR-BENEFICIARY-SAME-AS-CREATOR` | Creator cannot be a beneficiary |
+| `u22` | `ERR-BENEFICIARY-EXISTS` | Beneficiary already assigned to vault |
+| `u23` | `ERR-BENEFICIARY-NOT-FOUND` | Specified beneficiary not found |
+| `u24` | `ERR-BENEFICIARY-HAS-WITHDRAWN` | Beneficiary already withdrew their allocation |
 
 > **Note:** new error codes may be added as the contract evolves; keep this table in sync with
 > `contracts/flut.clar`.
