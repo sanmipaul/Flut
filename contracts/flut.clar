@@ -128,6 +128,10 @@
         (asserts! (<= (+ current-total shares) u10000) ERR-VAULT-AMOUNT-EXCEEDED)
         (map-set vault-total-shares {vault-id: vault-id} {total: (+ current-total shares)}))
       (map-set vault-beneficiaries {vault-id: vault-id, beneficiary: beneficiary} {shares: shares, withdrawn-amount: u0})
+      ;; Increment beneficiary count
+      (match (map-get? vault-beneficiary-count {vault-id: vault-id})
+        count-data (map-set vault-beneficiary-count {vault-id: vault-id} {count: (+ (get count count-data) u1)})
+        ERR-NOT-FOUND)
       (ok true))
     ERR-NOT-FOUND))
 
