@@ -77,6 +77,21 @@
       (ok true))
     ERR-NOT-FOUND))
 
+(define-public (withdraw-amount (vault-id uint) (amount uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (begin
+      (asserts! (is-eq (get owner vault) tx-sender) ERR-UNAUTHORIZED)
+      (asserts! (>= block-height (get unlock-height vault)) ERR-LOCKED)
+      (asserts! (not (get withdrawn vault)) ERR-WITHDRAWN)
+      (asserts! (> amount u0) ERR-INVALID-WITHDRAWAL-AMOUNT)
+      (asserts! (<= amount (get amount vault)) ERR-INSUFFICIENT-BALANCE)
+      (let ((caller tx-sender))
+        (try! (as-contract (stx-transfer? amount tx-sender caller)))
+        (map-set vaults {vault-id: vault-id} (merge vault {amount: (- (get amount vault) amount)}))
+        (ok true))
+      )
+    ERR-NOT-FOUND))
+
 (define-public (set-emergency-withdrawal-enabled (vault-id uint) (enabled bool))
   (match (map-get? vaults {vault-id: vault-id})
     vault (begin
