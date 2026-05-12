@@ -280,6 +280,15 @@
                    (> (get amount vault) u0)))
     ERR-NOT-FOUND))
 
+(define-read-only (can-withdraw-amount (vault-id uint) (caller principal) (amount uint))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (and (is-eq (get owner vault) caller)
+                   (>= block-height (get unlock-height vault))
+                   (not (get withdrawn vault))
+                   (> amount u0)
+                   (<= amount (get amount vault))))
+    ERR-NOT-FOUND))
+
 (define-read-only (get-vault-summary (vault-id uint))
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok {
