@@ -265,7 +265,11 @@
 (define-read-only (can-deposit (vault-id uint) (caller principal))
   (match (map-get? vaults {vault-id: vault-id})
     vault (ok (and (is-eq (get owner vault) caller)
-                   (not (get withdrawn vault))))
+                   (not (get withdrawn vault))
+                   (>= (- block-height (get last-deposit-height vault)) DEPOSIT-COOLDOWN-BLOCKS)
+                   (let ((balance (get amount vault)))
+                     (< balance MAX-VAULT-BALANCE))
+                   ))
     ERR-NOT-FOUND))
 
 (define-read-only (can-withdraw (vault-id uint) (caller principal))
