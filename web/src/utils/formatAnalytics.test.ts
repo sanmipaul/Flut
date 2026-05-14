@@ -22,6 +22,11 @@ describe('formatStxAmount', () => {
   it('delegates to formatStx — result ends with " STX"', () => {
     expect(formatStxAmount(500)).toMatch(/ STX$/);
   });
+
+  it('formats negative values via formatStx', () => {
+    const result = formatStxAmount(-100);
+    expect(result).toContain('STX');
+  });
 });
 
 describe('formatBlockDuration', () => {
