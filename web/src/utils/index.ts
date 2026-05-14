@@ -17,6 +17,13 @@ export {
   formatStxShort,
 } from './formatYield';
 export {
+  formatStxAmount,
+  formatMicroStxAmount,
+  formatBlockDuration,
+  formatPct,
+  formatVaultCount,
+} from './formatAnalytics';
+export {
   isStorageAvailable,
   saveToStorage,
   loadFromStorage,
