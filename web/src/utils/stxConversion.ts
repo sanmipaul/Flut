@@ -53,6 +53,8 @@ export function isValidStxAmount(stx: number): boolean {
 
 /**
  * Clamps a STX value to [0, maxStx].
+ * @example clampStx(200, 100) → 100
+ * @example clampStx(-5, 100) → 0
  */
 export function clampStx(stx: number, maxStx: number): number {
   return Math.min(Math.max(0, stx), maxStx);
