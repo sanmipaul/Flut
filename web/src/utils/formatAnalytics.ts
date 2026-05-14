@@ -20,6 +20,16 @@ export function formatStxAmount(stx: number): string {
 }
 
 /**
+ * Format a microSTX amount as STX for analytics display.
+ * Converts from microSTX before formatting.
+ */
+export function formatMicroStxAmount(uStx: number): string {
+  if (!Number.isFinite(uStx)) return '0 STX';
+  if (uStx === 0) return '0 STX';
+  return formatStx(uStx, { fromMicroStx: true, decimals: 2, showSymbol: true });
+}
+
+/**
  * Convert a block count to a human-readable duration string.
  * Mirrors the logic in useLockProgress for consistency.
  */
