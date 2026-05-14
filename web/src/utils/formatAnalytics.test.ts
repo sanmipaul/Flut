@@ -1,4 +1,4 @@
-import { formatStxAmount, formatBlockDuration, formatPct, formatVaultCount } from './formatAnalytics';
+import { formatStxAmount, formatMicroStxAmount, formatBlockDuration, formatPct, formatVaultCount } from './formatAnalytics';
 
 describe('formatStxAmount', () => {
   it('returns "0 STX" for 0', () => {
