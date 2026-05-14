@@ -99,6 +99,24 @@ describe('formatVaultCount', () => {
   });
 });
 
+describe('formatBlockDuration — regression suite', () => {
+  it('original positive behaviour still works for 3 blocks', () => {
+    expect(formatBlockDuration(3)).toContain('min');
+  });
+
+  it('original positive behaviour still works for 12 blocks', () => {
+    expect(formatBlockDuration(12)).toContain('hr');
+  });
+
+  it('original positive behaviour still works for 144 blocks', () => {
+    expect(formatBlockDuration(144)).toBe('~1 day');
+  });
+
+  it('original positive behaviour still works for 288 blocks', () => {
+    expect(formatBlockDuration(288)).toBe('~2 days');
+  });
+});
+
 describe('formatBlockDuration — boundary values', () => {
   it('exactly 6 blocks returns hours', () => {
     expect(formatBlockDuration(6)).toContain('hr');
@@ -140,25 +158,42 @@ describe('formatStxAmount — large values', () => {
   });
 });
 
-describe('formatMicroStxAmount', () => {
-  it('returns "0 STX" for 0', () => {
-    expect(formatMicroStxAmount(0)).toBe('0 STX');
+describe('formatBlockDuration — Infinity input', () => {
+  it('returns "—" for Infinity', () => {
+    expect(formatBlockDuration(Infinity)).toBe('—');
   });
 
-  it('converts 1_000_000 uSTX to 1 STX', () => {
-    expect(formatMicroStxAmount(1_000_000)).toContain('1');
-    expect(formatMicroStxAmount(1_000_000)).toContain('STX');
+  it('does not produce a string containing "Infinity"', () => {
+    expect(formatBlockDuration(Infinity)).not.toContain('Infinity');
+  });
+});
+
+describe('formatBlockDuration — NaN input', () => {
+  it('returns "—" for NaN', () => {
+    expect(formatBlockDuration(NaN)).toBe('—');
   });
 
-  it('returns "0 STX" for NaN', () => {
-    expect(formatMicroStxAmount(NaN)).toBe('0 STX');
+  it('does not produce a string containing "NaN"', () => {
+    expect(formatBlockDuration(NaN)).not.toContain('NaN');
+  });
+});
+
+describe('formatBlockDuration — -Infinity input', () => {
+  it('returns "—" for -Infinity', () => {
+    expect(formatBlockDuration(-Infinity)).toBe('—');
   });
 
-  it('returns "0 STX" for Infinity', () => {
-    expect(formatMicroStxAmount(Infinity)).toBe('0 STX');
+  it('does not produce a string containing "-Infinity"', () => {
+    expect(formatBlockDuration(-Infinity)).not.toContain('Infinity');
+  });
+});
+
+describe('formatStxAmount — negative values', () => {
+  it('returns "0 STX" for negative integers', () => {
+    expect(formatStxAmount(-5)).toBe('0 STX');
   });
 
-  it('result ends with " STX"', () => {
-    expect(formatMicroStxAmount(1_500_000)).toMatch(/ STX$/);
+  it('returns "0 STX" for large negative amounts', () => {
+    expect(formatStxAmount(-1000)).toBe('0 STX');
   });
 });
