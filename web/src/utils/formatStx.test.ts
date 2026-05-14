@@ -156,6 +156,15 @@ describe('parseStxInput', () => {
     expect(parseStxInput('1.2M')).toBeCloseTo(1_200_000, 0);
   });
 
+  it('parses compact m suffix (lowercase)', () => {
+    expect(parseStxInput('2m')).toBe(2_000_000);
+  });
+
+  it('M suffix means million STX not microSTX', () => {
+    // 1M should be 1_000_000 STX, not 1_000_000 * 1_000_000
+    expect(parseStxInput('1M')).toBe(1_000_000);
+  });
+
   it('returns NaN for invalid input', () => {
     expect(parseStxInput('abc')).toBeNaN();
   });
