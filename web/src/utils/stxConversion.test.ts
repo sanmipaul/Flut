@@ -39,6 +39,14 @@ describe('stxToMicroStx', () => {
   it('converts 0 STX to 0 uSTX', () => {
     expect(stxToMicroStx(0)).toBe(0);
   });
+
+  it('always returns an integer', () => {
+    expect(Number.isInteger(stxToMicroStx(1.5))).toBe(true);
+  });
+
+  it('converts 0.5 STX to 500_000 uSTX', () => {
+    expect(stxToMicroStx(0.5)).toBe(500_000);
+  });
 });
 
 describe('stxToMicroStxRound', () => {
