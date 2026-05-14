@@ -73,6 +73,16 @@ describe('formatBtcAmount', () => {
     const result = formatBtcAmount(0.000000001);
     expect(result).toContain('sats');
   });
+
+  it('large BTC value formats correctly', () => {
+    const result = formatBtcAmount(10);
+    expect(result).toContain('BTC');
+    expect(result).toContain('10');
+  });
+
+  it('exactly 0.001 BTC is BTC not sats', () => {
+    expect(formatBtcAmount(0.001)).toMatch(/BTC$/);
+  });
 });
 
 // ---------------------------------------------------------------------------
