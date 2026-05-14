@@ -20,7 +20,9 @@ export function formatBtcAmount(btc: number): string {
   return `${btc.toFixed(6)} BTC`;
 }
 
-/** Format a yield percentage as "10.0% APY". */
+/** Format a yield percentage as "10.0% APY".
+ * @example formatYieldPct(10) → "10.0% APY"
+ */
 export function formatYieldPct(pct: number): string {
   return `${pct.toFixed(1)}% APY`;
 }
