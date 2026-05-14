@@ -12,6 +12,7 @@ import {
   TransactionType,
   ChartDataPoint,
 } from '../types/TransactionHistory';
+import { formatStx } from './formatStx';
 
 /**
  * Filter transactions based on criteria
