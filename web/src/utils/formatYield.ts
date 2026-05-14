@@ -2,7 +2,10 @@
  * formatYield
  *
  * Display-formatting helpers for stacking yield values.
+ *
+ * STX amounts delegate to the canonical formatStx utility.
  */
+import { formatStx } from './formatStx';
 
 /**
  * Format a fractional BTC value for display.
