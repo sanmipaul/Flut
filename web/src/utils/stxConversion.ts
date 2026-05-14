@@ -20,6 +20,7 @@ export function microStxToStx(uStx: number): number {
 /**
  * Convert a STX decimal value to its microSTX integer equivalent.
  * Always rounds down to avoid spending more than intended.
+ * The result is always a non-negative integer.
  * @example stxToMicroStx(1.5) → 1_500_000
  */
 export function stxToMicroStx(stx: number): number {
