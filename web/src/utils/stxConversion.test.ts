@@ -107,4 +107,16 @@ describe('clampStx', () => {
   it('clamps to 0 for negative', () => {
     expect(clampStx(-10, 100)).toBe(0);
   });
+
+  it('returns 0 when value equals 0', () => {
+    expect(clampStx(0, 100)).toBe(0);
+  });
+
+  it('returns max when value equals max', () => {
+    expect(clampStx(100, 100)).toBe(100);
+  });
+
+  it('returns 0 when max is 0', () => {
+    expect(clampStx(50, 0)).toBe(0);
+  });
 });
