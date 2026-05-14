@@ -105,6 +105,16 @@ describe('formatStxPenalty', () => {
     expect(result).toContain('fee');
     expect(result).toContain('STX');
   });
+
+  it('handles negative input by using absolute value', () => {
+    const result = formatStxPenalty(-50);
+    expect(result).toContain('50');
+    expect(result).toContain('fee');
+  });
+
+  it('ends with "(fee)"', () => {
+    expect(formatStxPenalty(100)).toMatch(/\(fee\)$/);
+  });
 });
 
 describe('formatStxDiff', () => {
