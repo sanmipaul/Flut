@@ -71,6 +71,21 @@ describe('formatStx', () => {
     const result = formatStx(Infinity, { locale });
     expect(result).toContain('—');
   });
+
+  it('returns placeholder for -Infinity', () => {
+    const result = formatStx(-Infinity, { locale });
+    expect(result).toContain('—');
+  });
+
+  it('hides symbol and returns — for NaN when showSymbol=false', () => {
+    const result = formatStx(NaN, { showSymbol: false, locale });
+    expect(result).toBe('—');
+  });
+
+  it('respects custom decimals=4', () => {
+    const result = formatStx(1.23456, { decimals: 4, locale });
+    expect(result).toContain('1.2346');
+  });
 });
 
 describe('formatMicroStx', () => {
