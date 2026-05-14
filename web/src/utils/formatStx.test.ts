@@ -139,6 +139,16 @@ describe('formatStxDiff', () => {
   it('returns placeholder for NaN', () => {
     expect(formatStxDiff(NaN)).toContain('—');
   });
+
+  it('respects custom decimals parameter', () => {
+    const result = formatStxDiff(1.5, 1);
+    expect(result).toContain('1.5');
+  });
+
+  it('result always ends with " STX"', () => {
+    expect(formatStxDiff(100)).toMatch(/ STX$/);
+    expect(formatStxDiff(-100)).toMatch(/ STX$/);
+  });
 });
 
 describe('parseStxInput — round-trip with formatStx', () => {
