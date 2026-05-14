@@ -75,6 +75,10 @@ describe('formatPct', () => {
   it('works for 100%', () => {
     expect(formatPct(100)).toBe('100%');
   });
+
+  it('works for decimal percentages', () => {
+    expect(formatPct(33.3)).toBe('33.3%');
+  });
 });
 
 describe('formatVaultCount', () => {
