@@ -33,7 +33,7 @@ export function formatCycleCount(cycles: number): string {
 
 /** Format a small STX value with locale separators. */
 export function formatStxShort(stx: number): string {
-  if (stx >= 1_000_000) return `${(stx / 1_000_000).toFixed(2)}M STX`;
-  if (stx >= 1_000) return `${(stx / 1_000).toFixed(1)}k STX`;
-  return `${stx.toLocaleString()} STX`;
+  if (stx >= 1_000_000) return formatStx(stx, { compact: true, decimals: 2 });
+  if (stx >= 1_000) return formatStx(stx, { compact: true, decimals: 1 });
+  return formatStx(stx, { decimals: 0 });
 }
