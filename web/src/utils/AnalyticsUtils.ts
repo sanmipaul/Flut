@@ -206,6 +206,7 @@ export const calculateVaultPerformance = (
 /**
  * Format currency for display.
  * Accepts a microSTX amount and converts to STX before formatting.
+ * @example formatCurrency(1_500_000) → "1.500000"
  */
 export const formatCurrency = (amount: number, decimals = 6): string => {
   return formatStx(amount, { fromMicroStx: true, decimals, showSymbol: false });
