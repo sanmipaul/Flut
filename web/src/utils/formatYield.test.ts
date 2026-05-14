@@ -221,4 +221,9 @@ describe('formatStxShort', () => {
       expect(formatStxShort(n)).toMatch(/ STX$/);
     });
   });
+
+  it('delegates to formatStx — never throws', () => {
+    expect(() => formatStxShort(NaN)).not.toThrow();
+    expect(() => formatStxShort(Infinity)).not.toThrow();
+  });
 });
