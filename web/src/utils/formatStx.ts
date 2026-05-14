@@ -127,11 +127,8 @@ export function formatStxWhole(amount: number, showSymbol = true): string {
  * @example formatStxPenalty(100) → "−100 STX (fee)"
  */
 export function formatStxPenalty(penaltyStx: number): string {
-  const formatted = penaltyStx.toLocaleString(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
-  return `−${formatted} ${STX_SYMBOL} (fee)`;
+  const formatted = formatStx(Math.abs(penaltyStx), { decimals: 2, showSymbol: true });
+  return `−${formatted.replace(/ STX$/, '')} ${STX_SYMBOL} (fee)`;
 }
 
 /**
