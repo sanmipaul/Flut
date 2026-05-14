@@ -131,7 +131,18 @@ describe('formatStxDiff', () => {
   });
 });
 
-describe('parseStxInput', () => {
+describe('parseStxInput — round-trip with formatStx', () => {
+  it('compact k output can be re-parsed', () => {
+    const formatted = formatStx(5_000, { compact: true, showSymbol: false, locale: 'en-US' });
+    // formatted = "5k"
+    expect(parseStxInput(formatted)).toBe(5_000);
+  });
+
+  it('plain number output can be re-parsed', () => {
+    const formatted = formatStx(1_234, { showSymbol: false, locale: 'en-US' });
+    expect(parseStxInput(formatted)).toBe(1_234);
+  });
+});
   it('parses a plain number string', () => {
     expect(parseStxInput('500')).toBe(500);
   });
