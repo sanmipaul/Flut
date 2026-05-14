@@ -119,6 +119,15 @@ describe('formatBlockDuration — boundary values', () => {
   it('1 block returns minutes', () => {
     expect(formatBlockDuration(1)).toContain('min');
   });
+
+  it('very large block count returns days', () => {
+    expect(formatBlockDuration(10_000)).toContain('day');
+  });
+
+  it('2 blocks returns ~20 min', () => {
+    expect(formatBlockDuration(2)).toContain('20');
+    expect(formatBlockDuration(2)).toContain('min');
+  });
 });
 
 describe('formatStxAmount — large values', () => {
