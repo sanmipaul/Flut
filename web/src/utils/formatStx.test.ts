@@ -87,6 +87,14 @@ describe('formatMicroStx', () => {
   it('hides symbol when showSymbol=false', () => {
     expect(formatMicroStx(1_000_000, false)).not.toContain('STX');
   });
+
+  it('handles 0 uSTX', () => {
+    expect(formatMicroStx(0)).toContain('0');
+  });
+
+  it('handles 1.5 STX worth of uSTX', () => {
+    expect(formatMicroStx(1_500_000)).toContain('1.5');
+  });
 });
 
 describe('formatStxWhole', () => {
