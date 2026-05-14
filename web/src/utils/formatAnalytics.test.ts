@@ -18,6 +18,10 @@ describe('formatStxAmount', () => {
     expect(formatStxAmount(Infinity)).toBe('0 STX');
     expect(formatStxAmount(NaN)).toBe('0 STX');
   });
+
+  it('delegates to formatStx — result ends with " STX"', () => {
+    expect(formatStxAmount(500)).toMatch(/ STX$/);
+  });
 });
 
 describe('formatBlockDuration', () => {
