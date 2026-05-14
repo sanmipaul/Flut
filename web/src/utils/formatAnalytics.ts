@@ -3,6 +3,9 @@
  *
  * Thin display-formatting helpers used by VaultAnalyticsDashboard.
  * All functions are pure and return localised strings.
+ *
+ * STX amounts are formatted via the canonical formatStx utility to ensure
+ * consistent display across the application.
  */
 import { formatStx } from './formatStx';
 
