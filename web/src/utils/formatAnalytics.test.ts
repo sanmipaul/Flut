@@ -122,3 +122,26 @@ describe('formatStxAmount — large values', () => {
     expect(formatStxAmount(1_000_000)).toContain('STX');
   });
 });
+
+describe('formatMicroStxAmount', () => {
+  it('returns "0 STX" for 0', () => {
+    expect(formatMicroStxAmount(0)).toBe('0 STX');
+  });
+
+  it('converts 1_000_000 uSTX to 1 STX', () => {
+    expect(formatMicroStxAmount(1_000_000)).toContain('1');
+    expect(formatMicroStxAmount(1_000_000)).toContain('STX');
+  });
+
+  it('returns "0 STX" for NaN', () => {
+    expect(formatMicroStxAmount(NaN)).toBe('0 STX');
+  });
+
+  it('returns "0 STX" for Infinity', () => {
+    expect(formatMicroStxAmount(Infinity)).toBe('0 STX');
+  });
+
+  it('result ends with " STX"', () => {
+    expect(formatMicroStxAmount(1_500_000)).toMatch(/ STX$/);
+  });
+});
