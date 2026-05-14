@@ -12,7 +12,7 @@ const BLOCKS_PER_HOUR = 6;
 /** Format a whole-STX number for display (locale-aware, no decimals for round numbers). */
 export function formatStxAmount(stx: number): string {
   if (!Number.isFinite(stx) || stx === 0) return '0 STX';
-  return formatStx(stx, { decimals: 2 });
+  return formatStx(stx, { decimals: 2, showSymbol: true });
 }
 
 /**
