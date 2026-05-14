@@ -93,6 +93,10 @@ describe('formatVaultCount', () => {
   it('uses plural "vaults" for 2+', () => {
     expect(formatVaultCount(5)).toBe('5 vaults');
   });
+
+  it('uses plural "vaults" for large counts', () => {
+    expect(formatVaultCount(100)).toBe('100 vaults');
+  });
 });
 
 describe('formatBlockDuration — boundary values', () => {
