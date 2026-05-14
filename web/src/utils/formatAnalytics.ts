@@ -32,6 +32,10 @@ export function formatMicroStxAmount(uStx: number): string {
 /**
  * Convert a block count to a human-readable duration string.
  * Mirrors the logic in useLockProgress for consistency.
+ *
+ * @param blocks - Number of Bitcoin blocks
+ * @returns Human-readable duration with ~ prefix
+ * @example formatBlockDuration(144) → "~1 day"
  */
 export function formatBlockDuration(blocks: number): string {
   if (blocks <= 0) return '—';
