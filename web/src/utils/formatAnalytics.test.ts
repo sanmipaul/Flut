@@ -1,4 +1,4 @@
-import { formatStxAmount, formatBlockDuration, formatPct, formatVaultCount } from './formatAnalytics';
+import { formatStxAmount, formatMicroStxAmount, formatBlockDuration, formatPct, formatVaultCount } from './formatAnalytics';
 
 describe('formatStxAmount', () => {
   it('returns "0 STX" for 0', () => {
@@ -17,6 +17,15 @@ describe('formatStxAmount', () => {
   it('returns "0 STX" for non-finite values', () => {
     expect(formatStxAmount(Infinity)).toBe('0 STX');
     expect(formatStxAmount(NaN)).toBe('0 STX');
+  });
+
+  it('delegates to formatStx — result ends with " STX"', () => {
+    expect(formatStxAmount(500)).toMatch(/ STX$/);
+  });
+
+  it('formats negative values via formatStx', () => {
+    const result = formatStxAmount(-100);
+    expect(result).toContain('STX');
   });
 });
 
@@ -66,6 +75,10 @@ describe('formatPct', () => {
   it('works for 100%', () => {
     expect(formatPct(100)).toBe('100%');
   });
+
+  it('works for decimal percentages', () => {
+    expect(formatPct(33.3)).toBe('33.3%');
+  });
 });
 
 describe('formatVaultCount', () => {
@@ -79,6 +92,10 @@ describe('formatVaultCount', () => {
 
   it('uses plural "vaults" for 2+', () => {
     expect(formatVaultCount(5)).toBe('5 vaults');
+  });
+
+  it('uses plural "vaults" for large counts', () => {
+    expect(formatVaultCount(100)).toBe('100 vaults');
   });
 });
 
@@ -119,6 +136,15 @@ describe('formatBlockDuration — boundary values', () => {
 
   it('1 block returns minutes', () => {
     expect(formatBlockDuration(1)).toContain('min');
+  });
+
+  it('very large block count returns days', () => {
+    expect(formatBlockDuration(10_000)).toContain('day');
+  });
+
+  it('2 blocks returns ~20 min', () => {
+    expect(formatBlockDuration(2)).toContain('20');
+    expect(formatBlockDuration(2)).toContain('min');
   });
 });
 

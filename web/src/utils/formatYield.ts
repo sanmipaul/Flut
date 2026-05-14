@@ -2,7 +2,10 @@
  * formatYield
  *
  * Display-formatting helpers for stacking yield values.
+ *
+ * STX amounts delegate to the canonical formatStx utility.
  */
+import { formatStx } from './formatStx';
 
 /**
  * Format a fractional BTC value for display.
@@ -17,20 +20,29 @@ export function formatBtcAmount(btc: number): string {
   return `${btc.toFixed(6)} BTC`;
 }
 
-/** Format a yield percentage as "10.0% APY". */
+/** Format a yield percentage as "10.0% APY".
+ * @example formatYieldPct(10) → "10.0% APY"
+ */
 export function formatYieldPct(pct: number): string {
   return `${pct.toFixed(1)}% APY`;
 }
 
-/** Format a cycle count as "12 cycles (~24 weeks)". */
+/** Format a cycle count as "12 cycles (~24 weeks)".
+ * @example formatCycleCount(6) → "6 cycles (~12 weeks)"
+ */
 export function formatCycleCount(cycles: number): string {
   const weeks = cycles * 2;
   return `${cycles} cycle${cycles !== 1 ? 's' : ''} (~${weeks} week${weeks !== 1 ? 's' : ''})`;
 }
 
-/** Format a small STX value with locale separators. */
+/** Format a small STX value with compact notation.
+ * Delegates to canonical formatStx for consistency.
+ * @example formatStxShort(1_500_000) → "1.5M STX"
+ * @example formatStxShort(2_500) → "2.5k STX"
+ * @example formatStxShort(500) → "500 STX"
+ */
 export function formatStxShort(stx: number): string {
-  if (stx >= 1_000_000) return `${(stx / 1_000_000).toFixed(2)}M STX`;
-  if (stx >= 1_000) return `${(stx / 1_000).toFixed(1)}k STX`;
-  return `${stx.toLocaleString()} STX`;
+  if (stx >= 1_000_000) return formatStx(stx, { compact: true, decimals: 2 });
+  if (stx >= 1_000) return formatStx(stx, { compact: true, decimals: 1 });
+  return formatStx(stx, { decimals: 0 });
 }

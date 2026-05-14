@@ -20,6 +20,7 @@ export function microStxToStx(uStx: number): number {
 /**
  * Convert a STX decimal value to its microSTX integer equivalent.
  * Always rounds down to avoid spending more than intended.
+ * The result is always a non-negative integer.
  * @example stxToMicroStx(1.5) → 1_500_000
  */
 export function stxToMicroStx(stx: number): number {
@@ -52,6 +53,8 @@ export function isValidStxAmount(stx: number): boolean {
 
 /**
  * Clamps a STX value to [0, maxStx].
+ * @example clampStx(200, 100) → 100
+ * @example clampStx(-5, 100) → 0
  */
 export function clampStx(stx: number, maxStx: number): number {
   return Math.min(Math.max(0, stx), maxStx);

@@ -71,6 +71,21 @@ describe('formatStx', () => {
     const result = formatStx(Infinity, { locale });
     expect(result).toContain('—');
   });
+
+  it('returns placeholder for -Infinity', () => {
+    const result = formatStx(-Infinity, { locale });
+    expect(result).toContain('—');
+  });
+
+  it('hides symbol and returns — for NaN when showSymbol=false', () => {
+    const result = formatStx(NaN, { showSymbol: false, locale });
+    expect(result).toBe('—');
+  });
+
+  it('respects custom decimals=4', () => {
+    const result = formatStx(1.23456, { decimals: 4, locale });
+    expect(result).toContain('1.2346');
+  });
 });
 
 describe('formatMicroStx', () => {
@@ -87,6 +102,14 @@ describe('formatMicroStx', () => {
   it('hides symbol when showSymbol=false', () => {
     expect(formatMicroStx(1_000_000, false)).not.toContain('STX');
   });
+
+  it('handles 0 uSTX', () => {
+    expect(formatMicroStx(0)).toContain('0');
+  });
+
+  it('handles 1.5 STX worth of uSTX', () => {
+    expect(formatMicroStx(1_500_000)).toContain('1.5');
+  });
 });
 
 describe('formatStxWhole', () => {
@@ -94,6 +117,22 @@ describe('formatStxWhole', () => {
     const result = formatStxWhole(1_234_567.89, false);
     expect(result).toContain('1');
     expect(result).not.toContain('.');
+  });
+
+  it('rounds 0.5 up', () => {
+    expect(formatStxWhole(0.5, false)).toContain('1');
+  });
+
+  it('rounds 0.4 down to 0', () => {
+    expect(formatStxWhole(0.4, false)).toContain('0');
+  });
+
+  it('shows STX symbol by default', () => {
+    expect(formatStxWhole(100)).toContain('STX');
+  });
+
+  it('hides STX symbol when showSymbol=false', () => {
+    expect(formatStxWhole(100, false)).not.toContain('STX');
   });
 });
 
@@ -104,6 +143,16 @@ describe('formatStxPenalty', () => {
     expect(result).toContain('50');
     expect(result).toContain('fee');
     expect(result).toContain('STX');
+  });
+
+  it('handles negative input by using absolute value', () => {
+    const result = formatStxPenalty(-50);
+    expect(result).toContain('50');
+    expect(result).toContain('fee');
+  });
+
+  it('ends with "(fee)"', () => {
+    expect(formatStxPenalty(100)).toMatch(/\(fee\)$/);
   });
 });
 
@@ -129,9 +178,30 @@ describe('formatStxDiff', () => {
   it('returns placeholder for NaN', () => {
     expect(formatStxDiff(NaN)).toContain('—');
   });
+
+  it('respects custom decimals parameter', () => {
+    const result = formatStxDiff(1.5, 1);
+    expect(result).toContain('1.5');
+  });
+
+  it('result always ends with " STX"', () => {
+    expect(formatStxDiff(100)).toMatch(/ STX$/);
+    expect(formatStxDiff(-100)).toMatch(/ STX$/);
+  });
 });
 
-describe('parseStxInput', () => {
+describe('parseStxInput — round-trip with formatStx', () => {
+  it('compact k output can be re-parsed', () => {
+    const formatted = formatStx(5_000, { compact: true, showSymbol: false, locale: 'en-US' });
+    // formatted = "5k"
+    expect(parseStxInput(formatted)).toBe(5_000);
+  });
+
+  it('plain number output can be re-parsed', () => {
+    const formatted = formatStx(1_234, { showSymbol: false, locale: 'en-US' });
+    expect(parseStxInput(formatted)).toBe(1_234);
+  });
+});
   it('parses a plain number string', () => {
     expect(parseStxInput('500')).toBe(500);
   });
@@ -156,11 +226,32 @@ describe('parseStxInput', () => {
     expect(parseStxInput('1.2M')).toBeCloseTo(1_200_000, 0);
   });
 
+  it('parses compact m suffix (lowercase)', () => {
+    expect(parseStxInput('2m')).toBe(2_000_000);
+  });
+
+  it('M suffix means million STX not microSTX', () => {
+    // 1M should be 1_000_000 STX, not 1_000_000 * 1_000_000
+    expect(parseStxInput('1M')).toBe(1_000_000);
+  });
+
   it('returns NaN for invalid input', () => {
     expect(parseStxInput('abc')).toBeNaN();
   });
 
   it('trims whitespace', () => {
     expect(parseStxInput('  100  ')).toBe(100);
+  });
+
+  it('returns NaN for empty string', () => {
+    expect(parseStxInput('')).toBeNaN();
+  });
+
+  it('returns NaN for whitespace-only string', () => {
+    expect(parseStxInput('   ')).toBeNaN();
+  });
+
+  it('handles decimal k suffix', () => {
+    expect(parseStxInput('1.5k')).toBe(1_500);
   });
 });
