@@ -159,6 +159,10 @@ export function formatStxDiff(diffStx: number, decimals = 2): string {
  * Parses a user-typed string into a STX number.
  * Returns NaN for non-numeric input.
  * Handles common input patterns: "1,234.56", "1.5M", "500k".
+ *
+ * Compact suffixes:
+ *   k / K  → multiply by 1,000
+ *   m / M  → multiply by 1,000,000 (million STX, NOT microSTX)
  */
 export function parseStxInput(raw: string): number {
   const cleaned = raw.trim().replace(/,/g, '');
@@ -169,7 +173,7 @@ export function parseStxInput(raw: string): number {
     const num = parseFloat(compactMatch[1]);
     const suffix = compactMatch[2].toLowerCase();
     if (!Number.isFinite(num)) return NaN;
-    return suffix === 'm' ? num * MICROSTX_PER_STX : num * 1000;
+    return suffix === 'm' ? num * 1_000_000 : num * 1_000;
   }
 
   return parseFloat(cleaned);
