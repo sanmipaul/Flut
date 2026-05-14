@@ -27,7 +27,9 @@ export function formatYieldPct(pct: number): string {
   return `${pct.toFixed(1)}% APY`;
 }
 
-/** Format a cycle count as "12 cycles (~24 weeks)". */
+/** Format a cycle count as "12 cycles (~24 weeks)".
+ * @example formatCycleCount(6) → "6 cycles (~12 weeks)"
+ */
 export function formatCycleCount(cycles: number): string {
   const weeks = cycles * 2;
   return `${cycles} cycle${cycles !== 1 ? 's' : ''} (~${weeks} week${weeks !== 1 ? 's' : ''})`;
