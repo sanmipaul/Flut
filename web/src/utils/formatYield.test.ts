@@ -209,6 +209,10 @@ describe('formatStxShort', () => {
     expect(formatStxShort(0)).toBe('0 STX');
   });
 
+  it('handles negative values without throwing', () => {
+    expect(() => formatStxShort(-500)).not.toThrow();
+  });
+
   it('threshold: 999 is not formatted as "k"', () => {
     expect(formatStxShort(999)).not.toContain('k');
   });
