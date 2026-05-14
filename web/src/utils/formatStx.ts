@@ -143,10 +143,7 @@ export function formatStxDiff(diffStx: number, decimals = 2): string {
   if (!Number.isFinite(diffStx)) return `— ${STX_SYMBOL}`;
   if (diffStx === 0) return `0 ${STX_SYMBOL}`;
   const abs = Math.abs(diffStx);
-  const formatted = abs.toLocaleString(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: decimals,
-  });
+  const formatted = formatStx(abs, { decimals, showSymbol: false });
   const sign = diffStx > 0 ? '+' : '−';
   return `${sign}${formatted} ${STX_SYMBOL}`;
 }
