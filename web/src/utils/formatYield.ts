@@ -35,7 +35,12 @@ export function formatCycleCount(cycles: number): string {
   return `${cycles} cycle${cycles !== 1 ? 's' : ''} (~${weeks} week${weeks !== 1 ? 's' : ''})`;
 }
 
-/** Format a small STX value with locale separators. */
+/** Format a small STX value with compact notation.
+ * Delegates to canonical formatStx for consistency.
+ * @example formatStxShort(1_500_000) → "1.5M STX"
+ * @example formatStxShort(2_500) → "2.5k STX"
+ * @example formatStxShort(500) → "500 STX"
+ */
 export function formatStxShort(stx: number): string {
   if (stx >= 1_000_000) return formatStx(stx, { compact: true, decimals: 2 });
   if (stx >= 1_000) return formatStx(stx, { compact: true, decimals: 1 });
