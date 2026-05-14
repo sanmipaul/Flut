@@ -93,6 +93,14 @@ describe('isValidStxAmount', () => {
   it('returns false for NaN', () => {
     expect(isValidStxAmount(NaN)).toBe(false);
   });
+
+  it('returns false for Infinity', () => {
+    expect(isValidStxAmount(Infinity)).toBe(false);
+  });
+
+  it('returns false for -Infinity', () => {
+    expect(isValidStxAmount(-Infinity)).toBe(false);
+  });
 });
 
 describe('clampStx', () => {
