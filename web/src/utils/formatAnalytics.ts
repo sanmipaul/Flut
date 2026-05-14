@@ -52,7 +52,10 @@ export function formatPct(pct: number): string {
   return `${pct}%`;
 }
 
-/** Format a vault count with singular/plural label. */
+/** Format a vault count with singular/plural label.
+ * @example formatVaultCount(1) → "1 vault"
+ * @example formatVaultCount(5) → "5 vaults"
+ */
 export function formatVaultCount(count: number): string {
   return `${count} vault${count !== 1 ? 's' : ''}`;
 }
