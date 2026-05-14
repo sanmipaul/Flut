@@ -118,6 +118,22 @@ describe('formatStxWhole', () => {
     expect(result).toContain('1');
     expect(result).not.toContain('.');
   });
+
+  it('rounds 0.5 up', () => {
+    expect(formatStxWhole(0.5, false)).toContain('1');
+  });
+
+  it('rounds 0.4 down to 0', () => {
+    expect(formatStxWhole(0.4, false)).toContain('0');
+  });
+
+  it('shows STX symbol by default', () => {
+    expect(formatStxWhole(100)).toContain('STX');
+  });
+
+  it('hides STX symbol when showSymbol=false', () => {
+    expect(formatStxWhole(100, false)).not.toContain('STX');
+  });
 });
 
 describe('formatStxPenalty', () => {
