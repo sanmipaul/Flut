@@ -172,4 +172,16 @@ describe('parseStxInput', () => {
   it('trims whitespace', () => {
     expect(parseStxInput('  100  ')).toBe(100);
   });
+
+  it('returns NaN for empty string', () => {
+    expect(parseStxInput('')).toBeNaN();
+  });
+
+  it('returns NaN for whitespace-only string', () => {
+    expect(parseStxInput('   ')).toBeNaN();
+  });
+
+  it('handles decimal k suffix', () => {
+    expect(parseStxInput('1.5k')).toBe(1_500);
+  });
 });
