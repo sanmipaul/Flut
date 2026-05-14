@@ -11,7 +11,6 @@
  * All functions treat the input as STX unless `fromMicroStx` is set.
  */
 import {
-  MICROSTX_PER_STX,
   STX_SYMBOL,
   COMPACT_THRESHOLD_MILLION,
   COMPACT_THRESHOLD_THOUSAND,
