@@ -45,7 +45,9 @@ export function formatBlockDuration(blocks: number): string {
   return `~${days} day${days !== 1 ? 's' : ''}`;
 }
 
-/** Format a percentage value as "42%". */
+/** Format a percentage value as "42%".
+ * @example formatPct(42) → "42%"
+ */
 export function formatPct(pct: number): string {
   return `${pct}%`;
 }
