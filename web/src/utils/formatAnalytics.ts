@@ -4,6 +4,7 @@
  * Thin display-formatting helpers used by VaultAnalyticsDashboard.
  * All functions are pure and return localised strings.
  */
+import { formatStx } from './formatStx';
 
 const BLOCKS_PER_DAY = 144;
 const BLOCKS_PER_HOUR = 6;
@@ -11,7 +12,7 @@ const BLOCKS_PER_HOUR = 6;
 /** Format a whole-STX number for display (locale-aware, no decimals for round numbers). */
 export function formatStxAmount(stx: number): string {
   if (!Number.isFinite(stx) || stx === 0) return '0 STX';
-  return `${stx.toLocaleString(undefined, { maximumFractionDigits: 2 })} STX`;
+  return formatStx(stx, { decimals: 2 });
 }
 
 /**
