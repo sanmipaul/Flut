@@ -215,4 +215,9 @@ describe('computeVaultAnalytics — large array', () => {
     // min duration = 100 + 0 = 100
     expect(result.lockDurationStats.shortestLockBlocks).toBe(100);
   });
+
+  it('statusCounts.total matches array length for 100k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    expect(result.statusCounts.total).toBe(100_000);
+  });
 });
