@@ -67,3 +67,21 @@ describe('arrayMin', () => {
     expect(arrayMin(arr)).toBe(Math.min(...arr));
   });
 });
+
+describe('arraySum', () => {
+  it('sums a normal array', () => {
+    expect(arraySum([1, 2, 3, 4])).toBe(10);
+  });
+
+  it('returns 0 for empty array', () => {
+    expect(arraySum([])).toBe(0);
+  });
+
+  it('handles negative numbers', () => {
+    expect(arraySum([-1, -2, 3])).toBe(0);
+  });
+
+  it('returns the single element for one-item array', () => {
+    expect(arraySum([99])).toBe(99);
+  });
+});
