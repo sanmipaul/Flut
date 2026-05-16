@@ -96,7 +96,7 @@ export function computeVaultAnalytics(vaults: AnalyticsVaultInput[]): VaultAnaly
 
   const lockDurationStats: VaultLockDurationStats = {
     averageLockBlocks: Math.round(totalDuration / total),
-    longestLockBlocks: Math.max(...durations),
+    longestLockBlocks: safeArrayMax(durations),
     shortestLockBlocks: Math.min(...durations),
   };
 
