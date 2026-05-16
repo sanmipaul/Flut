@@ -254,6 +254,11 @@ describe('computeVaultAnalytics — large array', () => {
     expect(result.statusCounts.withdrawn).toBe(0);
   });
 
+  it('statusDistribution.lockedPct is 100 for all-locked 100k array', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    expect(result.statusDistribution.lockedPct).toBe(100);
+  });
+
   it('original 3-vault results unchanged after fix', () => {
     const result = computeVaultAnalytics([
       { vaultId: 1, amount: 1000, unlockHeight: 300, createdAt: 100, isWithdrawn: false, currentBlockHeight: 200 },
