@@ -202,4 +202,11 @@ describe('computeVaultAnalytics — large array', () => {
   it('does not throw RangeError with 100k vaults', () => {
     expect(() => computeVaultAnalytics(makeVaults(100_000))).not.toThrow();
   });
+
+  it('longestLockBlocks is correct with 100k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    // vault i has unlockHeight = 200+i, createdAt = 100, duration = 100+i
+    // max duration = 100 + 99999 = 100099
+    expect(result.lockDurationStats.longestLockBlocks).toBe(100099);
+  });
 });
