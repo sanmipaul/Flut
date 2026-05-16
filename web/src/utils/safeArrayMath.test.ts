@@ -201,3 +201,21 @@ describe('safeArrayMax/safeArrayMin — never NaN', () => {
     expect(Number.isNaN(safeArrayMin([1, 2]))).toBe(false);
   });
 });
+
+describe('arrayMax — input not mutated', () => {
+  it('does not mutate the input array', () => {
+    const arr = [5, 3, 9, 1];
+    const copy = [...arr];
+    arrayMax(arr);
+    expect(arr).toEqual(copy);
+  });
+});
+
+describe('arrayMin — input not mutated', () => {
+  it('does not mutate the input array', () => {
+    const arr = [5, 3, 9, 1];
+    const copy = [...arr];
+    arrayMin(arr);
+    expect(arr).toEqual(copy);
+  });
+});
