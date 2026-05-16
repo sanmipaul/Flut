@@ -155,3 +155,13 @@ describe('arrayMin — all-equal values', () => {
     expect(arrayMin([3, 3, 3])).toBe(3);
   });
 });
+
+describe('arraySum — negative values', () => {
+  it('correctly sums an array of all negatives', () => {
+    expect(arraySum([-1, -2, -3])).toBe(-6);
+  });
+
+  it('returns 0 for a balanced positive/negative array', () => {
+    expect(arraySum([-5, 5])).toBe(0);
+  });
+});
