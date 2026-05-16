@@ -223,3 +223,16 @@ describe('calculateStackingYield — boundary at exactly one cycle', () => {
     expect(at20.totalBtc).toBeCloseTo(at10.totalBtc * 2, 8);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Compound interest — failing tests exposing the linear model bug
+// ---------------------------------------------------------------------------
+
+describe('calculateStackingYield — compound interest', () => {
+  it('each cycle reward should be strictly greater than the previous (compound growth)', () => {
+    const result = calculateStackingYield(BASE_INPUT);
+    for (let i = 1; i < result.cycles.length; i++) {
+      expect(result.cycles[i].estimatedBtc).toBeGreaterThan(result.cycles[i - 1].estimatedBtc);
+    }
+  });
+});
