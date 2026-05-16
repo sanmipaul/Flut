@@ -247,6 +247,13 @@ describe('computeVaultAnalytics — large array', () => {
     expect(result.amountTotals.average).toBe(1000);
   });
 
+  it('all 100k vaults are counted as locked (currentBlockHeight < unlockHeight)', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    expect(result.statusCounts.locked).toBe(100_000);
+    expect(result.statusCounts.unlocked).toBe(0);
+    expect(result.statusCounts.withdrawn).toBe(0);
+  });
+
   it('original 3-vault results unchanged after fix', () => {
     const result = computeVaultAnalytics([
       { vaultId: 1, amount: 1000, unlockHeight: 300, createdAt: 100, isWithdrawn: false, currentBlockHeight: 200 },
