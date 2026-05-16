@@ -220,4 +220,9 @@ describe('computeVaultAnalytics — large array', () => {
     const result = computeVaultAnalytics(makeVaults(100_000));
     expect(result.statusCounts.total).toBe(100_000);
   });
+
+  it('hasData is true for 100k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    expect(result.hasData).toBe(true);
+  });
 });
