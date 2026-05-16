@@ -229,3 +229,10 @@ describe('safeArrayMax and safeArrayMin — consistency with arrayMax/arrayMin',
     expect(safeArrayMin([1, 2, 3])).toBe(arrayMin([1, 2, 3]));
   });
 });
+
+describe('arraySum — large array correctness', () => {
+  it('correctly sums 10k identical elements', () => {
+    const arr = Array(10_000).fill(3);
+    expect(arraySum(arr)).toBe(30_000);
+  });
+});
