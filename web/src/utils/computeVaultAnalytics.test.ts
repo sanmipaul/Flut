@@ -235,6 +235,13 @@ describe('computeVaultAnalytics — large array', () => {
     expect(result.lockDurationStats.longestLockBlocks).toBe(200099);
   });
 
+  it('amountTotals are correct with 100k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    // all vaults have amount=1000, none are withdrawn
+    expect(result.amountTotals.activeTotal).toBe(100_000 * 1000);
+    expect(result.amountTotals.withdrawnTotal).toBe(0);
+  });
+
   it('original 3-vault results unchanged after fix', () => {
     const result = computeVaultAnalytics([
       { vaultId: 1, amount: 1000, unlockHeight: 300, createdAt: 100, isWithdrawn: false, currentBlockHeight: 200 },
