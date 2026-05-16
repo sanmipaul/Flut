@@ -66,13 +66,25 @@ export function arrayMean(arr: number[]): number {
   return arraySum(arr) / arr.length;
 }
 
-/** Like arrayMax but returns 0 instead of -Infinity for empty arrays. */
+/**
+ * Like arrayMax but returns 0 instead of -Infinity for empty arrays.
+ * Preferred over arrayMax when the domain is non-negative (e.g. block counts).
+ *
+ * @example safeArrayMax([3, 1, 4]) // 4
+ * @example safeArrayMax([])        // 0
+ */
 export function safeArrayMax(arr: number[]): number {
   if (isEmptyArray(arr)) return 0;
   return arrayMax(arr);
 }
 
-/** Like arrayMin but returns 0 instead of Infinity for empty arrays. */
+/**
+ * Like arrayMin but returns 0 instead of Infinity for empty arrays.
+ * Preferred over arrayMin when the domain is non-negative (e.g. block counts).
+ *
+ * @example safeArrayMin([3, 1, 4]) // 1
+ * @example safeArrayMin([])        // 0
+ */
 export function safeArrayMin(arr: number[]): number {
   if (isEmptyArray(arr)) return 0;
   return arrayMin(arr);
