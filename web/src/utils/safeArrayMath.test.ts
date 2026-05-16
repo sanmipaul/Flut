@@ -123,3 +123,23 @@ describe('safeArrayMin', () => {
     expect(safeArrayMin([3, 1, 4])).toBe(1);
   });
 });
+
+describe('large array — no stack overflow', () => {
+  const big = Array.from({ length: 200_000 }, (_, i) => i);
+
+  it('arrayMax does not throw for 200k elements', () => {
+    expect(() => arrayMax(big)).not.toThrow();
+  });
+
+  it('arrayMin does not throw for 200k elements', () => {
+    expect(() => arrayMin(big)).not.toThrow();
+  });
+
+  it('arrayMax returns the correct maximum', () => {
+    expect(arrayMax(big)).toBe(199_999);
+  });
+
+  it('arrayMin returns the correct minimum', () => {
+    expect(arrayMin(big)).toBe(0);
+  });
+});
