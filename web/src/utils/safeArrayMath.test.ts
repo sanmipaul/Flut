@@ -103,3 +103,23 @@ describe('arrayMean', () => {
     expect(arrayMean([5, 5, 5, 5])).toBe(5);
   });
 });
+
+describe('safeArrayMax', () => {
+  it('returns 0 for empty array', () => {
+    expect(safeArrayMax([])).toBe(0);
+  });
+
+  it('returns max for non-empty array', () => {
+    expect(safeArrayMax([3, 1, 4])).toBe(4);
+  });
+});
+
+describe('safeArrayMin', () => {
+  it('returns 0 for empty array', () => {
+    expect(safeArrayMin([])).toBe(0);
+  });
+
+  it('returns min for non-empty array', () => {
+    expect(safeArrayMin([3, 1, 4])).toBe(1);
+  });
+});
