@@ -85,3 +85,21 @@ describe('arraySum', () => {
     expect(arraySum([99])).toBe(99);
   });
 });
+
+describe('arrayMean', () => {
+  it('computes mean of [1, 2, 3]', () => {
+    expect(arrayMean([1, 2, 3])).toBeCloseTo(2);
+  });
+
+  it('returns 0 for empty array', () => {
+    expect(arrayMean([])).toBe(0);
+  });
+
+  it('returns the value itself for a single-element array', () => {
+    expect(arrayMean([7])).toBe(7);
+  });
+
+  it('handles arrays with all equal values', () => {
+    expect(arrayMean([5, 5, 5, 5])).toBe(5);
+  });
+});
