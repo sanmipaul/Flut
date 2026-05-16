@@ -2,8 +2,16 @@
  * safeArrayMath
  *
  * Array reduction helpers that replace spread-based Math.min/Math.max calls.
- * Using spread (Math.max(...arr)) blows the JS call stack for arrays with
- * more than ~100k elements; reduce-based versions are O(n) with O(1) stack.
+ *
+ * Problem: `Math.max(...arr)` passes every element as a separate function
+ * argument. JavaScript engines store function arguments on the call stack,
+ * which has a fixed depth. Arrays with more than ~100k–250k elements cause a
+ * "Maximum call stack size exceeded" RangeError.
+ *
+ * Fix: use Array.prototype.reduce, which walks the array iteratively in O(n)
+ * time and O(1) stack space regardless of array length.
+ *
+ * All exported functions are pure and never throw.
  */
 
 /** Returns true if the array has no elements. */
