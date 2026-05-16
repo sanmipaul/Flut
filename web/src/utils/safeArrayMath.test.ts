@@ -219,3 +219,13 @@ describe('arrayMin — input not mutated', () => {
     expect(arr).toEqual(copy);
   });
 });
+
+describe('safeArrayMax and safeArrayMin — consistency with arrayMax/arrayMin', () => {
+  it('safeArrayMax([1,2,3]) equals arrayMax([1,2,3])', () => {
+    expect(safeArrayMax([1, 2, 3])).toBe(arrayMax([1, 2, 3]));
+  });
+
+  it('safeArrayMin([1,2,3]) equals arrayMin([1,2,3])', () => {
+    expect(safeArrayMin([1, 2, 3])).toBe(arrayMin([1, 2, 3]));
+  });
+});
