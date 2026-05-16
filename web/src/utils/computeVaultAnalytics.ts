@@ -12,6 +12,7 @@ import type {
   VaultAmountTotals,
   VaultLockDurationStats,
 } from '../types/VaultAnalytics';
+import { safeArrayMax, safeArrayMin } from './safeArrayMath';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
