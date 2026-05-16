@@ -143,3 +143,15 @@ describe('large array — no stack overflow', () => {
     expect(arrayMin(big)).toBe(0);
   });
 });
+
+describe('arrayMax — all-equal values', () => {
+  it('returns that value when all elements are equal', () => {
+    expect(arrayMax([7, 7, 7, 7])).toBe(7);
+  });
+});
+
+describe('arrayMin — all-equal values', () => {
+  it('returns that value when all elements are equal', () => {
+    expect(arrayMin([3, 3, 3])).toBe(3);
+  });
+});
