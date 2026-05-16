@@ -236,6 +236,14 @@ describe('calculateStackingYield — compound interest', () => {
     }
   });
 
+  it('cycle 2 reward is greater than cycle 1 reward under compounding', () => {
+    const result = calculateStackingYield({
+      ...BASE_INPUT,
+      totalLockBlocks: BLOCKS_PER_CYCLE * 2,
+    });
+    expect(result.cycles[1].estimatedBtc).toBeGreaterThan(result.cycles[0].estimatedBtc);
+  });
+
   it('totalBtc with 12 cycles compound should exceed simple linear total', () => {
     const compoundResult = calculateStackingYield({
       stxAmount: 10_000,
