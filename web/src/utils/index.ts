@@ -11,6 +11,15 @@ export {
 } from './activityHeatmapHelpers';
 export { calculateStackingYield } from './calculateStackingYield';
 export {
+  isEmptyArray,
+  arrayMax,
+  arrayMin,
+  arraySum,
+  arrayMean,
+  safeArrayMax,
+  safeArrayMin,
+} from './safeArrayMath';
+export {
   formatBtcAmount,
   formatYieldPct,
   formatCycleCount,
