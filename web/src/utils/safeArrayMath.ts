@@ -35,3 +35,9 @@ export function arrayMin(arr: number[]): number {
 export function arraySum(arr: number[]): number {
   return arr.reduce((sum, n) => sum + n, 0);
 }
+
+/** Returns the arithmetic mean of a number array. Returns 0 for empty arrays. */
+export function arrayMean(arr: number[]): number {
+  if (isEmptyArray(arr)) return 0;
+  return arraySum(arr) / arr.length;
+}
