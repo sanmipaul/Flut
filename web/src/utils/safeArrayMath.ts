@@ -20,3 +20,13 @@ export function arrayMax(arr: number[]): number {
   if (isEmptyArray(arr)) return -Infinity;
   return arr.reduce((max, n) => (n > max ? n : max), arr[0]);
 }
+
+/**
+ * Returns the minimum value in a number array using reduce.
+ * Safe for arrays of any length — does not spread into function arguments.
+ * Returns Infinity for an empty array (same semantics as Math.min()).
+ */
+export function arrayMin(arr: number[]): number {
+  if (isEmptyArray(arr)) return Infinity;
+  return arr.reduce((min, n) => (n < min ? n : min), arr[0]);
+}
