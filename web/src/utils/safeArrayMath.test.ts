@@ -270,3 +270,12 @@ describe('all safeArrayMath functions — never throw', () => {
     expect(() => safeArrayMin([1])).not.toThrow();
   });
 });
+
+describe('comprehensive edge case matrix', () => {
+  it('arrayMax of [0] is 0', () => expect(arrayMax([0])).toBe(0));
+  it('arrayMin of [0] is 0', () => expect(arrayMin([0])).toBe(0));
+  it('arraySum of [0] is 0', () => expect(arraySum([0])).toBe(0));
+  it('arrayMean of [0] is 0', () => expect(arrayMean([0])).toBe(0));
+  it('arrayMax of two-element array picks larger', () => expect(arrayMax([4, 7])).toBe(7));
+  it('arrayMin of two-element array picks smaller', () => expect(arrayMin([4, 7])).toBe(4));
+});
