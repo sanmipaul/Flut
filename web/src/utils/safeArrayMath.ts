@@ -47,3 +47,9 @@ export function safeArrayMax(arr: number[]): number {
   if (isEmptyArray(arr)) return 0;
   return arrayMax(arr);
 }
+
+/** Like arrayMin but returns 0 instead of Infinity for empty arrays. */
+export function safeArrayMin(arr: number[]): number {
+  if (isEmptyArray(arr)) return 0;
+  return arrayMin(arr);
+}
