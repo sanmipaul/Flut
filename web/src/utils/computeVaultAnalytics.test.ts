@@ -229,4 +229,9 @@ describe('computeVaultAnalytics — large array', () => {
   it('does not throw with 200k vaults', () => {
     expect(() => computeVaultAnalytics(makeVaults(200_000))).not.toThrow();
   });
+
+  it('longestLockBlocks is correct with 200k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(200_000));
+    expect(result.lockDurationStats.longestLockBlocks).toBe(200099);
+  });
 });
