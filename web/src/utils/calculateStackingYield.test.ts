@@ -235,4 +235,16 @@ describe('calculateStackingYield — compound interest', () => {
       expect(result.cycles[i].estimatedBtc).toBeGreaterThan(result.cycles[i - 1].estimatedBtc);
     }
   });
+
+  it('totalBtc with 12 cycles compound should exceed simple linear total', () => {
+    const compoundResult = calculateStackingYield({
+      stxAmount: 10_000,
+      totalLockBlocks: BLOCKS_PER_CYCLE * 12,
+      annualisedYieldPct: 10,
+    });
+    // Simple linear total = 12 * cycleReward (flat)
+    const simpleCycleReward = compoundResult.cycles[0].estimatedBtc;
+    const simpleTotal = simpleCycleReward * 12;
+    expect(compoundResult.totalBtc).toBeGreaterThan(simpleTotal);
+  });
 });
