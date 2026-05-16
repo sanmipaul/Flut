@@ -189,3 +189,15 @@ describe('arrayMax/arrayMin — monotone property', () => {
     expect(arrayMin(superset)).toBeLessThanOrEqual(arrayMin(subset));
   });
 });
+
+describe('safeArrayMax/safeArrayMin — never NaN', () => {
+  it('safeArrayMax never returns NaN', () => {
+    expect(Number.isNaN(safeArrayMax([]))).toBe(false);
+    expect(Number.isNaN(safeArrayMax([1, 2]))).toBe(false);
+  });
+
+  it('safeArrayMin never returns NaN', () => {
+    expect(Number.isNaN(safeArrayMin([]))).toBe(false);
+    expect(Number.isNaN(safeArrayMin([1, 2]))).toBe(false);
+  });
+});
