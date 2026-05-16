@@ -243,3 +243,30 @@ describe('arrayMean — large array', () => {
     expect(arrayMean(arr)).toBeCloseTo(500.5);
   });
 });
+
+describe('all safeArrayMath functions — never throw', () => {
+  it('isEmptyArray never throws', () => {
+    expect(() => isEmptyArray([])).not.toThrow();
+    expect(() => isEmptyArray([1, 2])).not.toThrow();
+  });
+
+  it('arrayMax never throws', () => {
+    expect(() => arrayMax([])).not.toThrow();
+    expect(() => arrayMax([1])).not.toThrow();
+  });
+
+  it('arrayMin never throws', () => {
+    expect(() => arrayMin([])).not.toThrow();
+    expect(() => arrayMin([1])).not.toThrow();
+  });
+
+  it('safeArrayMax never throws', () => {
+    expect(() => safeArrayMax([])).not.toThrow();
+    expect(() => safeArrayMax([1])).not.toThrow();
+  });
+
+  it('safeArrayMin never throws', () => {
+    expect(() => safeArrayMin([])).not.toThrow();
+    expect(() => safeArrayMin([1])).not.toThrow();
+  });
+});
