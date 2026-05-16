@@ -30,3 +30,8 @@ export function arrayMin(arr: number[]): number {
   if (isEmptyArray(arr)) return Infinity;
   return arr.reduce((min, n) => (n < min ? n : min), arr[0]);
 }
+
+/** Returns the sum of all values in a number array. Returns 0 for empty arrays. */
+export function arraySum(arr: number[]): number {
+  return arr.reduce((sum, n) => sum + n, 0);
+}
