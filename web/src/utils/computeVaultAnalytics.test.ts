@@ -225,4 +225,8 @@ describe('computeVaultAnalytics — large array', () => {
     const result = computeVaultAnalytics(makeVaults(100_000));
     expect(result.hasData).toBe(true);
   });
+
+  it('does not throw with 200k vaults', () => {
+    expect(() => computeVaultAnalytics(makeVaults(200_000))).not.toThrow();
+  });
 });
