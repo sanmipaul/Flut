@@ -94,6 +94,8 @@ export function computeVaultAnalytics(vaults: AnalyticsVaultInput[]): VaultAnaly
   const durations = vaults.map(lockDuration);
   const totalDuration = durations.reduce((sum, d) => sum + d, 0);
 
+  // safeArrayMax/Min use reduce — safe for arrays of any size.
+  // Math.max/min spread blows the call stack above ~100k elements.
   const lockDurationStats: VaultLockDurationStats = {
     averageLockBlocks: Math.round(totalDuration / total),
     longestLockBlocks: safeArrayMax(durations),
