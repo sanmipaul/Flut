@@ -209,4 +209,10 @@ describe('computeVaultAnalytics — large array', () => {
     // max duration = 100 + 99999 = 100099
     expect(result.lockDurationStats.longestLockBlocks).toBe(100099);
   });
+
+  it('shortestLockBlocks is correct with 100k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    // min duration = 100 + 0 = 100
+    expect(result.lockDurationStats.shortestLockBlocks).toBe(100);
+  });
 });
