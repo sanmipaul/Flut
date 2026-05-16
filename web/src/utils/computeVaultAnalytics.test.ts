@@ -234,4 +234,14 @@ describe('computeVaultAnalytics — large array', () => {
     const result = computeVaultAnalytics(makeVaults(200_000));
     expect(result.lockDurationStats.longestLockBlocks).toBe(200099);
   });
+
+  it('original 3-vault results unchanged after fix', () => {
+    const result = computeVaultAnalytics([
+      { vaultId: 1, amount: 1000, unlockHeight: 300, createdAt: 100, isWithdrawn: false, currentBlockHeight: 200 },
+      { vaultId: 2, amount: 500, unlockHeight: 200, createdAt: 100, isWithdrawn: false, currentBlockHeight: 250 },
+      { vaultId: 3, amount: 750, unlockHeight: 200, createdAt: 100, isWithdrawn: true, currentBlockHeight: 300 },
+    ]);
+    expect(result.lockDurationStats.longestLockBlocks).toBe(200);
+    expect(result.lockDurationStats.shortestLockBlocks).toBe(100);
+  });
 });
