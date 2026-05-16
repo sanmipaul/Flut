@@ -182,3 +182,24 @@ describe('computeVaultAnalytics — edge cases', () => {
     expect(result.lockDurationStats.shortestLockBlocks).toBe(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Large array — spread overflow regression
+// ---------------------------------------------------------------------------
+
+function makeVaults(n: number): AnalyticsVaultInput[] {
+  return Array.from({ length: n }, (_, i) => ({
+    vaultId: i,
+    amount: 1000,
+    unlockHeight: 200 + i,
+    createdAt: 100,
+    isWithdrawn: false,
+    currentBlockHeight: 150,
+  }));
+}
+
+describe('computeVaultAnalytics — large array', () => {
+  it('does not throw RangeError with 100k vaults', () => {
+    expect(() => computeVaultAnalytics(makeVaults(100_000))).not.toThrow();
+  });
+});
