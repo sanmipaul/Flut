@@ -14,7 +14,12 @@
  * All exported functions are pure and never throw.
  */
 
-/** Returns true if the array has no elements. */
+/**
+ * Returns true if the array has no elements.
+ *
+ * @example isEmptyArray([]) // true
+ * @example isEmptyArray([1]) // false
+ */
 export function isEmptyArray<T>(arr: T[]): boolean {
   return arr.length === 0;
 }
