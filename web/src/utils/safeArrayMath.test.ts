@@ -175,3 +175,17 @@ describe('arrayMean — parametrised accuracy', () => {
     expect(arrayMean(arr)).toBeCloseTo(expected);
   });
 });
+
+describe('arrayMax/arrayMin — monotone property', () => {
+  it('arrayMax of a superset is >= arrayMax of subset', () => {
+    const subset = [1, 5, 3];
+    const superset = [...subset, 10];
+    expect(arrayMax(superset)).toBeGreaterThanOrEqual(arrayMax(subset));
+  });
+
+  it('arrayMin of a superset is <= arrayMin of subset', () => {
+    const subset = [5, 8, 3];
+    const superset = [...subset, 1];
+    expect(arrayMin(superset)).toBeLessThanOrEqual(arrayMin(subset));
+  });
+});
