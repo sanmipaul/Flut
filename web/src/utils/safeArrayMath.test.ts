@@ -236,3 +236,10 @@ describe('arraySum — large array correctness', () => {
     expect(arraySum(arr)).toBe(30_000);
   });
 });
+
+describe('arrayMean — large array', () => {
+  it('computes mean of 1k consecutive integers starting from 1', () => {
+    const arr = Array.from({ length: 1000 }, (_, i) => i + 1);
+    expect(arrayMean(arr)).toBeCloseTo(500.5);
+  });
+});
