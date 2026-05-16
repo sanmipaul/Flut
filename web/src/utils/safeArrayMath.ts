@@ -10,3 +10,13 @@
 export function isEmptyArray<T>(arr: T[]): boolean {
   return arr.length === 0;
 }
+
+/**
+ * Returns the maximum value in a number array using reduce.
+ * Safe for arrays of any length — does not spread into function arguments.
+ * Returns -Infinity for an empty array (same semantics as Math.max()).
+ */
+export function arrayMax(arr: number[]): number {
+  if (isEmptyArray(arr)) return -Infinity;
+  return arr.reduce((max, n) => (n > max ? n : max), arr[0]);
+}
