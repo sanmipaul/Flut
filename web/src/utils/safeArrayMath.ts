@@ -36,6 +36,9 @@ export function arrayMax(arr: number[]): number {
  * Returns the minimum value in a number array using reduce.
  * Safe for arrays of any length — does not spread into function arguments.
  * Returns Infinity for an empty array (same semantics as Math.min()).
+ *
+ * @example arrayMin([3, 1, 4]) // 1
+ * @example arrayMin([])        // Infinity
  */
 export function arrayMin(arr: number[]): number {
   if (isEmptyArray(arr)) return Infinity;
