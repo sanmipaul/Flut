@@ -41,3 +41,9 @@ export function arrayMean(arr: number[]): number {
   if (isEmptyArray(arr)) return 0;
   return arraySum(arr) / arr.length;
 }
+
+/** Like arrayMax but returns 0 instead of -Infinity for empty arrays. */
+export function safeArrayMax(arr: number[]): number {
+  if (isEmptyArray(arr)) return 0;
+  return arrayMax(arr);
+}
