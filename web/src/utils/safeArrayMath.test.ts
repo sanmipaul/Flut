@@ -165,3 +165,13 @@ describe('arraySum — negative values', () => {
     expect(arraySum([-5, 5])).toBe(0);
   });
 });
+
+describe('arrayMean — parametrised accuracy', () => {
+  it.each([
+    { arr: [0, 10], expected: 5 },
+    { arr: [1, 3, 5, 7], expected: 4 },
+    { arr: [100], expected: 100 },
+  ])('mean of $arr is $expected', ({ arr, expected }) => {
+    expect(arrayMean(arr)).toBeCloseTo(expected);
+  });
+});
