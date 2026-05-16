@@ -3,6 +3,10 @@
  *
  * Pure function that derives VaultAnalytics from an array of vault inputs.
  * No side-effects, no network calls — safe to call in useMemo.
+ *
+ * Safe for arrays of any size: min/max operations use reduce-based helpers
+ * from safeArrayMath rather than spread syntax, which overflows the call
+ * stack for arrays larger than ~100k elements.
  */
 import type {
   AnalyticsVaultInput,
