@@ -55,7 +55,12 @@ export function arraySum(arr: number[]): number {
   return arr.reduce((sum, n) => sum + n, 0);
 }
 
-/** Returns the arithmetic mean of a number array. Returns 0 for empty arrays. */
+/**
+ * Returns the arithmetic mean of a number array. Returns 0 for empty arrays.
+ *
+ * @example arrayMean([1, 2, 3]) // 2
+ * @example arrayMean([])        // 0
+ */
 export function arrayMean(arr: number[]): number {
   if (isEmptyArray(arr)) return 0;
   return arraySum(arr) / arr.length;
