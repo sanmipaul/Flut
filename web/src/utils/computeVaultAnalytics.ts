@@ -3,6 +3,10 @@
  *
  * Pure function that derives VaultAnalytics from an array of vault inputs.
  * No side-effects, no network calls — safe to call in useMemo.
+ *
+ * Safe for arrays of any size: min/max operations use reduce-based helpers
+ * from safeArrayMath rather than spread syntax, which overflows the call
+ * stack for arrays larger than ~100k elements.
  */
 import type {
   AnalyticsVaultInput,
@@ -12,6 +16,7 @@ import type {
   VaultAmountTotals,
   VaultLockDurationStats,
 } from '../types/VaultAnalytics';
+import { safeArrayMax, safeArrayMin } from './safeArrayMath';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -93,10 +98,12 @@ export function computeVaultAnalytics(vaults: AnalyticsVaultInput[]): VaultAnaly
   const durations = vaults.map(lockDuration);
   const totalDuration = durations.reduce((sum, d) => sum + d, 0);
 
+  // safeArrayMax/Min use reduce — safe for arrays of any size.
+  // Math.max/min spread blows the call stack above ~100k elements.
   const lockDurationStats: VaultLockDurationStats = {
     averageLockBlocks: Math.round(totalDuration / total),
-    longestLockBlocks: Math.max(...durations),
-    shortestLockBlocks: Math.min(...durations),
+    longestLockBlocks: safeArrayMax(durations),
+    shortestLockBlocks: safeArrayMin(durations),
   };
 
   return {
