@@ -55,22 +55,18 @@ export function calculateStackingYield(input: StackingYieldInput): StackingYield
     };
   }
 
-  const cycleReward = yieldPerCycle(safeAmount, safeYield);
+  const r = cycleRate(safeYield);
   const cycles: StackingCycleReward[] = [];
-  let cumulative = 0;
 
   for (let i = 1; i <= fullCycleCount; i++) {
-    cumulative += cycleReward;
-    cycles.push({
-      cycleNumber: i,
-      estimatedBtc: cycleReward,
-      cumulativeBtc: cumulative,
-    });
+    const estimatedBtc = cycleCompoundReward(safeAmount, r, i);
+    const cumulativeBtc = totalCompoundYield(safeAmount, r, i);
+    cycles.push({ cycleNumber: i, estimatedBtc, cumulativeBtc });
   }
 
   return {
     cycles,
-    totalBtc: cumulative,
+    totalBtc: totalCompoundYield(safeAmount, r, fullCycleCount),
     fullCycleCount,
     effectiveYieldPct: safeYield,
     hasYield: true,
