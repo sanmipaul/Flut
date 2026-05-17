@@ -132,6 +132,20 @@ describe('effectiveAnnualYieldPct', () => {
   });
 });
 
+describe('compound vs simple convergence', () => {
+  it('totalCompoundYield equals principal*r*1 for n=1 (no compounding benefit)', () => {
+    const p = 10_000;
+    const r = cycleRate(10);
+    expect(totalCompoundYield(p, r, 1)).toBeCloseTo(p * r, 8);
+  });
+
+  it('cycleCompoundReward(p, r, 1) equals p*r', () => {
+    const p = 5_000;
+    const r = 0.005;
+    expect(cycleCompoundReward(p, r, 1)).toBeCloseTo(p * r, 10);
+  });
+});
+
 describe('compoundInterestUtils — never-NaN safety', () => {
   it('cycleRate(0) is finite', () => expect(Number.isFinite(cycleRate(0))).toBe(true));
   it('compoundedPrincipal with valid args is finite', () => {
