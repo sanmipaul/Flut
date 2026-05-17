@@ -2,8 +2,12 @@
  * calculateStackingYield
  *
  * Pure function that estimates BTC rewards earned by stacking STX over a
- * vault lock period. Yields are modelled as a simple annualised rate applied
- * proportionally to each completed stacking cycle (~2,100 blocks / 14 days).
+ * vault lock period. Yields use a compound interest model: each cycle earns
+ * on the growing accumulated amount, so rewards increase cycle-over-cycle.
+ *
+ * The per-cycle rate r = (annualisedYieldPct / 100) × (BLOCKS_PER_CYCLE / BLOCKS_PER_YEAR).
+ * Cycle i reward = principal × r × (1 + r)^(i − 1).
+ * Total yield after n cycles = principal × ((1 + r)^n − 1).
  *
  * The result is intentionally approximate. Real stacking rewards depend on
  * miner fees, total STX stacked network-wide, and BTC/STX price — none of
