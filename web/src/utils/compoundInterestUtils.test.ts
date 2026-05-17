@@ -83,6 +83,10 @@ describe('cycleCompoundReward', () => {
     }
   });
 
+  it('reward for r=0 is always 0', () => {
+    expect(cycleCompoundReward(1000, 0, 5)).toBeCloseTo(0, 10);
+  });
+
   it('sum of n cycle rewards equals totalCompoundYield', () => {
     const p = 1000;
     const r = 0.01;
@@ -91,4 +95,20 @@ describe('cycleCompoundReward', () => {
       .reduce((s, v) => s + v, 0);
     expect(sumOfCycles).toBeCloseTo(totalCompoundYield(p, r, n), 6);
   });
+});
+
+describe('isValidRate', () => {
+  it('returns true for 0', () => expect(isValidRate(0)).toBe(true));
+  it('returns true for a small positive rate', () => expect(isValidRate(0.005)).toBe(true));
+  it('returns false for NaN', () => expect(isValidRate(NaN)).toBe(false));
+  it('returns false for Infinity', () => expect(isValidRate(Infinity)).toBe(false));
+  it('returns false for negative rates', () => expect(isValidRate(-0.01)).toBe(false));
+});
+
+describe('isValidCycleIndex', () => {
+  it('returns true for 1', () => expect(isValidCycleIndex(1)).toBe(true));
+  it('returns true for large integers', () => expect(isValidCycleIndex(1000)).toBe(true));
+  it('returns false for 0', () => expect(isValidCycleIndex(0)).toBe(false));
+  it('returns false for negative', () => expect(isValidCycleIndex(-1)).toBe(false));
+  it('returns false for non-integers', () => expect(isValidCycleIndex(1.5)).toBe(false));
 });
