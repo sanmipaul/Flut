@@ -36,3 +36,13 @@ export function cycleRate(annualisedYieldPct: number): number {
 export function compoundedPrincipal(principal: number, r: number, n: number): number {
   return principal * Math.pow(1 + r, n);
 }
+
+/**
+ * Returns the total yield (not including principal) after n compound cycles.
+ *   total = principal × ((1 + r)^n − 1)
+ *
+ * @example totalCompoundYield(1000, 0.01, 12) // ≈ 126.83
+ */
+export function totalCompoundYield(principal: number, r: number, n: number): number {
+  return principal * (Math.pow(1 + r, n) - 1);
+}
