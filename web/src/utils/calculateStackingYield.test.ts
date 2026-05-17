@@ -227,6 +227,14 @@ describe('calculateStackingYield — boundary at exactly one cycle', () => {
 // Compound interest — failing tests exposing the linear model bug
 // ---------------------------------------------------------------------------
 
+describe('calculateStackingYield — zero-APY unchanged', () => {
+  it('0% APY still returns hasYield=false', () => {
+    const result = calculateStackingYield({ ...BASE_INPUT, annualisedYieldPct: 0 });
+    expect(result.hasYield).toBe(false);
+    expect(result.totalBtc).toBe(0);
+  });
+});
+
 describe('calculateStackingYield — compound model verification', () => {
   it('cycle 1 reward equals simple-interest amount (no prior accumulation)', () => {
     const result = calculateStackingYield({ ...BASE_INPUT, totalLockBlocks: BLOCKS_PER_CYCLE });
