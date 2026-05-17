@@ -227,6 +227,14 @@ describe('calculateStackingYield — boundary at exactly one cycle', () => {
 // Compound interest — failing tests exposing the linear model bug
 // ---------------------------------------------------------------------------
 
+describe('calculateStackingYield — proportional scaling still holds', () => {
+  it('doubling the principal doubles totalBtc (compound preserves linearity in principal)', () => {
+    const base = calculateStackingYield(BASE_INPUT);
+    const doubled = calculateStackingYield({ ...BASE_INPUT, stxAmount: BASE_INPUT.stxAmount * 2 });
+    expect(doubled.totalBtc).toBeCloseTo(base.totalBtc * 2, 6);
+  });
+});
+
 describe('calculateStackingYield — zero-APY unchanged', () => {
   it('0% APY still returns hasYield=false', () => {
     const result = calculateStackingYield({ ...BASE_INPUT, annualisedYieldPct: 0 });
