@@ -236,6 +236,16 @@ describe('calculateStackingYield — compound interest', () => {
     }
   });
 
+  it('cycle 1 reward equals the simple-interest reward (no prior accumulation)', () => {
+    const oneCycle = calculateStackingYield({
+      ...BASE_INPUT,
+      totalLockBlocks: BLOCKS_PER_CYCLE,
+    });
+    const sixCycles = calculateStackingYield(BASE_INPUT);
+    // First cycle reward must be identical regardless of total cycle count
+    expect(oneCycle.totalBtc).toBeCloseTo(sixCycles.cycles[0].estimatedBtc, 10);
+  });
+
   it('compound totalBtc diverges visibly from simple at 26 cycles (1 year at 10% APY)', () => {
     // At 10% APY, 26 cycles ≈ 1 year. Compound should beat simple by a measurable margin.
     const result = calculateStackingYield({
