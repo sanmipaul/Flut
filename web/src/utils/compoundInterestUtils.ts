@@ -3,12 +3,20 @@
  *
  * Pure helpers for compound-interest calculations used by calculateStackingYield.
  *
- * The compound model computes each cycle's reward as:
+ * Background
+ * ----------
+ * The old simple-interest model applied the same flat reward every cycle:
+ *   reward = principal × r   (for every cycle)
+ *
+ * The compound model reinvests each cycle's yield into the next, so rewards
+ * grow cycle-over-cycle:
  *   reward_i = principal × r × (1 + r)^(i − 1)
  *
- * where r is the per-cycle rate derived from the annualised yield percentage.
  * After n cycles the total yield is:
  *   total = principal × ((1 + r)^n − 1)
+ *
+ * The difference is negligible for 1–2 cycles but becomes meaningful over a
+ * full year (26 cycles at 10% APY produces ~5% more than the simple model).
  *
  * All functions are pure and never throw.
  */
