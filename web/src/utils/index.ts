@@ -11,6 +11,15 @@ export {
 } from './activityHeatmapHelpers';
 export { calculateStackingYield } from './calculateStackingYield';
 export {
+  cycleRate,
+  compoundedPrincipal,
+  totalCompoundYield,
+  cycleCompoundReward,
+  isValidRate,
+  isValidCycleIndex,
+  effectiveAnnualYieldPct,
+} from './compoundInterestUtils';
+export {
   formatBtcAmount,
   formatYieldPct,
   formatCycleCount,
