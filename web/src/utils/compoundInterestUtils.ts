@@ -47,6 +47,11 @@ export function totalCompoundYield(principal: number, r: number, n: number): num
   return principal * (Math.pow(1 + r, n) - 1);
 }
 
+/** Returns true if r is a finite non-negative rate. */
+export function isValidRate(r: number): boolean {
+  return Number.isFinite(r) && r >= 0;
+}
+
 /**
  * Returns the yield earned in cycle i (1-indexed) under compound interest.
  *   reward_i = principal × r × (1 + r)^(i − 1)
