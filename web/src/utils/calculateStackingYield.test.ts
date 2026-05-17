@@ -227,6 +227,27 @@ describe('calculateStackingYield — boundary at exactly one cycle', () => {
 // Compound interest — failing tests exposing the linear model bug
 // ---------------------------------------------------------------------------
 
+describe('calculateStackingYield — compound model verification', () => {
+  it('cycle 1 reward equals simple-interest amount (no prior accumulation)', () => {
+    const result = calculateStackingYield({ ...BASE_INPUT, totalLockBlocks: BLOCKS_PER_CYCLE });
+    const r = (BASE_INPUT.annualisedYieldPct / 100) * (BLOCKS_PER_CYCLE / 52_596);
+    expect(result.totalBtc).toBeCloseTo(BASE_INPUT.stxAmount * r, 6);
+  });
+
+  it('cycle rewards are strictly increasing', () => {
+    const result = calculateStackingYield(BASE_INPUT);
+    for (let i = 1; i < result.cycles.length; i++) {
+      expect(result.cycles[i].estimatedBtc).toBeGreaterThan(result.cycles[i - 1].estimatedBtc);
+    }
+  });
+
+  it('cumulativeBtc of last cycle equals totalBtc', () => {
+    const result = calculateStackingYield(BASE_INPUT);
+    const last = result.cycles[result.cycles.length - 1];
+    expect(last.cumulativeBtc).toBeCloseTo(result.totalBtc, 8);
+  });
+});
+
 describe('calculateStackingYield — compound interest', () => {
   it('each cycle reward should be strictly greater than the previous (compound growth)', () => {
     const result = calculateStackingYield(BASE_INPUT);
