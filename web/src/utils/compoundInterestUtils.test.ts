@@ -131,3 +131,19 @@ describe('effectiveAnnualYieldPct', () => {
     });
   });
 });
+
+describe('compoundInterestUtils — never-NaN safety', () => {
+  it('cycleRate(0) is finite', () => expect(Number.isFinite(cycleRate(0))).toBe(true));
+  it('compoundedPrincipal with valid args is finite', () => {
+    expect(Number.isFinite(compoundedPrincipal(1000, 0.01, 12))).toBe(true);
+  });
+  it('totalCompoundYield with valid args is finite', () => {
+    expect(Number.isFinite(totalCompoundYield(1000, 0.01, 12))).toBe(true);
+  });
+  it('cycleCompoundReward with valid args is finite', () => {
+    expect(Number.isFinite(cycleCompoundReward(1000, 0.01, 6))).toBe(true);
+  });
+  it('effectiveAnnualYieldPct with valid rate is finite', () => {
+    expect(Number.isFinite(effectiveAnnualYieldPct(0.004))).toBe(true);
+  });
+});
