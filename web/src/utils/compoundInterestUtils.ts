@@ -29,7 +29,14 @@ const BLOCKS_PER_YEAR = 52_596;
 /**
  * Compute the per-cycle compounding rate from an annualised yield percentage.
  *
+ * Derivation: annual rate / cycles-per-year, where each Stacks cycle is
+ * BLOCKS_PER_CYCLE blocks at ~10 min/block.
+ *
+ * @param annualisedYieldPct - Annual yield in percent (e.g. 10 for 10%)
+ * @returns Per-cycle rate as a decimal (e.g. ≈ 0.003993 for 10% APY)
+ *
  * @example cycleRate(10) // ≈ 0.003993
+ * @example cycleRate(0)  // 0
  */
 export function cycleRate(annualisedYieldPct: number): number {
   return (annualisedYieldPct / 100) * (BLOCKS_PER_CYCLE / BLOCKS_PER_YEAR);
