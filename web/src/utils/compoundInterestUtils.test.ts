@@ -146,6 +146,14 @@ describe('compound vs simple convergence', () => {
   });
 });
 
+describe('compoundedPrincipal — monotone in n', () => {
+  it('larger n always yields larger compoundedPrincipal for r>0', () => {
+    const p = 1000;
+    const r = 0.005;
+    expect(compoundedPrincipal(p, r, 10)).toBeGreaterThan(compoundedPrincipal(p, r, 5));
+  });
+});
+
 describe('totalCompoundYield — equals compoundedPrincipal minus principal', () => {
   it('totalCompoundYield(p,r,n) === compoundedPrincipal(p,r,n) - p', () => {
     const p = 5000;
