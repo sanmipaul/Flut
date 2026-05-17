@@ -58,6 +58,17 @@ export function isValidCycleIndex(cycleIndex: number): boolean {
 }
 
 /**
+ * Converts a per-cycle rate to the equivalent effective annual yield percentage.
+ * Accounts for compounding: EAY = ((1 + r)^cyclesPerYear − 1) × 100
+ *
+ * @example effectiveAnnualYieldPct(cycleRate(10)) // slightly above 10
+ */
+export function effectiveAnnualYieldPct(r: number): number {
+  const cyclesPerYear = BLOCKS_PER_YEAR / BLOCKS_PER_CYCLE;
+  return (Math.pow(1 + r, cyclesPerYear) - 1) * 100;
+}
+
+/**
  * Returns the yield earned in cycle i (1-indexed) under compound interest.
  *   reward_i = principal × r × (1 + r)^(i − 1)
  *
