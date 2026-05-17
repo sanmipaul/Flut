@@ -146,6 +146,15 @@ describe('compound vs simple convergence', () => {
   });
 });
 
+describe('totalCompoundYield — equals compoundedPrincipal minus principal', () => {
+  it('totalCompoundYield(p,r,n) === compoundedPrincipal(p,r,n) - p', () => {
+    const p = 5000;
+    const r = 0.008;
+    const n = 10;
+    expect(totalCompoundYield(p, r, n)).toBeCloseTo(compoundedPrincipal(p, r, n) - p, 8);
+  });
+});
+
 describe('cycleCompoundReward — parametrised accuracy', () => {
   it.each([
     { p: 1000, r: 0.01, i: 1, expected: 10 },
