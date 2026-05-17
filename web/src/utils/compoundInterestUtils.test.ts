@@ -146,6 +146,16 @@ describe('compound vs simple convergence', () => {
   });
 });
 
+describe('cycleCompoundReward — parametrised accuracy', () => {
+  it.each([
+    { p: 1000, r: 0.01, i: 1, expected: 10 },
+    { p: 1000, r: 0.01, i: 2, expected: 10.1 },
+    { p: 1000, r: 0.01, i: 3, expected: 10.201 },
+  ])('reward for cycle $i is $expected', ({ p, r, i, expected }) => {
+    expect(cycleCompoundReward(p, r, i)).toBeCloseTo(expected, 4);
+  });
+});
+
 describe('compoundInterestUtils — never-NaN safety', () => {
   it('cycleRate(0) is finite', () => expect(Number.isFinite(cycleRate(0))).toBe(true));
   it('compoundedPrincipal with valid args is finite', () => {
