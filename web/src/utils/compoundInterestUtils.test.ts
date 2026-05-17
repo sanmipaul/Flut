@@ -64,3 +64,31 @@ describe('totalCompoundYield', () => {
     expect(totalCompoundYield(5000, 0, 100)).toBeCloseTo(0, 10);
   });
 });
+
+describe('cycleCompoundReward', () => {
+  it('cycle 1 reward equals principal * r (simple interest)', () => {
+    expect(cycleCompoundReward(1000, 0.01, 1)).toBeCloseTo(10, 8);
+  });
+
+  it('cycle 2 reward is larger than cycle 1 by factor (1+r)', () => {
+    const r1 = cycleCompoundReward(1000, 0.01, 1);
+    const r2 = cycleCompoundReward(1000, 0.01, 2);
+    expect(r2).toBeCloseTo(r1 * 1.01, 8);
+  });
+
+  it('rewards increase monotonically with cycle index', () => {
+    const rewards = [1, 2, 3, 4, 5].map((i) => cycleCompoundReward(1000, 0.01, i));
+    for (let i = 1; i < rewards.length; i++) {
+      expect(rewards[i]).toBeGreaterThan(rewards[i - 1]);
+    }
+  });
+
+  it('sum of n cycle rewards equals totalCompoundYield', () => {
+    const p = 1000;
+    const r = 0.01;
+    const n = 12;
+    const sumOfCycles = Array.from({ length: n }, (_, i) => cycleCompoundReward(p, r, i + 1))
+      .reduce((s, v) => s + v, 0);
+    expect(sumOfCycles).toBeCloseTo(totalCompoundYield(p, r, n), 6);
+  });
+});
