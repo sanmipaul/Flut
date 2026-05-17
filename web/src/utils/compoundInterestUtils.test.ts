@@ -44,3 +44,23 @@ describe('compoundedPrincipal', () => {
     expect(compoundedPrincipal(5000, 0, 100)).toBeCloseTo(5000, 10);
   });
 });
+
+describe('totalCompoundYield', () => {
+  it('returns 0 for 0 cycles', () => {
+    expect(totalCompoundYield(1000, 0.01, 0)).toBeCloseTo(0, 10);
+  });
+
+  it('returns principal * r for 1 cycle (matches simple interest)', () => {
+    expect(totalCompoundYield(1000, 0.01, 1)).toBeCloseTo(10, 8);
+  });
+
+  it('returns more than simple interest for 2+ cycles', () => {
+    const simple = 1000 * 0.01 * 12;
+    const compound = totalCompoundYield(1000, 0.01, 12);
+    expect(compound).toBeGreaterThan(simple);
+  });
+
+  it('returns 0 for r=0', () => {
+    expect(totalCompoundYield(5000, 0, 100)).toBeCloseTo(0, 10);
+  });
+});
