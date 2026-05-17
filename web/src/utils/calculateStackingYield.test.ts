@@ -236,6 +236,18 @@ describe('calculateStackingYield — compound interest', () => {
     }
   });
 
+  it('compound totalBtc diverges visibly from simple at 26 cycles (1 year at 10% APY)', () => {
+    // At 10% APY, 26 cycles ≈ 1 year. Compound should beat simple by a measurable margin.
+    const result = calculateStackingYield({
+      stxAmount: 100_000,
+      totalLockBlocks: BLOCKS_PER_CYCLE * 26,
+      annualisedYieldPct: 10,
+    });
+    const flatReward = result.cycles[0].estimatedBtc;
+    const simpleTotal = flatReward * 26;
+    expect(result.totalBtc).toBeGreaterThan(simpleTotal);
+  });
+
   it('cycle 2 reward is greater than cycle 1 reward under compounding', () => {
     const result = calculateStackingYield({
       ...BASE_INPUT,
