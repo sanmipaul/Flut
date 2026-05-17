@@ -56,7 +56,15 @@ export function compoundedPrincipal(principal: number, r: number, n: number): nu
  * Returns the total yield (not including principal) after n compound cycles.
  *   total = principal × ((1 + r)^n − 1)
  *
+ * Equivalent to compoundedPrincipal(principal, r, n) − principal.
+ * Also equals the sum of cycleCompoundReward(principal, r, i) for i = 1..n.
+ *
+ * @param principal - STX stacking amount
+ * @param r         - Per-cycle rate from cycleRate()
+ * @param n         - Number of complete stacking cycles
+ *
  * @example totalCompoundYield(1000, 0.01, 12) // ≈ 126.83
+ * @example totalCompoundYield(1000, 0,    12) // 0 (no yield at 0%)
  */
 export function totalCompoundYield(principal: number, r: number, n: number): number {
   return principal * (Math.pow(1 + r, n) - 1);
