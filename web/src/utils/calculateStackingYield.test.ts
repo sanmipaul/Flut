@@ -227,6 +227,19 @@ describe('calculateStackingYield — boundary at exactly one cycle', () => {
 // Compound interest — failing tests exposing the linear model bug
 // ---------------------------------------------------------------------------
 
+describe('calculateStackingYield — high-APY compounding effect', () => {
+  it('at 25% APY, 26-cycle compound total significantly exceeds simple total', () => {
+    const result = calculateStackingYield({
+      stxAmount: 10_000,
+      totalLockBlocks: BLOCKS_PER_CYCLE * 26,
+      annualisedYieldPct: 25,
+    });
+    const firstCycle = result.cycles[0].estimatedBtc;
+    const simpleTotal = firstCycle * 26;
+    expect(result.totalBtc).toBeGreaterThan(simpleTotal * 1.05);
+  });
+});
+
 describe('calculateStackingYield — proportional scaling still holds', () => {
   it('doubling the principal doubles totalBtc (compound preserves linearity in principal)', () => {
     const base = calculateStackingYield(BASE_INPUT);
