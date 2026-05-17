@@ -46,3 +46,17 @@ export function compoundedPrincipal(principal: number, r: number, n: number): nu
 export function totalCompoundYield(principal: number, r: number, n: number): number {
   return principal * (Math.pow(1 + r, n) - 1);
 }
+
+/**
+ * Returns the yield earned in cycle i (1-indexed) under compound interest.
+ *   reward_i = principal × r × (1 + r)^(i − 1)
+ *
+ * Cycle 1 equals the simple-interest reward. Each subsequent cycle is larger
+ * by a factor of (1 + r) because the accumulated yield is reinvested.
+ *
+ * @example cycleCompoundReward(1000, 0.01, 1) // 10   (= 1000 × 0.01)
+ * @example cycleCompoundReward(1000, 0.01, 2) // 10.1 (= 1000 × 0.01 × 1.01)
+ */
+export function cycleCompoundReward(principal: number, r: number, cycleIndex: number): number {
+  return principal * r * Math.pow(1 + r, cycleIndex - 1);
+}
