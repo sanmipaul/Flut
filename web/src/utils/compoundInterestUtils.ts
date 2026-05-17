@@ -26,3 +26,13 @@ const BLOCKS_PER_YEAR = 52_596;
 export function cycleRate(annualisedYieldPct: number): number {
   return (annualisedYieldPct / 100) * (BLOCKS_PER_CYCLE / BLOCKS_PER_YEAR);
 }
+
+/**
+ * Returns the value of a principal after n compounding cycles.
+ *   result = principal × (1 + r)^n
+ *
+ * @example compoundedPrincipal(1000, 0.01, 12) // ≈ 1126.83
+ */
+export function compoundedPrincipal(principal: number, r: number, n: number): number {
+  return principal * Math.pow(1 + r, n);
+}
