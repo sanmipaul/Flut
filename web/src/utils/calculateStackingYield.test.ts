@@ -227,6 +227,22 @@ describe('calculateStackingYield — boundary at exactly one cycle', () => {
 // Compound interest — failing tests exposing the linear model bug
 // ---------------------------------------------------------------------------
 
+describe('calculateStackingYield — 100-cycle stress test', () => {
+  it('handles 100 cycles without NaN or Infinity', () => {
+    const result = calculateStackingYield({
+      stxAmount: 10_000,
+      totalLockBlocks: BLOCKS_PER_CYCLE * 100,
+      annualisedYieldPct: 10,
+    });
+    expect(Number.isFinite(result.totalBtc)).toBe(true);
+    expect(result.cycles).toHaveLength(100);
+    result.cycles.forEach((c) => {
+      expect(Number.isFinite(c.estimatedBtc)).toBe(true);
+      expect(Number.isFinite(c.cumulativeBtc)).toBe(true);
+    });
+  });
+});
+
 describe('calculateStackingYield — high-APY compounding effect', () => {
   it('at 25% APY, 26-cycle compound total significantly exceeds simple total', () => {
     const result = calculateStackingYield({
