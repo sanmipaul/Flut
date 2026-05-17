@@ -112,3 +112,22 @@ describe('isValidCycleIndex', () => {
   it('returns false for negative', () => expect(isValidCycleIndex(-1)).toBe(false));
   it('returns false for non-integers', () => expect(isValidCycleIndex(1.5)).toBe(false));
 });
+
+describe('effectiveAnnualYieldPct', () => {
+  it('returns 0 for r=0', () => {
+    expect(effectiveAnnualYieldPct(0)).toBeCloseTo(0, 10);
+  });
+
+  it('returns slightly above 10 for cycleRate(10)', () => {
+    const eay = effectiveAnnualYieldPct(cycleRate(10));
+    expect(eay).toBeGreaterThan(10);
+    expect(eay).toBeLessThan(11);
+  });
+
+  it('is always >= nominal APY for positive rates (due to compounding)', () => {
+    [1, 5, 10, 20].forEach((apy) => {
+      const eay = effectiveAnnualYieldPct(cycleRate(apy));
+      expect(eay).toBeGreaterThanOrEqual(apy);
+    });
+  });
+});
