@@ -20,21 +20,6 @@ import type {
   StackingCycleReward,
 } from '../types/StackingYield';
 
-/** Approximate blocks per year at 10 min/block: 365.25 × 24 × 6 */
-const BLOCKS_PER_YEAR = 52_596;
-
-/**
- * Compute the BTC yield for a single cycle given an STX amount and annual rate.
- * Uses a simple linear model: cycleYield = stxAmount × (yieldPct/100) × (blocksPerCycle / blocksPerYear).
- * The STX→BTC conversion is omitted by design — the output is expressed as
- * "BTC-equivalent value" relative to the STX principal, so callers can apply
- * their own price assumptions.
- */
-function yieldPerCycle(stxAmount: number, annualisedYieldPct: number): number {
-  const annualRate = annualisedYieldPct / 100;
-  const cycleWeight = BLOCKS_PER_CYCLE / BLOCKS_PER_YEAR;
-  return stxAmount * annualRate * cycleWeight;
-}
 
 export function calculateStackingYield(input: StackingYieldInput): StackingYieldResult {
   const { stxAmount, totalLockBlocks, annualisedYieldPct } = input;
