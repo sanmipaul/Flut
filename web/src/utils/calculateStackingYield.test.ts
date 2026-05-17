@@ -227,6 +227,15 @@ describe('calculateStackingYield — boundary at exactly one cycle', () => {
 // Compound interest — failing tests exposing the linear model bug
 // ---------------------------------------------------------------------------
 
+describe('calculateStackingYield — never-NaN', () => {
+  it('totalBtc is never NaN for valid positive inputs', () => {
+    [1, 5, 10, 25].forEach((apy) => {
+      const result = calculateStackingYield({ ...BASE_INPUT, annualisedYieldPct: apy });
+      expect(Number.isNaN(result.totalBtc)).toBe(false);
+    });
+  });
+});
+
 describe('calculateStackingYield — cumulativeBtc strictly increases', () => {
   it('each cumulativeBtc is greater than the previous', () => {
     const result = calculateStackingYield(BASE_INPUT);
