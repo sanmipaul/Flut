@@ -146,6 +146,18 @@ describe('compound vs simple convergence', () => {
   });
 });
 
+describe('effectiveAnnualYieldPct — greater than nominal for r>0', () => {
+  it('EAY of 5% nominal is slightly above 5', () => {
+    const eay = effectiveAnnualYieldPct(cycleRate(5));
+    expect(eay).toBeGreaterThan(5);
+  });
+
+  it('EAY of 20% nominal is slightly above 20', () => {
+    const eay = effectiveAnnualYieldPct(cycleRate(20));
+    expect(eay).toBeGreaterThan(20);
+  });
+});
+
 describe('compoundedPrincipal — monotone in n', () => {
   it('larger n always yields larger compoundedPrincipal for r>0', () => {
     const p = 1000;
