@@ -227,6 +227,15 @@ describe('calculateStackingYield — boundary at exactly one cycle', () => {
 // Compound interest — failing tests exposing the linear model bug
 // ---------------------------------------------------------------------------
 
+describe('calculateStackingYield — cumulativeBtc strictly increases', () => {
+  it('each cumulativeBtc is greater than the previous', () => {
+    const result = calculateStackingYield(BASE_INPUT);
+    for (let i = 1; i < result.cycles.length; i++) {
+      expect(result.cycles[i].cumulativeBtc).toBeGreaterThan(result.cycles[i - 1].cumulativeBtc);
+    }
+  });
+});
+
 describe('calculateStackingYield — 100-cycle stress test', () => {
   it('handles 100 cycles without NaN or Infinity', () => {
     const result = calculateStackingYield({
