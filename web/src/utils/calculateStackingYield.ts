@@ -13,6 +13,7 @@ import {
   BLOCKS_PER_CYCLE,
   SATOSHIS_PER_BTC,
 } from '../types/StackingYield';
+import { cycleRate, cycleCompoundReward, totalCompoundYield } from './compoundInterestUtils';
 import type {
   StackingYieldInput,
   StackingYieldResult,
