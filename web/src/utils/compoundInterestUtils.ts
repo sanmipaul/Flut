@@ -52,6 +52,11 @@ export function isValidRate(r: number): boolean {
   return Number.isFinite(r) && r >= 0;
 }
 
+/** Returns true if cycleIndex is a positive integer (1-based). */
+export function isValidCycleIndex(cycleIndex: number): boolean {
+  return Number.isInteger(cycleIndex) && cycleIndex >= 1;
+}
+
 /**
  * Returns the yield earned in cycle i (1-indexed) under compound interest.
  *   reward_i = principal × r × (1 + r)^(i − 1)
