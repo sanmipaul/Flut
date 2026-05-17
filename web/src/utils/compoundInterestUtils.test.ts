@@ -146,6 +146,13 @@ describe('compound vs simple convergence', () => {
   });
 });
 
+describe('cycleRate — known value check', () => {
+  it('cycleRate(10) ≈ BLOCKS_PER_CYCLE / 52596 * 0.1', () => {
+    const expected = (BLOCKS_PER_CYCLE / 52_596) * 0.1;
+    expect(cycleRate(10)).toBeCloseTo(expected, 10);
+  });
+});
+
 describe('effectiveAnnualYieldPct — greater than nominal for r>0', () => {
   it('EAY of 5% nominal is slightly above 5', () => {
     const eay = effectiveAnnualYieldPct(cycleRate(5));
