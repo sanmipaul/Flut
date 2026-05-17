@@ -102,12 +102,11 @@ describe('calculateStackingYield — cycle count', () => {
 // ---------------------------------------------------------------------------
 
 describe('calculateStackingYield — reward values', () => {
-  it('estimatedBtc is the same for each cycle (fixed rate model)', () => {
+  it('estimatedBtc increases each cycle (compound model)', () => {
     const result = calculateStackingYield(BASE_INPUT);
-    const firstReward = result.cycles[0].estimatedBtc;
-    result.cycles.forEach((cycle) => {
-      expect(cycle.estimatedBtc).toBeCloseTo(firstReward, 10);
-    });
+    for (let i = 1; i < result.cycles.length; i++) {
+      expect(result.cycles[i].estimatedBtc).toBeGreaterThan(result.cycles[i - 1].estimatedBtc);
+    }
   });
 
   it('totalBtc equals sum of all cycle rewards', () => {
