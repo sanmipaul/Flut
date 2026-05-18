@@ -102,12 +102,11 @@ describe('calculateStackingYield — cycle count', () => {
 // ---------------------------------------------------------------------------
 
 describe('calculateStackingYield — reward values', () => {
-  it('estimatedBtc is the same for each cycle (fixed rate model)', () => {
+  it('estimatedBtc increases each cycle (compound model)', () => {
     const result = calculateStackingYield(BASE_INPUT);
-    const firstReward = result.cycles[0].estimatedBtc;
-    result.cycles.forEach((cycle) => {
-      expect(cycle.estimatedBtc).toBeCloseTo(firstReward, 10);
-    });
+    for (let i = 1; i < result.cycles.length; i++) {
+      expect(result.cycles[i].estimatedBtc).toBeGreaterThan(result.cycles[i - 1].estimatedBtc);
+    }
   });
 
   it('totalBtc equals sum of all cycle rewards', () => {
@@ -221,5 +220,144 @@ describe('calculateStackingYield — boundary at exactly one cycle', () => {
     const at10 = calculateStackingYield({ stxAmount: 1_000, totalLockBlocks: BLOCKS_PER_CYCLE, annualisedYieldPct: 10 });
     const at20 = calculateStackingYield({ stxAmount: 1_000, totalLockBlocks: BLOCKS_PER_CYCLE, annualisedYieldPct: 20 });
     expect(at20.totalBtc).toBeCloseTo(at10.totalBtc * 2, 8);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Compound interest — failing tests exposing the linear model bug
+// ---------------------------------------------------------------------------
+
+describe('calculateStackingYield — never-NaN', () => {
+  it('totalBtc is never NaN for valid positive inputs', () => {
+    [1, 5, 10, 25].forEach((apy) => {
+      const result = calculateStackingYield({ ...BASE_INPUT, annualisedYieldPct: apy });
+      expect(Number.isNaN(result.totalBtc)).toBe(false);
+    });
+  });
+});
+
+describe('calculateStackingYield — cumulativeBtc strictly increases', () => {
+  it('each cumulativeBtc is greater than the previous', () => {
+    const result = calculateStackingYield(BASE_INPUT);
+    for (let i = 1; i < result.cycles.length; i++) {
+      expect(result.cycles[i].cumulativeBtc).toBeGreaterThan(result.cycles[i - 1].cumulativeBtc);
+    }
+  });
+});
+
+describe('calculateStackingYield — 100-cycle stress test', () => {
+  it('handles 100 cycles without NaN or Infinity', () => {
+    const result = calculateStackingYield({
+      stxAmount: 10_000,
+      totalLockBlocks: BLOCKS_PER_CYCLE * 100,
+      annualisedYieldPct: 10,
+    });
+    expect(Number.isFinite(result.totalBtc)).toBe(true);
+    expect(result.cycles).toHaveLength(100);
+    result.cycles.forEach((c) => {
+      expect(Number.isFinite(c.estimatedBtc)).toBe(true);
+      expect(Number.isFinite(c.cumulativeBtc)).toBe(true);
+    });
+  });
+});
+
+describe('calculateStackingYield — high-APY compounding effect', () => {
+  it('at 25% APY, 26-cycle compound total significantly exceeds simple total', () => {
+    const result = calculateStackingYield({
+      stxAmount: 10_000,
+      totalLockBlocks: BLOCKS_PER_CYCLE * 26,
+      annualisedYieldPct: 25,
+    });
+    const firstCycle = result.cycles[0].estimatedBtc;
+    const simpleTotal = firstCycle * 26;
+    expect(result.totalBtc).toBeGreaterThan(simpleTotal * 1.05);
+  });
+});
+
+describe('calculateStackingYield — proportional scaling still holds', () => {
+  it('doubling the principal doubles totalBtc (compound preserves linearity in principal)', () => {
+    const base = calculateStackingYield(BASE_INPUT);
+    const doubled = calculateStackingYield({ ...BASE_INPUT, stxAmount: BASE_INPUT.stxAmount * 2 });
+    expect(doubled.totalBtc).toBeCloseTo(base.totalBtc * 2, 6);
+  });
+});
+
+describe('calculateStackingYield — zero-APY unchanged', () => {
+  it('0% APY still returns hasYield=false', () => {
+    const result = calculateStackingYield({ ...BASE_INPUT, annualisedYieldPct: 0 });
+    expect(result.hasYield).toBe(false);
+    expect(result.totalBtc).toBe(0);
+  });
+});
+
+describe('calculateStackingYield — compound model verification', () => {
+  it('cycle 1 reward equals simple-interest amount (no prior accumulation)', () => {
+    const result = calculateStackingYield({ ...BASE_INPUT, totalLockBlocks: BLOCKS_PER_CYCLE });
+    const r = (BASE_INPUT.annualisedYieldPct / 100) * (BLOCKS_PER_CYCLE / 52_596);
+    expect(result.totalBtc).toBeCloseTo(BASE_INPUT.stxAmount * r, 6);
+  });
+
+  it('cycle rewards are strictly increasing', () => {
+    const result = calculateStackingYield(BASE_INPUT);
+    for (let i = 1; i < result.cycles.length; i++) {
+      expect(result.cycles[i].estimatedBtc).toBeGreaterThan(result.cycles[i - 1].estimatedBtc);
+    }
+  });
+
+  it('cumulativeBtc of last cycle equals totalBtc', () => {
+    const result = calculateStackingYield(BASE_INPUT);
+    const last = result.cycles[result.cycles.length - 1];
+    expect(last.cumulativeBtc).toBeCloseTo(result.totalBtc, 8);
+  });
+});
+
+describe('calculateStackingYield — compound interest', () => {
+  it('each cycle reward should be strictly greater than the previous (compound growth)', () => {
+    const result = calculateStackingYield(BASE_INPUT);
+    for (let i = 1; i < result.cycles.length; i++) {
+      expect(result.cycles[i].estimatedBtc).toBeGreaterThan(result.cycles[i - 1].estimatedBtc);
+    }
+  });
+
+  it('cycle 1 reward equals the simple-interest reward (no prior accumulation)', () => {
+    const oneCycle = calculateStackingYield({
+      ...BASE_INPUT,
+      totalLockBlocks: BLOCKS_PER_CYCLE,
+    });
+    const sixCycles = calculateStackingYield(BASE_INPUT);
+    // First cycle reward must be identical regardless of total cycle count
+    expect(oneCycle.totalBtc).toBeCloseTo(sixCycles.cycles[0].estimatedBtc, 10);
+  });
+
+  it('compound totalBtc diverges visibly from simple at 26 cycles (1 year at 10% APY)', () => {
+    // At 10% APY, 26 cycles ≈ 1 year. Compound should beat simple by a measurable margin.
+    const result = calculateStackingYield({
+      stxAmount: 100_000,
+      totalLockBlocks: BLOCKS_PER_CYCLE * 26,
+      annualisedYieldPct: 10,
+    });
+    const flatReward = result.cycles[0].estimatedBtc;
+    const simpleTotal = flatReward * 26;
+    expect(result.totalBtc).toBeGreaterThan(simpleTotal);
+  });
+
+  it('cycle 2 reward is greater than cycle 1 reward under compounding', () => {
+    const result = calculateStackingYield({
+      ...BASE_INPUT,
+      totalLockBlocks: BLOCKS_PER_CYCLE * 2,
+    });
+    expect(result.cycles[1].estimatedBtc).toBeGreaterThan(result.cycles[0].estimatedBtc);
+  });
+
+  it('totalBtc with 12 cycles compound should exceed simple linear total', () => {
+    const compoundResult = calculateStackingYield({
+      stxAmount: 10_000,
+      totalLockBlocks: BLOCKS_PER_CYCLE * 12,
+      annualisedYieldPct: 10,
+    });
+    // Simple linear total = 12 * cycleReward (flat)
+    const simpleCycleReward = compoundResult.cycles[0].estimatedBtc;
+    const simpleTotal = simpleCycleReward * 12;
+    expect(compoundResult.totalBtc).toBeGreaterThan(simpleTotal);
   });
 });
