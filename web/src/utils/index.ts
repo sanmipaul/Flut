@@ -11,20 +11,27 @@ export {
 } from './activityHeatmapHelpers';
 export { calculateStackingYield } from './calculateStackingYield';
 export {
-  cycleRate,
-  compoundedPrincipal,
-  totalCompoundYield,
-  cycleCompoundReward,
-  isValidRate,
-  isValidCycleIndex,
-  effectiveAnnualYieldPct,
-} from './compoundInterestUtils';
+  isEmptyArray,
+  arrayMax,
+  arrayMin,
+  arraySum,
+  arrayMean,
+  safeArrayMax,
+  safeArrayMin,
+} from './safeArrayMath';
 export {
   formatBtcAmount,
   formatYieldPct,
   formatCycleCount,
   formatStxShort,
 } from './formatYield';
+export {
+  formatStxAmount,
+  formatMicroStxAmount,
+  formatBlockDuration,
+  formatPct,
+  formatVaultCount,
+} from './formatAnalytics';
 export {
   isStorageAvailable,
   saveToStorage,

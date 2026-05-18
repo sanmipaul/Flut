@@ -12,6 +12,7 @@ import {
   TransactionType,
   ChartDataPoint,
 } from '../types/TransactionHistory';
+import { formatStx } from './formatStx';
 
 /**
  * Filter transactions based on criteria
@@ -203,14 +204,12 @@ export const calculateVaultPerformance = (
 };
 
 /**
- * Format currency for display
+ * Format currency for display.
+ * Accepts a microSTX amount and converts to STX before formatting.
+ * @example formatCurrency(1_500_000) → "1.500000"
  */
 export const formatCurrency = (amount: number, decimals = 6): string => {
-  const stx = amount / 1000000;
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: decimals,
-  }).format(stx);
+  return formatStx(amount, { fromMicroStx: true, decimals, showSymbol: false });
 };
 
 /**

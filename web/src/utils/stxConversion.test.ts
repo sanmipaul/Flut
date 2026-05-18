@@ -39,6 +39,14 @@ describe('stxToMicroStx', () => {
   it('converts 0 STX to 0 uSTX', () => {
     expect(stxToMicroStx(0)).toBe(0);
   });
+
+  it('always returns an integer', () => {
+    expect(Number.isInteger(stxToMicroStx(1.5))).toBe(true);
+  });
+
+  it('converts 0.5 STX to 500_000 uSTX', () => {
+    expect(stxToMicroStx(0.5)).toBe(500_000);
+  });
 });
 
 describe('stxToMicroStxRound', () => {
@@ -93,6 +101,14 @@ describe('isValidStxAmount', () => {
   it('returns false for NaN', () => {
     expect(isValidStxAmount(NaN)).toBe(false);
   });
+
+  it('returns false for Infinity', () => {
+    expect(isValidStxAmount(Infinity)).toBe(false);
+  });
+
+  it('returns false for -Infinity', () => {
+    expect(isValidStxAmount(-Infinity)).toBe(false);
+  });
 });
 
 describe('clampStx', () => {
@@ -106,5 +122,17 @@ describe('clampStx', () => {
 
   it('clamps to 0 for negative', () => {
     expect(clampStx(-10, 100)).toBe(0);
+  });
+
+  it('returns 0 when value equals 0', () => {
+    expect(clampStx(0, 100)).toBe(0);
+  });
+
+  it('returns max when value equals max', () => {
+    expect(clampStx(100, 100)).toBe(100);
+  });
+
+  it('returns 0 when max is 0', () => {
+    expect(clampStx(50, 0)).toBe(0);
   });
 });
