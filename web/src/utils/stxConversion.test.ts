@@ -55,6 +55,12 @@ describe('stxToMicroStx', () => {
   it('converts 1.3 STX to exactly 1_300_000 uSTX', () => {
     expect(stxToMicroStx(1.3)).toBe(1_300_000);
   });
+
+  it('converts all tenths 0.1–0.9 to exact multiples of 100_000', () => {
+    for (let i = 1; i <= 9; i++) {
+      expect(stxToMicroStx(i / 10)).toBe(i * 100_000);
+    }
+  });
 });
 
 describe('stxToMicroStxRound', () => {
