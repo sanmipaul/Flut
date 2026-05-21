@@ -182,3 +182,90 @@ describe('computeVaultAnalytics — edge cases', () => {
     expect(result.lockDurationStats.shortestLockBlocks).toBe(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Large array — spread overflow regression
+// ---------------------------------------------------------------------------
+
+function makeVaults(n: number): AnalyticsVaultInput[] {
+  return Array.from({ length: n }, (_, i) => ({
+    vaultId: i,
+    amount: 1000,
+    unlockHeight: 200 + i,
+    createdAt: 100,
+    isWithdrawn: false,
+    currentBlockHeight: 150,
+  }));
+}
+
+describe('computeVaultAnalytics — large array', () => {
+  it('does not throw RangeError with 100k vaults', () => {
+    expect(() => computeVaultAnalytics(makeVaults(100_000))).not.toThrow();
+  });
+
+  it('longestLockBlocks is correct with 100k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    // vault i has unlockHeight = 200+i, createdAt = 100, duration = 100+i
+    // max duration = 100 + 99999 = 100099
+    expect(result.lockDurationStats.longestLockBlocks).toBe(100099);
+  });
+
+  it('shortestLockBlocks is correct with 100k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    // min duration = 100 + 0 = 100
+    expect(result.lockDurationStats.shortestLockBlocks).toBe(100);
+  });
+
+  it('statusCounts.total matches array length for 100k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    expect(result.statusCounts.total).toBe(100_000);
+  });
+
+  it('hasData is true for 100k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    expect(result.hasData).toBe(true);
+  });
+
+  it('does not throw with 200k vaults', () => {
+    expect(() => computeVaultAnalytics(makeVaults(200_000))).not.toThrow();
+  });
+
+  it('longestLockBlocks is correct with 200k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(200_000));
+    expect(result.lockDurationStats.longestLockBlocks).toBe(200099);
+  });
+
+  it('amountTotals are correct with 100k vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    // all vaults have amount=1000, none are withdrawn
+    expect(result.amountTotals.activeTotal).toBe(100_000 * 1000);
+    expect(result.amountTotals.withdrawnTotal).toBe(0);
+  });
+
+  it('average amount is 1000 for 100k uniform vaults', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    expect(result.amountTotals.average).toBe(1000);
+  });
+
+  it('all 100k vaults are counted as locked (currentBlockHeight < unlockHeight)', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    expect(result.statusCounts.locked).toBe(100_000);
+    expect(result.statusCounts.unlocked).toBe(0);
+    expect(result.statusCounts.withdrawn).toBe(0);
+  });
+
+  it('statusDistribution.lockedPct is 100 for all-locked 100k array', () => {
+    const result = computeVaultAnalytics(makeVaults(100_000));
+    expect(result.statusDistribution.lockedPct).toBe(100);
+  });
+
+  it('original 3-vault results unchanged after fix', () => {
+    const result = computeVaultAnalytics([
+      { vaultId: 1, amount: 1000, unlockHeight: 300, createdAt: 100, isWithdrawn: false, currentBlockHeight: 200 },
+      { vaultId: 2, amount: 500, unlockHeight: 200, createdAt: 100, isWithdrawn: false, currentBlockHeight: 250 },
+      { vaultId: 3, amount: 750, unlockHeight: 200, createdAt: 100, isWithdrawn: true, currentBlockHeight: 300 },
+    ]);
+    expect(result.lockDurationStats.longestLockBlocks).toBe(200);
+    expect(result.lockDurationStats.shortestLockBlocks).toBe(100);
+  });
+});

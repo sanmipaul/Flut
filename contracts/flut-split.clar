@@ -16,17 +16,21 @@
 (define-constant ERR-ALREADY-CLAIMED (err u8))
 (define-constant ERR-NOTHING-TO-CLAIM (err u9))
 (define-constant ERR-SPLIT-CLOSED (err u10))
+(define-constant ERR-EMPTY-MEMBERS (err u11))
+(define-constant ERR-EMPTY-MEMBERS (err u11))
 
 (define-private (is-member (user principal) (members (list 5 principal)))
-  (or (is-eq user (unwrap-panic (element-at members u0)))
-      (is-eq user (default-to user (element-at members u1)))
-      (is-eq user (default-to user (element-at members u2)))
-      (is-eq user (default-to user (element-at members u3)))
-      (is-eq user (default-to user (element-at members u4)))))
+  (or
+    (match (element-at members u0) slot (is-eq user slot) false)
+    (match (element-at members u1) slot (is-eq user slot) false)
+    (match (element-at members u2) slot (is-eq user slot) false)
+    (match (element-at members u3) slot (is-eq user slot) false)
+    (match (element-at members u4) slot (is-eq user slot) false)))
 
 (define-public (create-split (target uint) (members (list 5 principal)))
   (let ((id (var-get split-counter)))
     (asserts! (> target u0) ERR-ZERO-TARGET)
+    (asserts! (is-some (element-at members u0)) ERR-EMPTY-MEMBERS)
     (map-set splits {split-id: id} {creator: tx-sender, target: target, saved: u0, paid-out: false, members: members})
     (var-set split-counter (+ id u1))
     (ok id)))
@@ -120,6 +124,16 @@
 (define-read-only (is-split-member (split-id uint) (user principal))
   (match (map-get? splits {split-id: split-id})
     split (ok (is-member user (get members split)))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-member-at-index (split-id uint) (index uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (element-at (get members split) index))
+    ERR-NOT-FOUND))
+
+(define-read-only (get-split-member-count (split-id uint))
+  (match (map-get? splits {split-id: split-id})
+    split (ok (len (get members split)))
     ERR-NOT-FOUND))
 
 (define-read-only (get-split-summary (split-id uint))

@@ -11,19 +11,27 @@ export {
 } from './activityHeatmapHelpers';
 export { calculateStackingYield } from './calculateStackingYield';
 export {
-  CONVERSION_EPSILON,
-  STX_DECIMAL_PLACES,
-  isNearInteger,
-  snapToNearestInteger,
-  safeMicroStxFloor,
-  safeMicroStxRound,
-} from './stxPrecisionUtils';
+  isEmptyArray,
+  arrayMax,
+  arrayMin,
+  arraySum,
+  arrayMean,
+  safeArrayMax,
+  safeArrayMin,
+} from './safeArrayMath';
 export {
   formatBtcAmount,
   formatYieldPct,
   formatCycleCount,
   formatStxShort,
 } from './formatYield';
+export {
+  formatStxAmount,
+  formatMicroStxAmount,
+  formatBlockDuration,
+  formatPct,
+  formatVaultCount,
+} from './formatAnalytics';
 export {
   isStorageAvailable,
   saveToStorage,

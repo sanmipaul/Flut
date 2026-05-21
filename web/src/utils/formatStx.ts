@@ -11,7 +11,6 @@
  * All functions treat the input as STX unless `fromMicroStx` is set.
  */
 import {
-  MICROSTX_PER_STX,
   STX_SYMBOL,
   COMPACT_THRESHOLD_MILLION,
   COMPACT_THRESHOLD_THOUSAND,
@@ -128,11 +127,8 @@ export function formatStxWhole(amount: number, showSymbol = true): string {
  * @example formatStxPenalty(100) → "−100 STX (fee)"
  */
 export function formatStxPenalty(penaltyStx: number): string {
-  const formatted = penaltyStx.toLocaleString(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
-  return `−${formatted} ${STX_SYMBOL} (fee)`;
+  const formatted = formatStx(Math.abs(penaltyStx), { decimals: 2, showSymbol: true });
+  return `−${formatted.replace(/ STX$/, '')} ${STX_SYMBOL} (fee)`;
 }
 
 /**
@@ -147,10 +143,7 @@ export function formatStxDiff(diffStx: number, decimals = 2): string {
   if (!Number.isFinite(diffStx)) return `— ${STX_SYMBOL}`;
   if (diffStx === 0) return `0 ${STX_SYMBOL}`;
   const abs = Math.abs(diffStx);
-  const formatted = abs.toLocaleString(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: decimals,
-  });
+  const formatted = formatStx(abs, { decimals, showSymbol: false });
   const sign = diffStx > 0 ? '+' : '−';
   return `${sign}${formatted} ${STX_SYMBOL}`;
 }
@@ -159,6 +152,10 @@ export function formatStxDiff(diffStx: number, decimals = 2): string {
  * Parses a user-typed string into a STX number.
  * Returns NaN for non-numeric input.
  * Handles common input patterns: "1,234.56", "1.5M", "500k".
+ *
+ * Compact suffixes:
+ *   k / K  → multiply by 1,000
+ *   m / M  → multiply by 1,000,000 (million STX, NOT microSTX)
  */
 export function parseStxInput(raw: string): number {
   const cleaned = raw.trim().replace(/,/g, '');
@@ -169,7 +166,7 @@ export function parseStxInput(raw: string): number {
     const num = parseFloat(compactMatch[1]);
     const suffix = compactMatch[2].toLowerCase();
     if (!Number.isFinite(num)) return NaN;
-    return suffix === 'm' ? num * MICROSTX_PER_STX : num * 1000;
+    return suffix === 'm' ? num * 1_000_000 : num * 1_000;
   }
 
   return parseFloat(cleaned);

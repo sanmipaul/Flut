@@ -70,6 +70,12 @@ export function VaultCard({ vault, currentBlock, active = false, onClick, onKeyD
           <span>Stacking active</span>
         </div>
       )}
+      {vault.isEmergencyWithdrawalEnabled && (
+        <div className="mt-1.5 flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+          <span>⚠️</span>
+          <span>Emergency withdrawal enabled</span>
+        </div>
+      )}
     </button>
   );
 }
