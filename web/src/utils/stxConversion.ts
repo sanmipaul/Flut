@@ -8,6 +8,7 @@
  * only for display purposes.
  */
 import { MICROSTX_PER_STX } from './stxConstants';
+import { safeMicroStxFloor, safeMicroStxRound } from './stxPrecisionUtils';
 
 /**
  * Convert a microSTX integer to its STX decimal equivalent.
