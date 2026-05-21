@@ -33,10 +33,12 @@ export function stxToMicroStx(stx: number): number {
 /**
  * Convert a STX decimal to microSTX, rounding to the nearest uSTX.
  * Useful when the caller controls rounding (e.g. fee calculations).
+ * Corrects IEEE-754 float drift before rounding.
  * @example stxToMicroStxRound(1.0000005) → 1_000_001
+ * @example stxToMicroStxRound(1.1)       → 1_100_000
  */
 export function stxToMicroStxRound(stx: number): number {
-  return Math.round(stx * MICROSTX_PER_STX);
+  return safeMicroStxRound(stx);
 }
 
 /**
