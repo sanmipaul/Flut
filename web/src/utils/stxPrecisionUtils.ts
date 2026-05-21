@@ -57,3 +57,17 @@ export function snapToNearestInteger(value: number): number {
   const rounded = Math.round(value);
   return Math.abs(value - rounded) < CONVERSION_EPSILON ? rounded : value;
 }
+
+/**
+ * Convert STX to microSTX using floor semantics, correcting IEEE-754 drift.
+ *
+ * Equivalent to Math.floor(stx * MICROSTX_PER_STX) but first snaps values
+ * that are within CONVERSION_EPSILON of a whole number to that integer,
+ * preventing 1.1 * 1e6 → 1_099_999.999... from flooring to 1_099_999.
+ *
+ * @example safeMicroStxFloor(1.1) // 1_100_000 (not 1_099_999)
+ * @example safeMicroStxFloor(1.0000005) // 1_000_000 (genuinely fractional → floored)
+ */
+export function safeMicroStxFloor(stx: number): number {
+  return Math.floor(snapToNearestInteger(stx * MICROSTX_PER_STX));
+}
