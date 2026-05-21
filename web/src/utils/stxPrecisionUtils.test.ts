@@ -108,3 +108,18 @@ describe('safeMicroStxRound', () => {
     expect(safeMicroStxRound(1.5)).toBe(1_500_000);
   });
 });
+
+describe('safeMicroStxFloor — parametrised common fractions', () => {
+  it.each([
+    [0.1, 100_000],
+    [0.2, 200_000],
+    [0.3, 300_000],
+    [0.5, 500_000],
+    [1.1, 1_100_000],
+    [1.2, 1_200_000],
+    [2.5, 2_500_000],
+    [10.1, 10_100_000],
+  ])('safeMicroStxFloor(%s STX) = %i uSTX', (stx, expected) => {
+    expect(safeMicroStxFloor(stx)).toBe(expected);
+  });
+});
