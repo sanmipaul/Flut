@@ -68,6 +68,18 @@ describe('stxToMicroStx', () => {
       expect(stxToMicroStx(stx)).toBe(1_000_000 + i * 100_000);
     }
   });
+
+  it('converts 1.5 STX to 1_500_000 uSTX', () => {
+    expect(stxToMicroStx(1.5)).toBe(1_500_000);
+  });
+
+  it('result is always a non-negative integer', () => {
+    [0, 0.1, 1, 1.1, 2.5, 100].forEach((stx) => {
+      const result = stxToMicroStx(stx);
+      expect(Number.isInteger(result)).toBe(true);
+      expect(result).toBeGreaterThanOrEqual(0);
+    });
+  });
 });
 
 describe('stxToMicroStxRound', () => {
