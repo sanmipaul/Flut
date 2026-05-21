@@ -109,6 +109,30 @@ describe('safeMicroStxRound', () => {
   });
 });
 
+describe('stxPrecisionUtils — never-NaN safety', () => {
+  it('isNearInteger never throws', () => {
+    expect(() => isNearInteger(NaN)).not.toThrow();
+    expect(() => isNearInteger(Infinity)).not.toThrow();
+  });
+
+  it('snapToNearestInteger returns a number for any finite input', () => {
+    expect(Number.isFinite(snapToNearestInteger(1.1 * 1_000_000))).toBe(true);
+    expect(Number.isFinite(snapToNearestInteger(0))).toBe(true);
+  });
+
+  it('safeMicroStxFloor result is always an integer', () => {
+    [0.1, 0.5, 1.1, 2.2, 100].forEach((stx) => {
+      expect(Number.isInteger(safeMicroStxFloor(stx))).toBe(true);
+    });
+  });
+
+  it('safeMicroStxRound result is always an integer', () => {
+    [0.1, 0.5, 1.1, 2.2, 100].forEach((stx) => {
+      expect(Number.isInteger(safeMicroStxRound(stx))).toBe(true);
+    });
+  });
+});
+
 describe('safeMicroStxFloor — parametrised common fractions', () => {
   it.each([
     [0.1, 100_000],
