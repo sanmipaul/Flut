@@ -91,6 +91,20 @@ describe('stxToMicroStx', () => {
   });
 });
 
+describe('stxToMicroStxRound — regression after precision fix', () => {
+  it('stxToMicroStxRound(1.1) is 1_100_000', () => {
+    expect(stxToMicroStxRound(1.1)).toBe(1_100_000);
+  });
+
+  it('stxToMicroStxRound(1.0000005) rounds up to 1_000_001', () => {
+    expect(stxToMicroStxRound(1.0000005)).toBe(1_000_001);
+  });
+
+  it('stxToMicroStxRound(0.5) is 500_000', () => {
+    expect(stxToMicroStxRound(0.5)).toBe(500_000);
+  });
+});
+
 describe('stxToMicroStx — round-trip with microStxToStx', () => {
   it('round-trips integer STX values exactly', () => {
     [1, 5, 10, 100, 1000].forEach((stx) => {
