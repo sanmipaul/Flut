@@ -91,6 +91,18 @@ describe('stxToMicroStx', () => {
   });
 });
 
+describe('stxToMicroStx — round-trip with microStxToStx', () => {
+  it('round-trips integer STX values exactly', () => {
+    [1, 5, 10, 100, 1000].forEach((stx) => {
+      expect(microStxToStx(stxToMicroStx(stx))).toBe(stx);
+    });
+  });
+
+  it('round-trips 0 exactly', () => {
+    expect(microStxToStx(stxToMicroStx(0))).toBe(0);
+  });
+});
+
 describe('stxToMicroStxRound', () => {
   it('rounds to nearest uSTX', () => {
     expect(stxToMicroStxRound(1.0000005)).toBe(1_000_001);
