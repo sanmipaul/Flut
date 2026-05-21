@@ -45,3 +45,15 @@ export const STX_DECIMAL_PLACES = 6;
 export function isNearInteger(value: number): boolean {
   return Math.abs(value - Math.round(value)) < CONVERSION_EPSILON;
 }
+
+/**
+ * If `value` is within CONVERSION_EPSILON of a whole number, returns that
+ * integer; otherwise returns `value` unchanged.
+ *
+ * @example snapToNearestInteger(1099999.9999999998) // 1100000
+ * @example snapToNearestInteger(1000000.5)          // 1000000.5 (unchanged)
+ */
+export function snapToNearestInteger(value: number): number {
+  const rounded = Math.round(value);
+  return Math.abs(value - rounded) < CONVERSION_EPSILON ? rounded : value;
+}
