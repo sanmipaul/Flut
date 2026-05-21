@@ -61,6 +61,13 @@ describe('stxToMicroStx', () => {
       expect(stxToMicroStx(i / 10)).toBe(i * 100_000);
     }
   });
+
+  it('converts tenths 1.1–1.9 to correct uSTX values', () => {
+    for (let i = 1; i <= 9; i++) {
+      const stx = 1 + i / 10;
+      expect(stxToMicroStx(stx)).toBe(1_000_000 + i * 100_000);
+    }
+  });
 });
 
 describe('stxToMicroStxRound', () => {
