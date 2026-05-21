@@ -90,3 +90,21 @@ describe('safeMicroStxFloor', () => {
     expect(safeMicroStxFloor(0)).toBe(0);
   });
 });
+
+describe('safeMicroStxRound', () => {
+  it('rounds 1.0000005 STX up to 1_000_001', () => {
+    expect(safeMicroStxRound(1.0000005)).toBe(1_000_001);
+  });
+
+  it('converts 1.1 STX to exactly 1_100_000 (no float error)', () => {
+    expect(safeMicroStxRound(1.1)).toBe(1_100_000);
+  });
+
+  it('converts 0 STX to 0', () => {
+    expect(safeMicroStxRound(0)).toBe(0);
+  });
+
+  it('converts 1.5 STX to 1_500_000', () => {
+    expect(safeMicroStxRound(1.5)).toBe(1_500_000);
+  });
+});
