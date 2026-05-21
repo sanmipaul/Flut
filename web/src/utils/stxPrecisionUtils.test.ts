@@ -133,6 +133,14 @@ describe('stxPrecisionUtils — never-NaN safety', () => {
   });
 });
 
+describe('CONVERSION_EPSILON — is small enough not to affect 0.5 uSTX', () => {
+  it('0.5 uSTX boundary is not affected by CONVERSION_EPSILON', () => {
+    // 0.5 is much larger than CONVERSION_EPSILON, so genuinely half-uSTX stays fractional
+    expect(isNearInteger(0.5)).toBe(false);
+    expect(snapToNearestInteger(0.5)).toBe(0.5);
+  });
+});
+
 describe('snapToNearestInteger — does not mutate near-correct values', () => {
   it('exact integer 1_500_000 is returned as-is', () => {
     expect(snapToNearestInteger(1_500_000)).toBe(1_500_000);
