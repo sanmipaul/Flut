@@ -34,3 +34,14 @@ export const CONVERSION_EPSILON = 1e-9;
 
 /** Number of decimal places in the STX unit (1 STX = 10^6 uSTX). */
 export const STX_DECIMAL_PLACES = 6;
+
+/**
+ * Returns true when `value` is within CONVERSION_EPSILON of a whole number.
+ * Used to detect IEEE-754 representation drift before rounding operations.
+ *
+ * @example isNearInteger(1099999.9999999998) // true  (1.1 * 1e6 float error)
+ * @example isNearInteger(1000000.5)          // false (genuinely fractional)
+ */
+export function isNearInteger(value: number): boolean {
+  return Math.abs(value - Math.round(value)) < CONVERSION_EPSILON;
+}
