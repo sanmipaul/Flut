@@ -80,6 +80,15 @@ describe('stxToMicroStx', () => {
       expect(result).toBeGreaterThanOrEqual(0);
     });
   });
+
+  it('still floors genuinely fractional results', () => {
+    // 1.0000005 * 1e6 = 1000000.5 → floor = 1_000_000
+    expect(stxToMicroStx(1.0000005)).toBe(1_000_000);
+  });
+
+  it('converts 100 STX to 100_000_000 uSTX', () => {
+    expect(stxToMicroStx(100)).toBe(100_000_000);
+  });
 });
 
 describe('stxToMicroStxRound', () => {
