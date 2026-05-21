@@ -21,10 +21,13 @@ export function microStxToStx(uStx: number): number {
 /**
  * Convert a STX decimal value to its microSTX integer equivalent.
  * Always rounds down to avoid spending more than intended.
+ * Corrects IEEE-754 float drift (e.g. 1.1 * 1e6 = 1_099_999.999...) before
+ * flooring, so 1.1 STX correctly returns 1_100_000 uSTX.
  * @example stxToMicroStx(1.5) → 1_500_000
+ * @example stxToMicroStx(1.1) → 1_100_000
  */
 export function stxToMicroStx(stx: number): number {
-  return Math.floor(stx * MICROSTX_PER_STX);
+  return safeMicroStxFloor(stx);
 }
 
 /**
