@@ -71,3 +71,13 @@ export function snapToNearestInteger(value: number): number {
 export function safeMicroStxFloor(stx: number): number {
   return Math.floor(snapToNearestInteger(stx * MICROSTX_PER_STX));
 }
+
+/**
+ * Convert STX to microSTX using round semantics, correcting IEEE-754 drift.
+ *
+ * @example safeMicroStxRound(1.0000005) // 1_000_001 (rounds up as expected)
+ * @example safeMicroStxRound(1.1)       // 1_100_000 (float error corrected)
+ */
+export function safeMicroStxRound(stx: number): number {
+  return Math.round(snapToNearestInteger(stx * MICROSTX_PER_STX));
+}
