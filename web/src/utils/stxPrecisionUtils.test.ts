@@ -133,6 +133,14 @@ describe('stxPrecisionUtils — never-NaN safety', () => {
   });
 });
 
+describe('safeMicroStxFloor — all tenths 0.1-0.9', () => {
+  it.each(
+    Array.from({ length: 9 }, (_, i) => [i + 1, (i + 1) * 100_000] as [number, number])
+  )('safeMicroStxFloor(%i/10) = %i', (num, expected) => {
+    expect(safeMicroStxFloor(num / 10)).toBe(expected);
+  });
+});
+
 describe('CONVERSION_EPSILON — is small enough not to affect 0.5 uSTX', () => {
   it('0.5 uSTX boundary is not affected by CONVERSION_EPSILON', () => {
     // 0.5 is much larger than CONVERSION_EPSILON, so genuinely half-uSTX stays fractional
