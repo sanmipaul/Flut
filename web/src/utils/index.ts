@@ -11,6 +11,14 @@ export {
 } from './activityHeatmapHelpers';
 export { calculateStackingYield } from './calculateStackingYield';
 export {
+  CONVERSION_EPSILON,
+  STX_DECIMAL_PLACES,
+  isNearInteger,
+  snapToNearestInteger,
+  safeMicroStxFloor,
+  safeMicroStxRound,
+} from './stxPrecisionUtils';
+export {
   formatBtcAmount,
   formatYieldPct,
   formatCycleCount,
