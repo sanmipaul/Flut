@@ -133,6 +133,17 @@ describe('stxPrecisionUtils — never-NaN safety', () => {
   });
 });
 
+describe('snapToNearestInteger — does not mutate near-correct values', () => {
+  it('exact integer 1_500_000 is returned as-is', () => {
+    expect(snapToNearestInteger(1_500_000)).toBe(1_500_000);
+    expect(snapToNearestInteger(1_500_000)).toStrictEqual(1_500_000);
+  });
+
+  it('genuinely fractional 500.7 is returned unchanged', () => {
+    expect(snapToNearestInteger(500.7)).toBe(500.7);
+  });
+});
+
 describe('safeMicroStxFloor — parametrised common fractions', () => {
   it.each([
     [0.1, 100_000],
