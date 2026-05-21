@@ -117,6 +117,15 @@ describe('stxToMicroStx — round-trip with microStxToStx', () => {
   });
 });
 
+describe('stxToMicroStx — monotone property', () => {
+  it('larger STX always yields >= uSTX', () => {
+    const pairs = [[0.1, 0.2], [1, 2], [10, 11]];
+    pairs.forEach(([small, large]) => {
+      expect(stxToMicroStx(large)).toBeGreaterThanOrEqual(stxToMicroStx(small));
+    });
+  });
+});
+
 describe('stxToMicroStxRound', () => {
   it('rounds to nearest uSTX', () => {
     expect(stxToMicroStxRound(1.0000005)).toBe(1_000_001);
