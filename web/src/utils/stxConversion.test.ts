@@ -39,6 +39,10 @@ describe('stxToMicroStx', () => {
   it('converts 0 STX to 0 uSTX', () => {
     expect(stxToMicroStx(0)).toBe(0);
   });
+
+  it('converts 1.1 STX to exactly 1_100_000 uSTX', () => {
+    expect(stxToMicroStx(1.1)).toBe(1_100_000);
+  });
 });
 
 describe('stxToMicroStxRound', () => {
