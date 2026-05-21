@@ -64,3 +64,29 @@ describe('snapToNearestInteger', () => {
     expect(snapToNearestInteger(2.2 * 1_000_000)).toBe(2_200_000);
   });
 });
+
+describe('safeMicroStxFloor', () => {
+  it('converts 1.1 STX to exactly 1_100_000', () => {
+    expect(safeMicroStxFloor(1.1)).toBe(1_100_000);
+  });
+
+  it('converts 0.1 STX to exactly 100_000', () => {
+    expect(safeMicroStxFloor(0.1)).toBe(100_000);
+  });
+
+  it('converts 2.2 STX to exactly 2_200_000', () => {
+    expect(safeMicroStxFloor(2.2)).toBe(2_200_000);
+  });
+
+  it('still floors genuinely fractional values', () => {
+    expect(safeMicroStxFloor(1.0000005)).toBe(1_000_000);
+  });
+
+  it('converts 1 STX to 1_000_000 exactly', () => {
+    expect(safeMicroStxFloor(1)).toBe(1_000_000);
+  });
+
+  it('converts 0 STX to 0', () => {
+    expect(safeMicroStxFloor(0)).toBe(0);
+  });
+});
