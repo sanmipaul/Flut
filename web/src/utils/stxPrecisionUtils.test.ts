@@ -133,6 +133,15 @@ describe('stxPrecisionUtils — never-NaN safety', () => {
   });
 });
 
+describe('isNearInteger — known float errors for tenths × 1e6', () => {
+  it.each([0.1, 0.2, 0.3, 0.7, 1.1, 1.2, 2.2, 3.3])(
+    'isNearInteger(%f * 1e6) is true',
+    (stx) => {
+      expect(isNearInteger(stx * 1_000_000)).toBe(true);
+    }
+  );
+});
+
 describe('safeMicroStxFloor — all tenths 0.1-0.9', () => {
   it.each(
     Array.from({ length: 9 }, (_, i) => [i + 1, (i + 1) * 100_000] as [number, number])
