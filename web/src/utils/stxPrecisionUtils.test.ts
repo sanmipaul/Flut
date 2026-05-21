@@ -42,3 +42,25 @@ describe('isNearInteger', () => {
     expect(isNearInteger(0.5)).toBe(false);
   });
 });
+
+describe('snapToNearestInteger', () => {
+  it('snaps 1.1 * 1e6 to 1_100_000', () => {
+    expect(snapToNearestInteger(1.1 * 1_000_000)).toBe(1_100_000);
+  });
+
+  it('snaps 0.1 * 1e6 to 100_000', () => {
+    expect(snapToNearestInteger(0.1 * 1_000_000)).toBe(100_000);
+  });
+
+  it('leaves genuinely fractional 1_000_000.5 unchanged', () => {
+    expect(snapToNearestInteger(1_000_000.5)).toBe(1_000_000.5);
+  });
+
+  it('leaves exact integers unchanged', () => {
+    expect(snapToNearestInteger(1_500_000)).toBe(1_500_000);
+  });
+
+  it('snaps 2.2 * 1e6 to 2_200_000', () => {
+    expect(snapToNearestInteger(2.2 * 1_000_000)).toBe(2_200_000);
+  });
+});
