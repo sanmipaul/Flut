@@ -47,6 +47,14 @@ describe('stxToMicroStx', () => {
   it('converts 0.1 STX to exactly 100_000 uSTX', () => {
     expect(stxToMicroStx(0.1)).toBe(100_000);
   });
+
+  it('converts 2.2 STX to exactly 2_200_000 uSTX', () => {
+    expect(stxToMicroStx(2.2)).toBe(2_200_000);
+  });
+
+  it('converts 1.3 STX to exactly 1_300_000 uSTX', () => {
+    expect(stxToMicroStx(1.3)).toBe(1_300_000);
+  });
 });
 
 describe('stxToMicroStxRound', () => {
