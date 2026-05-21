@@ -6,6 +6,16 @@
  * The Stacks blockchain stores all balances as integers in uSTX.
  * All on-chain values should be treated as uSTX; convert to STX
  * only for display purposes.
+ *
+ * Precision note
+ * --------------
+ * JavaScript's IEEE-754 doubles cannot represent many decimal fractions
+ * exactly. Naively multiplying 1.1 * 1_000_000 yields 1_099_999.999...
+ * which Math.floor then truncates to 1_099_999 — one uSTX short.
+ *
+ * stxToMicroStx and stxToMicroStxRound correct this via stxPrecisionUtils,
+ * which snaps values within CONVERSION_EPSILON (1e-9) of an integer to that
+ * integer before applying floor/round.
  */
 import { MICROSTX_PER_STX } from './stxConstants';
 import { safeMicroStxFloor, safeMicroStxRound } from './stxPrecisionUtils';
