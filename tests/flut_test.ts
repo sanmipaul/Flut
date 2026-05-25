@@ -149,6 +149,48 @@ Clarinet.test({
   }
 });
 
+// ============================================
+// Cooldown Reset After Deposit Tests
+// ============================================
+
+Clarinet.test({
+  name: "deposit: resets last-deposit-height after successful deposit",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(200);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], wallet.address)
+    ]);
+    // Try immediate second deposit - should fail due to cooldown
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u12)');
+  }
+});
+
+Clarinet.test({
+  name: "get-remaining-cooldown: returns zero when cooldown expired",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(200);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(350);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-remaining-cooldown', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+  }
+});
+
 Clarinet.test({
   name: "add-beneficiary: fails when beneficiary is same as owner",
   async fn(chain: Chain, accounts: Map<string, Account>) {
