@@ -1732,3 +1732,88 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, 'false');
   }
 });
+
+// ============================================
+// Withdrawal After Partial Tests
+// ============================================
+
+Clarinet.test({
+  name: "withdraw: works after partial withdrawal",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(300)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+// ============================================
+// Cooldown Exact Timing Tests
+// ============================================
+
+Clarinet.test({
+  name: "deposit: succeeds exactly 144 blocks after previous deposit",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2 + 144)], wallet.address)
+    ]);
+    // Mine exactly 144 blocks to expire cooldown
+    chain.mineEmptyBlockUntil(146);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+// ============================================
+// Beneficiary at Vault Limit Tests
+// ============================================
+
+Clarinet.test({
+  name: "add-beneficiary: fails when total shares would exceed 10000",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    const beneficiary2 = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(8000)], owner.address)
+    ]);
+    // Try to add beneficiary with 2001 shares (8000 + 2001 = 10001 > 10000)
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary2.address), types.uint(2001)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u14)');
+  }
+});
+
+Clarinet.test({
+  name: "add-beneficiary: succeeds when total shares equals exactly 10000",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    const beneficiary2 = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(8000)], owner.address)
+    ]);
+    // Add exactly 2000 shares to reach 10000
+    chain.mineBlock([
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary2.address), types.uint(2000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-vault-total-shares', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u10000)');
+  }
+});
