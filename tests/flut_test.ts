@@ -1817,3 +1817,70 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u10000)');
   }
 });
+
+// ============================================
+// Ownership Transfer with New Features Tests
+// ============================================
+
+Clarinet.test({
+  name: "deposit: new owner can deposit after ownership transfer",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const newOwner = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'initiate-ownership-transfer', [types.uint(0), types.principal(newOwner.address)], owner.address),
+      Tx.contractCall('flut', 'accept-ownership-transfer', [types.uint(0)], newOwner.address)
+    ]);
+    // Advance past cooldown
+    chain.mineEmptyBlockUntil(400);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], newOwner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+// ============================================
+// Vault Without Beneficiaries Partial Withdrawal Tests
+// ============================================
+
+Clarinet.test({
+  name: "withdraw-amount: fails for withdrawn vault",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw', [types.uint(0)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(500)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u4)');
+  }
+});
+
+// ============================================
+// Error Message Consistency Tests
+// ============================================
+
+Clarinet.test({
+  name: "deposit: ERR-VAULT-CLOSED returned for withdrawn vault",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw', [types.uint(0)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u9)');
+  }
+});
