@@ -114,6 +114,41 @@ Clarinet.test({
   }
 });
 
+// ============================================
+// Penalty Rate Validation Tests
+// ============================================
+
+Clarinet.test({
+  name: "set-emergency-withdrawal-penalty: fails when penalty exceeds max",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'set-emergency-withdrawal-penalty', [types.uint(0), types.uint(1001)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u23)');
+  }
+});
+
+Clarinet.test({
+  name: "set-emergency-withdrawal-penalty: succeeds with valid penalty",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'set-emergency-withdrawal-penalty', [types.uint(0), types.uint(500)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-emergency-withdrawal-penalty-bps', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u500)');
+  }
+});
+
 Clarinet.test({
   name: "add-beneficiary: fails when beneficiary is same as owner",
   async fn(chain: Chain, accounts: Map<string, Account>) {
