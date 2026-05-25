@@ -1166,3 +1166,58 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u2)');
   }
 });
+
+// ============================================
+// Remove Beneficiary Tests
+// ============================================
+
+Clarinet.test({
+  name: "remove-beneficiary: fails when vault already withdrawn",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(5000)], owner.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw', [types.uint(0)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'remove-beneficiary', [types.uint(0), types.principal(beneficiary.address)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u4)');
+  }
+});
+
+Clarinet.test({
+  name: "remove-beneficiary: fails when beneficiary not found",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'remove-beneficiary', [types.uint(0), types.principal(beneficiary.address)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u22)');
+  }
+});
+
+Clarinet.test({
+  name: "remove-beneficiary: succeeds and decrements shares",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(5000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'remove-beneficiary', [types.uint(0), types.principal(beneficiary.address)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
