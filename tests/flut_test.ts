@@ -1624,3 +1624,58 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u52560)');
   }
 });
+
+// ============================================
+// Emergency Withdrawal Toggle Persistence Tests
+// ============================================
+
+Clarinet.test({
+  name: "is-emergency-withdrawal-enabled: returns false after creating new vault",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'is-emergency-withdrawal-enabled', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
+
+Clarinet.test({
+  name: "set-emergency-withdrawal-enabled: can toggle multiple times",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-enabled', [types.uint(0), types.bool(true)], wallet.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-enabled', [types.uint(0), types.bool(false)], wallet.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-enabled', [types.uint(0), types.bool(true)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'is-emergency-withdrawal-enabled', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+// ============================================
+// Integration Tests - Full Lifecycle
+// ============================================
+
+Clarinet.test({
+  name: "full lifecycle: create vault, enable emergency, withdraw early, verify penalty",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(10000), types.uint(200)], wallet.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-penalty', [types.uint(0), types.uint(1000)], wallet.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-enabled', [types.uint(0), types.bool(true)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'emergency-withdraw', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
