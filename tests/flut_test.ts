@@ -2030,3 +2030,45 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u2)');
   }
 });
+
+// ============================================
+// Invalid Height Tests
+// ============================================
+
+Clarinet.test({
+  name: "create-vault: fails when unlock height equals current block",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(1)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u5)');
+  }
+});
+
+Clarinet.test({
+  name: "create-vault: fails when unlock height is in the past",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(1)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u5)');
+  }
+});
+
+// ============================================
+// Max Lock Blocks Tests
+// ============================================
+
+Clarinet.test({
+  name: "create-vault: fails when unlock height exceeds max lock blocks",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(100000)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u8)');
+  }
+});
