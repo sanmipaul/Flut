@@ -1393,3 +1393,59 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok u7000)');
   }
 });
+
+// ============================================
+// Edge Case Tests - Amount Boundaries
+// ============================================
+
+Clarinet.test({
+  name: "deposit: fails when deposit would exceed vault cap by 1 micro-STX",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(4999999999999), types.uint(200)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(200);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(2)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u14)');
+  }
+});
+
+Clarinet.test({
+  name: "withdraw-amount: fails when amount equals balance plus one",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(1001)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u16)');
+  }
+});
+
+// ============================================
+// Multi-Vault Tests
+// ============================================
+
+Clarinet.test({
+  name: "deposit: each vault tracks cooldown independently",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address),
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    // Both vaults should be in cooldown
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], wallet.address),
+      Tx.contractCall('flut', 'deposit', [types.uint(1), types.uint(500)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u12)');
+    assertEquals(block.receipts[1].result, '(err u12)');
+  }
+});
