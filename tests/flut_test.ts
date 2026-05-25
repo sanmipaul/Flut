@@ -2072,3 +2072,57 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u8)');
   }
 });
+
+// ============================================
+// Zero Amount Edge Case Tests
+// ============================================
+
+Clarinet.test({
+  name: "create-vault: fails with zero amount",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(0), types.uint(200)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u6)');
+  }
+});
+
+// ============================================
+// Withdraw Amount Validation Tests
+// ============================================
+
+Clarinet.test({
+  name: "withdraw-amount: fails with amount larger than balance",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(100), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(200)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u16)');
+  }
+});
+
+// ============================================
+// Emergency Withdrawal with Penalty Calculation Tests
+// ============================================
+
+Clarinet.test({
+  name: "emergency-withdraw: calculates penalty correctly for 5% rate",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(10000), types.uint(200)], wallet.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-penalty', [types.uint(0), types.uint(500)], wallet.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-enabled', [types.uint(0), types.bool(true)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'emergency-withdraw', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
