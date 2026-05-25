@@ -1010,3 +1010,54 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+// ============================================
+// Emergency Withdrawal Tests
+// ============================================
+
+Clarinet.test({
+  name: "emergency-withdraw: fails when emergency withdrawal is disabled",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'emergency-withdraw', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u17)');
+  }
+});
+
+Clarinet.test({
+  name: "emergency-withdraw: succeeds after enabling",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-enabled', [types.uint(0), types.bool(true)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'emergency-withdraw', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+Clarinet.test({
+  name: "emergency-withdraw: sets withdrawn flag after execution",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-enabled', [types.uint(0), types.bool(true)], wallet.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'emergency-withdraw', [types.uint(0)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'is-vault-withdrawn', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
