@@ -1884,3 +1884,88 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u9)');
   }
 });
+
+// ============================================
+// Get Last Deposit Height Tests
+// ============================================
+
+Clarinet.test({
+  name: "get-last-deposit-height: returns current block height after vault creation",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-last-deposit-height', [types.uint(0)], wallet.address)
+    ]);
+    // Block height should be 2 (1-based after mineBlock)
+    assertEquals(block.receipts[0].result, '(ok u2)');
+  }
+});
+
+// ============================================
+// Blocks Until Unlock Tests
+// ============================================
+
+Clarinet.test({
+  name: "get-blocks-until-unlock: returns zero for locked vault at unlock height",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(10)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(10);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-blocks-until-unlock', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+  }
+});
+
+// ============================================
+// Max Vault Balance Edge Case Tests
+// ============================================
+
+Clarinet.test({
+  name: "deposit: exactly fills vault to max balance",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const maxBalance = 5000000000000;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(maxBalance), types.uint(200)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(200);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(0)], wallet.address)
+    ]);
+    // Should fail - zero amount
+    assertEquals(block.receipts[0].result, '(err u6)');
+  }
+});
+
+// ============================================
+// Multiple Cooldown Tests
+// ============================================
+
+Clarinet.test({
+  name: "deposit: successive deposits require cooldown between each",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200 + 300)], wallet.address)
+    ]);
+    // First deposit - should fail (cooldown)
+    const first = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], wallet.address)
+    ]);
+    assertEquals(first.receipts[0].result, '(err u12)');
+    // Advance past cooldown
+    chain.mineEmptyBlockUntil(400);
+    // Second deposit - should succeed
+    const second = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], wallet.address)
+    ]);
+    assertEquals(second.receipts[0].result, '(ok true)');
+  }
+});
