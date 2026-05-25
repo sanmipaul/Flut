@@ -1449,3 +1449,57 @@ Clarinet.test({
     assertEquals(block.receipts[1].result, '(err u12)');
   }
 });
+
+// ============================================
+// Beneficiary Withdraw-As-Beneficiary Tests
+// ============================================
+
+Clarinet.test({
+  name: "withdraw-as-beneficiary: fails when vault is locked",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000000), types.uint(100)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(5000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-as-beneficiary', [types.uint(0), types.uint(100000)], beneficiary.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u3)');
+  }
+});
+
+Clarinet.test({
+  name: "withdraw-as-beneficiary: fails when caller is not a beneficiary",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const stranger = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000000), types.uint(2)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal('ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG'), types.uint(5000)], owner.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-as-beneficiary', [types.uint(0), types.uint(100000)], stranger.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u22)');
+  }
+});
+
+Clarinet.test({
+  name: "withdraw-as-beneficiary: fails with zero amount",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000000), types.uint(2)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(5000)], owner.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-as-beneficiary', [types.uint(0), types.uint(0)], beneficiary.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u15)');
+  }
+});
