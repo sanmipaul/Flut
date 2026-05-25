@@ -32,8 +32,57 @@ Clarinet.test({
     const wallet = accounts.get('wallet_1')!;
     const block = chain.mineBlock([
       Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(99999)], wallet.address)
+]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+// ============================================
+// Partial Withdrawal Tests
+// ============================================
+
+Clarinet.test({
+  name: "withdraw-amount: fails with zero amount",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], wallet.address)
     ]);
-    assertEquals(block.receipts[0].result, '(err u8)');
+    chain.mineEmptyBlockUntil(5);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u15)');
+  }
+});
+
+Clarinet.test({
+  name: "withdraw-amount: fails when amount exceeds vault balance",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(500), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(1000)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u16)');
+  }
+});
+
+Clarinet.test({
+  name: "withdraw-amount: succeeds with valid partial amount",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(300)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
 
