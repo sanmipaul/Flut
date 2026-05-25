@@ -1,6 +1,19 @@
 ;; Test suite for vault management enhancements
 ;; Tests: deposit cooldown, vault caps, partial withdrawal, emergency withdrawal, multi-beneficiary
 
+(define-constant ERR-DEPOSIT-COOLDOWN-ACTIVE (err u12))
+(define-constant ERR-DEPOSIT-AMOUNT-EXCEEDED (err u13))
+(define-constant ERR-VAULT-AMOUNT-EXCEEDED (err u14))
+(define-constant ERR-INVALID-WITHDRAWAL-AMOUNT (err u15))
+(define-constant ERR-INSUFFICIENT-BALANCE (err u16))
+(define-constant ERR-EMERGENCY-WITHDRAWAL-DISABLED (err u17))
+(define-constant ERR-INVALID-SHARES (err u18))
+(define-constant ERR-BENEFICIARY-SAME-AS-CREATOR (err u19))
+(define-constant ERR-BENEFICIARY-EXISTS (err u20))
+(define-constant ERR-BENEFICIARY-HAS-WITHDRAWN (err u21))
+(define-constant ERR-BENEFICIARY-NOT-FOUND (err u22))
+(define-constant ERR-INVALID-PENALTY-RATE (err u23))
+
 (define-constant TEST-VAULT-ID u0)
 (define-constant TEST-OWNER 'ST1SJ3DTE5DN7X54YDH5D64R3BJB2ZZAB3A24GTNNP)
 (define-constant TEST-BENEFICIARY 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG)
