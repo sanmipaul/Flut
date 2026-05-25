@@ -1969,3 +1969,64 @@ Clarinet.test({
     assertEquals(second.receipts[0].result, '(ok true)');
   }
 });
+
+// ============================================
+// Double Withdrawal Prevention Tests
+// ============================================
+
+Clarinet.test({
+  name: "withdraw: fails on already withdrawn vault",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw', [types.uint(0)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u4)');
+  }
+});
+
+// ============================================
+// Empty Vault Tests
+// ============================================
+
+Clarinet.test({
+  name: "withdraw: fails when vault balance is zero",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(0), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u7)');
+  }
+});
+
+// ============================================
+// Unauthorized Access Tests
+// ============================================
+
+Clarinet.test({
+  name: "deposit: fails when called by non-owner",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const stranger = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    chain.mineEmptyBlockUntil(200);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], stranger.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u2)');
+  }
+});
