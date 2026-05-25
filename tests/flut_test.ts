@@ -1110,3 +1110,59 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+// ============================================
+// Successful Beneficiary Adding Tests
+// ============================================
+
+Clarinet.test({
+  name: "add-beneficiary: succeeds with valid parameters",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(5000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-beneficiary-shares', [types.uint(0), types.principal(beneficiary.address)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u5000)');
+  }
+});
+
+Clarinet.test({
+  name: "add-beneficiary: increments total shares correctly",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    const beneficiary2 = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(3000)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary2.address), types.uint(2000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-vault-total-shares', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u5000)');
+  }
+});
+
+Clarinet.test({
+  name: "get-beneficiary-count: returns correct count after adding beneficiaries",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    const beneficiary2 = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(3000)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary2.address), types.uint(2000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-beneficiary-count', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u2)');
+  }
+});
