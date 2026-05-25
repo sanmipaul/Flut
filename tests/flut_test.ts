@@ -1554,3 +1554,73 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, 'false');
   }
 });
+
+// ============================================
+// Vault Summary Tests
+// ============================================
+
+Clarinet.test({
+  name: "get-vault-summary: returns correct unlocked status when locked",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-vault-summary', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result.includes('unlocked: false'), true);
+  }
+});
+
+Clarinet.test({
+  name: "get-vault-summary: returns correct unlocked status when unlocked",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-vault-summary', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result.includes('unlocked: true'), true);
+  }
+});
+
+// ============================================
+// Max Constants Tests
+// ============================================
+
+Clarinet.test({
+  name: "get-max-single-deposit: returns correct value",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-max-single-deposit', [], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u1000000000000)');
+  }
+});
+
+Clarinet.test({
+  name: "get-max-vault-balance: returns correct value",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-max-vault-balance', [], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u5000000000000)');
+  }
+});
+
+Clarinet.test({
+  name: "get-max-lock-blocks: returns correct value",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-max-lock-blocks', [], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u52560)');
+  }
+});
