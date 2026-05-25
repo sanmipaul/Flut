@@ -246,20 +246,19 @@ these codes correspond to the rows below.
 | `u8` | `ERR-HEIGHT-TOO-FAR` | Unlock height exceeds maximum lock period |
 | `u9` | `ERR-VAULT-CLOSED` | Vault is closed for further deposits |
 | `u10` | `ERR-SAME-OWNER` | New owner cannot be same as current owner |
-| `u11` | `ERR-DEPOSIT-COOLDOWN-ACTIVE` | Must wait between deposits |
-| `u12` | `ERR-DEPOSIT-AMOUNT-EXCEEDED` | Single deposit exceeds maximum allowed |
-| `u13` | `ERR-VAULT-AMOUNT-EXCEEDED` | Vault total balance would exceed cap |
-| `u14` | `ERR-INSUFFICIENT-BALANCE` | Withdrawal amount exceeds available balance |
+| `u11` | `ERR-NO-PENDING-TRANSFER` | No pending ownership transfer exists |
+| `u12` | `ERR-DEPOSIT-COOLDOWN-ACTIVE` | Must wait between deposits |
+| `u13` | `ERR-DEPOSIT-AMOUNT-EXCEEDED` | Single deposit exceeds maximum allowed |
+| `u14` | `ERR-VAULT-AMOUNT-EXCEEDED` | Vault total balance would exceed cap |
 | `u15` | `ERR-INVALID-WITHDRAWAL-AMOUNT` | Withdrawal amount must be > 0 |
-| `u16` | `ERR-RECIPIENT-CANNOT-WITHDRAW` | Beneficiary not yet eligible to withdraw |
-| `u17` | `ERR-WITHDRAWAL-NOT-ALLOWED` | Withdrawals are disabled for this vault |
-| `u18` | `ERR-EMERGENCY-WITHDRAWAL-DISABLED` | Emergency withdrawals are disabled |
-| `u19` | `ERR-INVALID-PENALTY-RATE` | Penalty rate out of bounds |
-| `u20` | `ERR-INVALID-SHARES` | Shares value must be ≤ 10000 |
-| `u21` | `ERR-BENEFICIARY-SAME-AS-CREATOR` | Creator cannot be a beneficiary |
-| `u22` | `ERR-BENEFICIARY-EXISTS` | Beneficiary already assigned to vault |
-| `u23` | `ERR-BENEFICIARY-NOT-FOUND` | Specified beneficiary not found |
-| `u24` | `ERR-BENEFICIARY-HAS-WITHDRAWN` | Beneficiary already withdrew their allocation |
+| `u16` | `ERR-INSUFFICIENT-BALANCE` | Withdrawal amount exceeds available balance |
+| `u17` | `ERR-EMERGENCY-WITHDRAWAL-DISABLED` | Emergency withdrawals are disabled |
+| `u18` | `ERR-INVALID-SHARES` | Shares value must be ≤ 10000 |
+| `u19` | `ERR-BENEFICIARY-SAME-AS-CREATOR` | Creator cannot be a beneficiary |
+| `u20` | `ERR-BENEFICIARY-EXISTS` | Beneficiary already assigned to vault |
+| `u21` | `ERR-BENEFICIARY-HAS-WITHDRAWN` | Beneficiary already withdrew their allocation |
+| `u22` | `ERR-BENEFICIARY-NOT-FOUND` | Specified beneficiary not found |
+| `u23` | `ERR-INVALID-PENALTY-RATE` | Penalty rate out of bounds (max 10%) |
 
 > **Note:** new error codes may be added as the contract evolves; keep this table in sync with
 > `contracts/flut.clar`.
