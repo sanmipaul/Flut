@@ -927,3 +927,37 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+// ============================================
+// Vault Balance Cap Tests
+// ============================================
+
+Clarinet.test({
+  name: "deposit: fails when vault balance would exceed MAX-VAULT-BALANCE",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(4900000000000), types.uint(200)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(200);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(100000000001)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u14)');
+  }
+});
+
+Clarinet.test({
+  name: "deposit: succeeds when vault balance equals MAX-VAULT-BALANCE exactly",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(4900000000000), types.uint(200)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(200);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(100000000000)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
