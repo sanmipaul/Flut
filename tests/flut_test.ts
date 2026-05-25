@@ -1679,3 +1679,56 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+// ============================================
+// Vault Counter Tests
+// ============================================
+
+Clarinet.test({
+  name: "get-vault-count: increments after each vault creation",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const before = chain.mineBlock([
+      Tx.contractCall('flut', 'get-vault-count', [], wallet.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(300)], wallet.address)
+    ]);
+    const after = chain.mineBlock([
+      Tx.contractCall('flut', 'get-vault-count', [], wallet.address)
+    ]);
+    assertEquals(after.receipts[0].result, '(ok u2)');
+  }
+});
+
+// ============================================
+// Vault Exists Tests
+// ============================================
+
+Clarinet.test({
+  name: "vault-exists: returns true for created vault",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'vault-exists', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'true');
+  }
+});
+
+Clarinet.test({
+  name: "vault-exists: returns false for non-existent vault",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'vault-exists', [types.uint(999)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'false');
+  }
+});
