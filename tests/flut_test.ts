@@ -1337,3 +1337,59 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+// ============================================
+// Beneficiary Withdrawn Amount Tests
+// ============================================
+
+Clarinet.test({
+  name: "get-beneficiary-withdrawn-amount: returns zero for new beneficiary",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(5000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-beneficiary-withdrawn-amount', [types.uint(0), types.principal(beneficiary.address)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+  }
+});
+
+// ============================================
+// Total Deposited Tracking Tests
+// ============================================
+
+Clarinet.test({
+  name: "get-total-deposited: returns initial amount after vault creation",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(5000), types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-total-deposited', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u5000)');
+  }
+});
+
+Clarinet.test({
+  name: "get-total-deposited: includes subsequent deposits",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(5000), types.uint(200)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(200);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(2000)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-total-deposited', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u7000)');
+  }
+});
