@@ -1503,3 +1503,54 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u15)');
   }
 });
+
+// ============================================
+// Has-Beneficiaries Tests
+// ============================================
+
+Clarinet.test({
+  name: "has-beneficiaries: returns false for vault without beneficiaries",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'has-beneficiaries', [types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'false');
+  }
+});
+
+Clarinet.test({
+  name: "has-beneficiaries: returns true after adding beneficiary",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(5000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'has-beneficiaries', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'true');
+  }
+});
+
+Clarinet.test({
+  name: "has-beneficiaries: returns false after removing all beneficiaries",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(5000)], owner.address),
+      Tx.contractCall('flut', 'remove-beneficiary', [types.uint(0), types.principal(beneficiary.address)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'has-beneficiaries', [types.uint(0)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'false');
+  }
+});
