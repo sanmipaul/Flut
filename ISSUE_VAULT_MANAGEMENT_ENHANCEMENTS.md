@@ -88,7 +88,7 @@ The current vault implementation lacks several important features needed for a r
 
 ---
 
-**Status:** Open  
+**Status:** Completed  
 **Priority:** High  
 **Assignee:** TBD  
 **Labels:** enhancement, vault-management, multi-beneficiary, emergency-withdrawal
