@@ -1,13 +1,14 @@
 ;; Flut - STX Savings Vault
 ;; Enhanced with comprehensive vault management features:
-;; - Deposit cooldown (configurable blocks between deposits)
-;; - Vault balance caps (max single deposit and total balance)
+;; - Deposit cooldown (144 blocks = ~1 day minimum between deposits)
+;; - Vault balance caps (max single deposit: 1M STX, max balance: 5M STX)
 ;; - Partial withdrawals (withdraw any amount after unlock)
-;; - Emergency withdrawal with configurable penalty
-;; - Multi-beneficiary support with share-based distribution
+;; - Emergency withdrawal with configurable penalty (0-10%)
+;; - Multi-beneficiary support with share-based distribution (shares sum to 10000)
 ;; - Extensive read-only helpers for frontend validation
 ;;
 ;; All new features are backward compatible; existing vaults unchanged.
+;; Error codes documented in ERR-* constants (u1-u23).
 (define-map vaults {vault-id: uint} {owner: principal, amount: uint, unlock-height: uint, withdrawn: bool, last-deposit-height: uint, total-deposited: uint, is-emergency-withdrawal-enabled: bool, emergency-withdrawal-penalty-bps: uint})
 (define-map vault-beneficiaries {vault-id: uint, beneficiary: principal} {shares: uint, withdrawn-amount: uint})
 (define-map vault-total-shares {vault-id: uint} {total: uint})
