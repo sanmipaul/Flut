@@ -70,8 +70,47 @@ Clarinet.test({
     ]);
     const block = chain.mineBlock([
       Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(15000)], owner.address)
+]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+// ============================================
+// Update Beneficiary Shares Tests
+// ============================================
+
+Clarinet.test({
+  name: "update-beneficiary-shares: fails when shares exceed 10000",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(5000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'update-beneficiary-shares', [types.uint(0), types.principal(beneficiary.address), types.uint(15000)], owner.address)
     ]);
     assertEquals(block.receipts[0].result, '(err u18)');
+  }
+});
+
+Clarinet.test({
+  name: "update-beneficiary-shares: succeeds with valid new shares",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(5000)], owner.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'update-beneficiary-shares', [types.uint(0), types.principal(beneficiary.address), types.uint(7000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'get-beneficiary-shares', [types.uint(0), types.principal(beneficiary.address)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u7000)');
   }
 });
 
