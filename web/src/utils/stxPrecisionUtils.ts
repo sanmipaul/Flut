@@ -27,8 +27,12 @@ import { MICROSTX_PER_STX } from './stxConstants';
 
 /**
  * Maximum distance from an integer that is treated as a float rounding error.
- * Chosen to be much smaller than 0.5 (half a uSTX) so it cannot corrupt
- * intentionally fractional results.
+ *
+ * Chosen to be much smaller than 0.5 (half a uSTX) so it cannot accidentally
+ * snap genuinely fractional values (e.g. 1_000_000.5) to their nearest integer.
+ * It is also much larger than the drift produced by IEEE-754 multiplication
+ * (e.g. |1099999.9999999998 − 1100000| ≈ 2e-10), so it reliably catches all
+ * float representation errors for STX values within the practical range.
  */
 export const CONVERSION_EPSILON = 1e-9;
 
