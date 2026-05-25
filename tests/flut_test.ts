@@ -860,3 +860,36 @@ Clarinet.test({
     assertEquals(block.receipts[0].result.includes('u0'), false);
   }
 });
+
+// ============================================
+// Deposit Cooldown Tests
+// ============================================
+
+Clarinet.test({
+  name: "deposit: fails when deposit cooldown is active",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u12)');
+  }
+});
+
+Clarinet.test({
+  name: "deposit: succeeds after cooldown period has passed",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(200);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'deposit', [types.uint(0), types.uint(500)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
