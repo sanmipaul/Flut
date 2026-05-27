@@ -158,7 +158,39 @@ Clarinet.test({
     const block = chain.mineBlock([
       Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(15000)], owner.address)
 ]);
+    assertEquals(block.receipts[0].result, '(err u18)');
+  }
+});
+
+Clarinet.test({
+  name: "add-beneficiary: succeeds with shares exactly 10000",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(10000)], owner.address)
+    ]);
     assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+Clarinet.test({
+  name: "add-beneficiary: fails when total shares would exceed 10000",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const b1 = accounts.get('wallet_2')!;
+    const b2 = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(b1.address), types.uint(6000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(b2.address), types.uint(5000)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u14)');
   }
 });
 
