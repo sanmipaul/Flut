@@ -79,6 +79,21 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "get-streak-summary: reflects can-deposit true after interval elapses",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(10)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(12);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-summary', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result.includes('can-deposit: true'), true);
+  }
+});
+
+Clarinet.test({
   name: "get-streak-summary: returns correct fields including count total and interval",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
