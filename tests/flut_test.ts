@@ -96,7 +96,50 @@ Clarinet.test({
     const block = chain.mineBlock([
       Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(0)], wallet.address)
 ]);
-    assertEquals(block.receipts[0].result, '(ok true)');
+    assertEquals(block.receipts[0].result, '(err u15)');
+  }
+});
+
+Clarinet.test({
+  name: "withdraw-amount: fails with vault-id that does not exist",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(99), types.uint(100)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u1)');
+  }
+});
+
+Clarinet.test({
+  name: "withdraw-amount: fails when vault is still locked",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(100)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(100)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u3)');
+  }
+});
+
+Clarinet.test({
+  name: "withdraw-amount: fails when vault was already fully withdrawn",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw', [types.uint(0)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(100)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u4)');
   }
 });
 
