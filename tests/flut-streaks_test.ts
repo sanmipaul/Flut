@@ -79,6 +79,20 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "start-streak: sets initial total to the deposited amount",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(750), types.uint(10)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-total', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u750)');
+  }
+});
+
+Clarinet.test({
   name: "start-streak: stores the correct interval in streak data",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
