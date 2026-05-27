@@ -266,22 +266,8 @@ This table mirrors the constants defined in `contracts/flut.clar` so that fronte
 can display meaningful messages when a transaction fails. When the contract returns `(err uXXX)`
 these codes correspond to the rows below.
 
-> **Tip:** the contract exposes a read-only function `get-error-description` which returns a human
-> readable string for a given numeric code. You can call this helper directly from your frontend or
-> mirror the mapping in your UI (see `web/src/utils/VaultContractAPI.ts` for an example).
->
-> **Example (frontend)**:
-> ```ts
-> import { formatError, VaultContractAPI } from './web/src/utils/VaultContractAPI';
->
-> try {
->   const result = await contract.createVault(100, 1000000);
->   VaultContractAPI.checkResult(result);
-> } catch (err) {
->   console.error('Vault creation failed:', err.message);
->   alert('Error: ' + err.message);
-> }
-> ```
+> **Tip:** you can call `get-error-description` from **flut-test.clar** or reference the numeric
+> codes below in your frontend error-handling logic.
 
 | Code | Constant | Meaning |
 |------|----------|---------|
