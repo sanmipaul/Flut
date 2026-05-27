@@ -79,6 +79,23 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "get-streak: returns some with full streak data after start-streak",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(10)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak', [types.principal(wallet.address)], wallet.address)
+    ]);
+    const result = block.receipts[0].result;
+    assertEquals(result.includes('interval: u10'), true);
+    assertEquals(result.includes('count: u1'), true);
+    assertEquals(result.includes('total: u500'), true);
+  }
+});
+
+Clarinet.test({
   name: "get-streak: returns none for user with no active streak",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
