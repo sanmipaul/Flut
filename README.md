@@ -486,7 +486,7 @@ npm run preview
 - **No admin keys** — the contract has no owner, admin functions, or upgrade mechanism. Once deployed, it runs exactly as written.
 - **Principal-based access control** — only the vault creator can withdraw from their own vault. This is enforced at the contract level, not the frontend.
 - **No reentrancy risk** — Clarity is not Turing-complete and does not support reentrancy by design.
-- **Block height as time** — the contract uses `burn-block-height` (Bitcoin block height) as its clock, which is more tamper-resistant than Stacks block height.
+- **Block height as time** — the contract uses Stacks `block-height` for lock timing, which maps to Bitcoin block height via Stacks consensus.
 - **Audit status** — this contract has not been formally audited. Use at your own risk and start with small amounts.
 
 ---
