@@ -79,6 +79,20 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "deposit-streak: returns ERR-TOO-EARLY before interval has elapsed",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(10)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(200)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u1)');
+  }
+});
+
+Clarinet.test({
   name: "deposit-streak: returns ERR-ZERO-AMOUNT for zero deposit",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
