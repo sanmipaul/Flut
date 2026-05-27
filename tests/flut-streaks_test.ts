@@ -79,6 +79,23 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "get-streak-summary: returns correct fields including count total and interval",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(15)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-summary', [types.principal(wallet.address)], wallet.address)
+    ]);
+    const result = block.receipts[0].result;
+    assertEquals(result.includes('count: u1'), true);
+    assertEquals(result.includes('total: u500'), true);
+    assertEquals(result.includes('interval: u15'), true);
+  }
+});
+
+Clarinet.test({
   name: "get-streak-last-deposit: returns ERR-NO-STREAK for user without streak",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
