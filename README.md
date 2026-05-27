@@ -497,10 +497,17 @@ npm run preview
 ## Roadmap
 
 - [x] Core vault contract (create, deposit, withdraw)
+- [x] Partial withdrawals (withdraw-amount)
+- [x] Deposit cooldown (144 blocks between deposits)
+- [x] Vault balance caps (max single deposit 1M STX, max balance 5M STX)
+- [x] Multi-beneficiary vaults with share-based distribution
+- [x] Emergency withdrawal with configurable penalty (0-10%)
+- [x] Ownership transfer (initiate, accept, cancel)
+- [x] Vault NFT receipt (flut-nft.clar)
+- [x] Savings goals (flut-goals.clar)
+- [x] Recurring deposit streaks (flut-streaks.clar)
+- [x] Group savings splits (flut-split.clar)
 - [x] Next.js frontend with wallet connect
-- [ ] Multi-beneficiary vaults (send to another address on unlock)
-- [ ] Emergency unlock with time penalty (e.g. 10% fee for early withdrawal)
-- [ ] Vault NFT receipt — mint an NFT representing your locked vault
 - [ ] Yield integration — route locked STX into Stacking while vaulted
 - [ ] Mobile-responsive PWA
 - [ ] Contract audit
