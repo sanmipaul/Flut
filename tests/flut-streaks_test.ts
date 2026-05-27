@@ -79,6 +79,24 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "is-streak-broken: returns true after a streak-breaking late deposit",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(5)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(25);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'is-streak-broken', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+Clarinet.test({
   name: "is-streak-broken: remains false after an on-time deposit",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
