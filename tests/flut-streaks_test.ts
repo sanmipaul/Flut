@@ -79,6 +79,17 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "has-streak: returns false for user with no active streak",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'has-streak', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'false');
+  }
+});
+
+Clarinet.test({
   name: "get-blocks-until-streak-expires: returns zero after 2x interval has passed",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
