@@ -106,9 +106,15 @@ This project was built as part of the [Stacks Builder Rewards](https://app.talen
 
 ## Smart Contract Reference
 
-**Contract:** `flut.clar`  
-**Testnet:** `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flut`  
-**Mainnet:** `SP1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flut` *(deploy your own)*
+The Flut protocol consists of five Clarity contracts:
+
+| Contract | Path | Purpose |
+|----------|------|---------|
+| `flut` | `contracts/flut.clar` | Core vault: create, deposit, withdraw, partial withdrawal, emergency withdrawal, ownership transfer, multi-beneficiary |
+| `flut-nft` | `contracts/flut-nft.clar` | Vault NFT receipt minting and management |
+| `flut-goals` | `contracts/flut-goals.clar` | Savings goal tracker with contributions |
+| `flut-streaks` | `contracts/flut-streaks.clar` | Recurring deposit habit tracker |
+| `flut-split` | `contracts/flut-split.clar` | Group savings split with per-member claims |
 
 ---
 
