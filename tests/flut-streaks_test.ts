@@ -79,6 +79,24 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "deposit-streak: updates last-deposit-height after successful deposit",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(10)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(12);
+    const depositBlock = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-last-deposit', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, `(ok u${depositBlock.height})`);
+  }
+});
+
+Clarinet.test({
   name: "deposit-streak: increments break-count after late deposit",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
