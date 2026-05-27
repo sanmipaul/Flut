@@ -79,6 +79,28 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "integration: streak count grows to 5 with five consecutive on-time deposits",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(100), types.uint(10)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(12);
+    chain.mineBlock([Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(50)], wallet.address)]);
+    chain.mineEmptyBlockUntil(24);
+    chain.mineBlock([Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(50)], wallet.address)]);
+    chain.mineEmptyBlockUntil(36);
+    chain.mineBlock([Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(50)], wallet.address)]);
+    chain.mineEmptyBlockUntil(48);
+    chain.mineBlock([Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(50)], wallet.address)]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-count', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u5)');
+  }
+});
+
+Clarinet.test({
   name: "get-streak-next-deposit-block: returns ERR-NO-STREAK for user without streak",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
