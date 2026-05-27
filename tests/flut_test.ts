@@ -6,9 +6,69 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
     const block = chain.mineBlock([
-      Tx.contractCall('flut', 'create-vault', [types.uint(0), types.uint(100)], wallet.address)
+      Tx.contractCall('flut', 'is-vault-withdrawn', [types.uint(0)], wallet.address)
     ]);
-    assertEquals(block.receipts[0].result, '(err u6)');
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+// ============================================
+// Can-Emergency-Withdraw Tests
+// ============================================
+
+Clarinet.test({
+  name: "can-emergency-withdraw: returns false when emergency withdrawal is disabled",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'can-emergency-withdraw', [types.uint(0), types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
+
+Clarinet.test({
+  name: "can-emergency-withdraw: returns true when emergency withdrawal is enabled",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-enabled', [types.uint(0), types.bool(true)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'can-emergency-withdraw', [types.uint(0), types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+Clarinet.test({
+  name: "can-emergency-withdraw: returns false for non-owner caller",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const stranger = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-enabled', [types.uint(0), types.bool(true)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'can-emergency-withdraw', [types.uint(0), types.principal(stranger.address)], stranger.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
+
+Clarinet.test({
+  name: "can-emergency-withdraw: returns false for non-existent vault",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'can-emergency-withdraw', [types.uint(999), types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u1)');
   }
 });
 
