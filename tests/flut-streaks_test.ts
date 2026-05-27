@@ -79,6 +79,17 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "deposit-streak: returns ERR-NO-STREAK for user without an active streak",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(200)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u2)');
+  }
+});
+
+Clarinet.test({
   name: "withdraw-streak: second call after withdrawal returns ERR-NO-STREAK",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
