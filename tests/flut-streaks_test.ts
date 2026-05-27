@@ -79,6 +79,23 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "withdraw-streak: deletes streak record so has-streak returns false",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(10)], wallet.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'withdraw-streak', [], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'has-streak', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, 'false');
+  }
+});
+
+Clarinet.test({
   name: "withdraw-streak: returns ok true for active streak",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
