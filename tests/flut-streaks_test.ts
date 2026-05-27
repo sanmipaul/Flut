@@ -79,6 +79,21 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "get-blocks-until-streak-expires: returns zero after 2x interval has passed",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(5)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(20);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-blocks-until-streak-expires', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+  }
+});
+
+Clarinet.test({
   name: "get-blocks-until-streak-expires: returns non-zero before expiry window",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
