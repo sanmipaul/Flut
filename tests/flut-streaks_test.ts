@@ -79,6 +79,30 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "integration: streak can be restarted after withdraw and break-count resets",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(300), types.uint(5)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(20);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(100)], wallet.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'withdraw-streak', [], wallet.address)
+    ]);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(10)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-break-count', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+  }
+});
+
+Clarinet.test({
   name: "integration: full lifecycle start deposit break deposit withdraw",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
