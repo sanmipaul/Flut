@@ -79,6 +79,28 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "integration: total accumulates correctly across mixed on-time and late deposits",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(200), types.uint(5)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(7);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(300)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(25);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(150)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-total', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u650)');
+  }
+});
+
+Clarinet.test({
   name: "integration: streak count grows to 5 with five consecutive on-time deposits",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
