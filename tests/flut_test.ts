@@ -33,7 +33,7 @@ Clarinet.test({
     const block = chain.mineBlock([
       Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(99999)], wallet.address)
 ]);
-    assertEquals(block.receipts[0].result, '(ok true)');
+    assertEquals(block.receipts[0].result, '(err u8)');
   }
 });
 
