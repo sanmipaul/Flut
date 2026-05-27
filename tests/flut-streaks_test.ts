@@ -79,6 +79,24 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "deposit-streak: accumulates total balance across multiple deposits",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(10)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(12);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(300)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-total', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u800)');
+  }
+});
+
+Clarinet.test({
   name: "deposit-streak: updates last-deposit-height after successful deposit",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
