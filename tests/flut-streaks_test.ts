@@ -79,6 +79,28 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "integration: full lifecycle start deposit break deposit withdraw",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(400), types.uint(5)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(7);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(200)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(30);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(100)], wallet.address)
+    ]);
+    const withdraw = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'withdraw-streak', [], wallet.address)
+    ]);
+    assertEquals(withdraw.receipts[0].result, '(ok true)');
+  }
+});
+
+Clarinet.test({
   name: "integration: total accumulates correctly across mixed on-time and late deposits",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
