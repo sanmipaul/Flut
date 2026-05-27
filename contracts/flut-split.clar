@@ -17,7 +17,6 @@
 (define-constant ERR-NOTHING-TO-CLAIM (err u9))
 (define-constant ERR-SPLIT-CLOSED (err u10))
 (define-constant ERR-EMPTY-MEMBERS (err u11))
-(define-constant ERR-EMPTY-MEMBERS (err u11))
 
 (define-private (is-member (user principal) (members (list 5 principal)))
   (or
