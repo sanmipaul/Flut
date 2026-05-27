@@ -79,6 +79,20 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "withdraw-streak: returns ok true for active streak",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(10)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'withdraw-streak', [], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+Clarinet.test({
   name: "withdraw-streak: returns ERR-NO-STREAK when no streak exists",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
