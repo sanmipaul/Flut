@@ -79,6 +79,24 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "deposit-streak: resets streak count to 1 when depositing after 2x interval",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(5)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(25);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-count', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u1)');
+  }
+});
+
+Clarinet.test({
   name: "deposit-streak: does not increment break-count for on-time deposit",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
