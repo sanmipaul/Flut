@@ -79,6 +79,21 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "get-streak-next-deposit-block: returns last-deposit plus interval",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const startBlock = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(10)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-next-deposit-block', [types.principal(wallet.address)], wallet.address)
+    ]);
+    const expectedNext = startBlock.height + 10;
+    assertEquals(block.receipts[0].result, `(ok u${expectedNext})`);
+  }
+});
+
+Clarinet.test({
   name: "get-streak-summary: reflects can-deposit true after interval elapses",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
