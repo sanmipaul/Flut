@@ -386,6 +386,17 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "create-split: succeeds with exactly one member",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([types.principal(creator.address)])], creator.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+  }
+});
+
+Clarinet.test({
   name: "full lifecycle: 2-member split contribute and claim",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const w1 = accounts.get('wallet_1')!;
