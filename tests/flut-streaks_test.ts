@@ -79,6 +79,28 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "get-streak-break-count: accumulates across multiple streak breaks",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(200), types.uint(5)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(25);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(100)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(60);
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'deposit-streak', [types.uint(100)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-break-count', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u2)');
+  }
+});
+
+Clarinet.test({
   name: "is-streak-broken: returns ERR-NO-STREAK for non-existent user",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
