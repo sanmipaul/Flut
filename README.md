@@ -338,32 +338,29 @@ cd flut
 ```
 flut/
 ├── contracts/
-│   └── flut.clar       # Main Clarity smart contract
+│   ├── flut.clar             # Core vault contract
+│   ├── flut-nft.clar         # Vault NFT receipt
+│   ├── flut-goals.clar       # Savings goal tracker
+│   ├── flut-streaks.clar     # Recurring deposit streaks
+│   └── flut-split.clar       # Group savings splits
 ├── tests/
-│   └── flut_test.ts    # Clarinet unit tests
+│   ├── flut_test.ts          # Core vault tests
+│   ├── flut-nft_test.ts      # NFT receipt tests
+│   ├── flut-goals_test.ts    # Goal tracker tests
+│   ├── flut-streaks_test.ts  # Streak tests
+│   ├── flut-split_test.ts    # Split tests
+│   ├── flut-test.clar        # Legacy Clarity tests
+│   └── vault-enhancements-test.clar
 ├── frontend/
-│   ├── src/
-│   │   ├── App.tsx              # Root app + routing
-│   │   ├── main.tsx             # Entry point
-│   │   ├── pages/
-│   │   │   ├── Dashboard.tsx    # Home / vault list
-│   │   │   └── VaultDetail.tsx  # Individual vault view
-│   │   ├── components/
-│   │   │   ├── CreateVaultModal.tsx
-│   │   │   ├── VaultCard.tsx
-│   │   │   ├── WalletConnect.tsx
-│   │   │   └── Countdown.tsx
-│   │   └── lib/
-│   │       ├── contract.ts      # Contract call helpers
-│   │       └── stacks.ts        # Stacks network config
-│   ├── index.html
-│   └── vite.config.ts
+│   └── src/                  # Next.js frontend
+├── web/
+│   └── src/                  # React (Vite) frontend
 ├── Clarinet.toml
 ├── settings/
-│   ├── Devnet.toml
-│   └── Mainnet.toml
-├── README.md
-└── package.json
+│   └── Devnet.toml
+├── deployments/
+│   └── default.mainnet-plan.yaml
+└── README.md
 ```
 
 ---
