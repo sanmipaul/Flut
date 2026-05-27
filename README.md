@@ -144,31 +144,30 @@ The Flut protocol consists of five Clarity contracts:
 
 ---
 
-### Public Functions
+### Public Functions (flut.clar)
 
 #### `create-vault`
 Creates a new time-locked vault for the caller.
 
 ```clarity
 (define-public (create-vault
-  (lock-duration uint)        ;; Number of Bitcoin blocks to lock for
-  (initial-deposit uint)      ;; Initial STX deposit in micro-STX
-  (label (string-ascii 64))   ;; Vault label
+  (amount uint)         ;; Initial STX deposit in micro-STX
+  (unlock-height uint)  ;; Bitcoin block height when vault unlocks
 ) (response uint uint))
 ```
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `lock-duration` | `uint` | Number of Bitcoin blocks until unlock (~10 min/block) |
-| `initial-deposit` | `uint` | Amount in micro-STX (1 STX = 1,000,000 micro-STX) |
-| `label` | `string-ascii 64` | Name for this vault, e.g. `"House Fund"` |
+| `amount` | `uint` | Initial deposit in micro-STX (1 STX = 1,000,000 micro-STX) |
+| `unlock-height` | `uint` | Bitcoin block height at which vault unlocks |
 
 **Returns:** `(ok vault-id)` on success, `(err code)` on failure.
+**Constraints:** `amount` > 0, `unlock-height` > current block, duration ≤ 52560 blocks (~1 year).
 
 ---
 
 #### `deposit`
-Adds STX to an existing vault. Can be called anytime before or after unlock.
+Adds STX to an existing vault. Subject to cooldown (144 blocks between deposits).
 
 ```clarity
 (define-public (deposit
@@ -176,6 +175,8 @@ Adds STX to an existing vault. Can be called anytime before or after unlock.
   (amount uint)     ;; Amount in micro-STX
 ) (response bool uint))
 ```
+
+**Constraints:** amount ≤ MAX-SINGLE-DEPOSIT (1M STX), total ≤ MAX-VAULT-BALANCE (5M STX).
 
 ---
 
@@ -188,38 +189,73 @@ Withdraws the full vault balance. Only callable after `unlock-height` is reached
 ) (response bool uint))
 ```
 
-**Errors:**
-- `u100` — Vault not found
-- `u101` — Vault is still locked (current block < unlock-height)
-- `u102` — Nothing to withdraw (balance is zero)
-- `u103` — Unauthorized (caller is not vault owner)
+---
+
+#### `withdraw-amount`
+Partially withdraws a specified amount from the vault.
+
+```clarity
+(define-public (withdraw-amount
+  (vault-id uint)
+  (amount uint)
+) (response bool uint))
+```
 
 ---
 
-### Read-Only Functions
-
-#### `get-vault`
-Returns vault details for a given owner and vault ID.
+#### `emergency-withdraw`
+Emergency withdrawal with configurable penalty (0-10% in basis points).
 
 ```clarity
-(define-read-only (get-vault
-  (owner principal)
-  (vault-id uint)
-) (optional { balance: uint, unlock-height: uint, label: string-ascii }))
+(define-public (emergency-withdraw (vault-id uint))
+  (response bool uint))
+```
+
+---
+
+#### Ownership Transfer
+```clarity
+(define-public (initiate-ownership-transfer (vault-id uint) (new-owner principal))
+(define-public (accept-ownership-transfer (vault-id uint))
+(define-public (cancel-ownership-transfer (vault-id uint))
+```
+
+---
+
+#### Multi-Beneficiary
+```clarity
+(define-public (add-beneficiary (vault-id uint) (beneficiary principal) (shares uint))
+(define-public (remove-beneficiary (vault-id uint) (beneficiary principal))
+(define-public (update-beneficiary-shares (vault-id uint) (beneficiary principal) (new-shares uint))
+(define-public (withdraw-as-beneficiary (vault-id uint) (amount uint))
+```
+
+---
+
+### Read-Only Functions (flut.clar)
+
+#### `get-vault`
+Returns vault details for a given vault ID.
+
+```clarity
+(define-read-only (get-vault (vault-id uint))
+  (optional { owner: principal, amount: uint, unlock-height: uint,
+              withdrawn: bool, last-deposit-height: uint,
+              total-deposited: uint, ... }))
 ```
 
 #### `get-vault-count`
-Returns the total number of vaults created by a principal.
+Returns the total number of vaults created.
 
 ```clarity
-(define-read-only (get-vault-count (owner principal)) uint)
+(define-read-only (get-vault-count) (response uint uint))
 ```
 
-#### `is-unlocked`
-Returns `true` if the vault has passed its lock period.
+#### `is-vault-unlocked`
+Returns `true` if the vault has passed its unlock height.
 
 ```clarity
-(define-read-only (is-unlocked (owner principal) (vault-id uint)) bool)
+(define-read-only (is-vault-unlocked (vault-id uint)) (response bool uint))
 ```
 
 ---
