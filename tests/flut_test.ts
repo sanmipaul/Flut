@@ -37,6 +37,50 @@ Clarinet.test({
   }
 });
 
+Clarinet.test({
+  name: "create-vault: rejects unlock-height equal to current block height",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(1)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u5)');
+  }
+});
+
+Clarinet.test({
+  name: "create-vault: rejects unlock-height below current block height",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u5)');
+  }
+});
+
+Clarinet.test({
+  name: "create-vault: accepts unlock-height exactly at MAX-LOCK-BLOCKS boundary",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(52561)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+  }
+});
+
+Clarinet.test({
+  name: "create-vault: rejects unlock-height that is one block beyond MAX-LOCK-BLOCKS",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(52562)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u8)');
+  }
+});
+
 // ============================================
 // Partial Withdrawal Tests
 // ============================================
