@@ -1,6 +1,9 @@
 ;; Flut Split - Shared Vault for Group Savings
 ;; Each member independently calls claim-share to withdraw their exact contribution once the group target is met.
 ;; Replaces the broken single-recipient payout that sent all funds to one address chosen by the creator.
+;; Error codes: ERR-NOT-FOUND (u1), ERR-NOT-MEMBER (u2), ERR-PAID-OUT (u3), ERR-TARGET-NOT-MET (u4),
+;; ERR-UNAUTHORIZED (u5), ERR-ZERO-AMOUNT (u6), ERR-ZERO-TARGET (u7), ERR-ALREADY-CLAIMED (u8),
+;; ERR-NOTHING-TO-CLAIM (u9), ERR-SPLIT-CLOSED (u10), ERR-EMPTY-MEMBERS (u11)
 (define-map splits {split-id: uint} {creator: principal, target: uint, saved: uint, paid-out: bool, members: (list 5 principal)})
 (define-map contributions {split-id: uint, member: principal} {amount: uint})
 (define-map claimed {split-id: uint, member: principal} {done: bool})
