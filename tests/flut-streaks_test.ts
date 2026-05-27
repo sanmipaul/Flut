@@ -77,3 +77,17 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(ok true)');
   }
 });
+
+Clarinet.test({
+  name: "start-streak: initializes streak count to 1",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(10)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-count', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u1)');
+  }
+});
