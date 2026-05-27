@@ -377,6 +377,14 @@
 (define-read-only (get-max-vault-balance)
   (ok MAX-VAULT-BALANCE))
 
+(define-read-only (can-emergency-withdraw (vault-id uint) (caller principal))
+  (match (map-get? vaults {vault-id: vault-id})
+    vault (ok (and (is-eq (get owner vault) caller)
+                   (not (get withdrawn vault))
+                   (get is-emergency-withdrawal-enabled vault)
+                   (> (get amount vault) u0)))
+    ERR-NOT-FOUND))
+
 (define-read-only (has-beneficiaries (vault-id uint))
   (match (map-get? vault-total-shares {vault-id: vault-id})
     total-data (> (get total total-data) u0)

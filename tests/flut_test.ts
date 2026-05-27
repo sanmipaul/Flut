@@ -6,9 +6,69 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
     const block = chain.mineBlock([
-      Tx.contractCall('flut', 'create-vault', [types.uint(0), types.uint(100)], wallet.address)
+      Tx.contractCall('flut', 'is-vault-withdrawn', [types.uint(0)], wallet.address)
     ]);
-    assertEquals(block.receipts[0].result, '(err u6)');
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+// ============================================
+// Can-Emergency-Withdraw Tests
+// ============================================
+
+Clarinet.test({
+  name: "can-emergency-withdraw: returns false when emergency withdrawal is disabled",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'can-emergency-withdraw', [types.uint(0), types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
+
+Clarinet.test({
+  name: "can-emergency-withdraw: returns true when emergency withdrawal is enabled",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], wallet.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-enabled', [types.uint(0), types.bool(true)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'can-emergency-withdraw', [types.uint(0), types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+Clarinet.test({
+  name: "can-emergency-withdraw: returns false for non-owner caller",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const stranger = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'set-emergency-withdrawal-enabled', [types.uint(0), types.bool(true)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'can-emergency-withdraw', [types.uint(0), types.principal(stranger.address)], stranger.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok false)');
+  }
+});
+
+Clarinet.test({
+  name: "can-emergency-withdraw: returns false for non-existent vault",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'can-emergency-withdraw', [types.uint(999), types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u1)');
   }
 });
 
@@ -33,7 +93,51 @@ Clarinet.test({
     const block = chain.mineBlock([
       Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(99999)], wallet.address)
 ]);
-    assertEquals(block.receipts[0].result, '(ok true)');
+    assertEquals(block.receipts[0].result, '(err u8)');
+  }
+});
+
+Clarinet.test({
+  name: "create-vault: rejects unlock-height equal to current block height",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(1)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u5)');
+  }
+});
+
+Clarinet.test({
+  name: "create-vault: rejects unlock-height below current block height",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u5)');
+  }
+});
+
+Clarinet.test({
+  name: "create-vault: accepts unlock-height exactly at MAX-LOCK-BLOCKS boundary",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(52561)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+  }
+});
+
+Clarinet.test({
+  name: "create-vault: rejects unlock-height that is one block beyond MAX-LOCK-BLOCKS",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(52562)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u8)');
   }
 });
 
@@ -52,7 +156,50 @@ Clarinet.test({
     const block = chain.mineBlock([
       Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(0)], wallet.address)
 ]);
-    assertEquals(block.receipts[0].result, '(ok true)');
+    assertEquals(block.receipts[0].result, '(err u15)');
+  }
+});
+
+Clarinet.test({
+  name: "withdraw-amount: fails with vault-id that does not exist",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(99), types.uint(100)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u1)');
+  }
+});
+
+Clarinet.test({
+  name: "withdraw-amount: fails when vault is still locked",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(100)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(100)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u3)');
+  }
+});
+
+Clarinet.test({
+  name: "withdraw-amount: fails when vault was already fully withdrawn",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(2)], wallet.address)
+    ]);
+    chain.mineEmptyBlockUntil(5);
+    chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw', [types.uint(0)], wallet.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'withdraw-amount', [types.uint(0), types.uint(100)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u4)');
   }
 });
 
@@ -71,7 +218,39 @@ Clarinet.test({
     const block = chain.mineBlock([
       Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(15000)], owner.address)
 ]);
+    assertEquals(block.receipts[0].result, '(err u18)');
+  }
+});
+
+Clarinet.test({
+  name: "add-beneficiary: succeeds with shares exactly 10000",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const beneficiary = accounts.get('wallet_2')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(beneficiary.address), types.uint(10000)], owner.address)
+    ]);
     assertEquals(block.receipts[0].result, '(ok true)');
+  }
+});
+
+Clarinet.test({
+  name: "add-beneficiary: fails when total shares would exceed 10000",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const owner = accounts.get('wallet_1')!;
+    const b1 = accounts.get('wallet_2')!;
+    const b2 = accounts.get('wallet_3')!;
+    chain.mineBlock([
+      Tx.contractCall('flut', 'create-vault', [types.uint(1000), types.uint(200)], owner.address),
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(b1.address), types.uint(6000)], owner.address)
+    ]);
+    const block = chain.mineBlock([
+      Tx.contractCall('flut', 'add-beneficiary', [types.uint(0), types.principal(b2.address), types.uint(5000)], owner.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u14)');
   }
 });
 

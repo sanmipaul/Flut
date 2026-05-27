@@ -106,56 +106,68 @@ This project was built as part of the [Stacks Builder Rewards](https://app.talen
 
 ## Smart Contract Reference
 
-**Contract:** `flut.clar`  
-**Testnet:** `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flut`  
-**Mainnet:** `SP1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flut` *(deploy your own)*
+The Flut protocol consists of five Clarity contracts:
+
+| Contract | Path | Purpose |
+|----------|------|---------|
+| `flut` | `contracts/flut.clar` | Core vault: create, deposit, withdraw, partial withdrawal, emergency withdrawal, ownership transfer, multi-beneficiary |
+| `flut-nft` | `contracts/flut-nft.clar` | Vault NFT receipt minting and management |
+| `flut-goals` | `contracts/flut-goals.clar` | Savings goal tracker with contributions |
+| `flut-streaks` | `contracts/flut-streaks.clar` | Recurring deposit habit tracker |
+| `flut-split` | `contracts/flut-split.clar` | Group savings split with per-member claims |
 
 ---
 
-### Data Structures
+### Data Structures (flut.clar)
 
 ```clarity
-;; Vault entry stored per user per vault-id
-(define-map vaults
-  { owner: principal, vault-id: uint }
-  {
-    balance: uint,          ;; STX balance in micro-STX
-    unlock-height: uint,    ;; Bitcoin block height to unlock
-    label: (string-ascii 64) ;; Human-readable vault name
-  }
-)
+;; Vault entry indexed by vault-id
+(define-map vaults {vault-id: uint}
+  { owner: principal,
+    amount: uint,                              ;; STX balance in micro-STX
+    unlock-height: uint,                       ;; Block height to unlock
+    withdrawn: bool,                           ;; Whether funds have been withdrawn
+    last-deposit-height: uint,                 ;; Block of most recent deposit
+    total-deposited: uint,                     ;; Lifetime deposits
+    is-emergency-withdrawal-enabled: bool,     ;; Emergency withdrawal toggle
+    emergency-withdrawal-penalty-bps: uint })  ;; Penalty rate in basis points
 
-;; Track number of vaults per user
-(define-map vault-count principal uint)
+;; Multi-beneficiary support
+(define-map vault-beneficiaries {vault-id: uint, beneficiary: principal}
+  {shares: uint, withdrawn-amount: uint})
+(define-map vault-total-shares {vault-id: uint} {total: uint})
+(define-map vault-beneficiary-count {vault-id: uint} {count: uint})
+
+;; Ownership transfer
+(define-map pending-owner {vault-id: uint} {new-owner: principal})
 ```
 
 ---
 
-### Public Functions
+### Public Functions (flut.clar)
 
 #### `create-vault`
 Creates a new time-locked vault for the caller.
 
 ```clarity
 (define-public (create-vault
-  (lock-duration uint)        ;; Number of Bitcoin blocks to lock for
-  (initial-deposit uint)      ;; Initial STX deposit in micro-STX
-  (label (string-ascii 64))   ;; Vault label
+  (amount uint)         ;; Initial STX deposit in micro-STX
+  (unlock-height uint)  ;; Bitcoin block height when vault unlocks
 ) (response uint uint))
 ```
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `lock-duration` | `uint` | Number of Bitcoin blocks until unlock (~10 min/block) |
-| `initial-deposit` | `uint` | Amount in micro-STX (1 STX = 1,000,000 micro-STX) |
-| `label` | `string-ascii 64` | Name for this vault, e.g. `"House Fund"` |
+| `amount` | `uint` | Initial deposit in micro-STX (1 STX = 1,000,000 micro-STX) |
+| `unlock-height` | `uint` | Bitcoin block height at which vault unlocks |
 
 **Returns:** `(ok vault-id)` on success, `(err code)` on failure.
+**Constraints:** `amount` > 0, `unlock-height` > current block, duration ≤ 52560 blocks (~1 year).
 
 ---
 
 #### `deposit`
-Adds STX to an existing vault. Can be called anytime before or after unlock.
+Adds STX to an existing vault. Subject to cooldown (144 blocks between deposits).
 
 ```clarity
 (define-public (deposit
@@ -163,6 +175,8 @@ Adds STX to an existing vault. Can be called anytime before or after unlock.
   (amount uint)     ;; Amount in micro-STX
 ) (response bool uint))
 ```
+
+**Constraints:** amount ≤ MAX-SINGLE-DEPOSIT (1M STX), total ≤ MAX-VAULT-BALANCE (5M STX).
 
 ---
 
@@ -175,38 +189,73 @@ Withdraws the full vault balance. Only callable after `unlock-height` is reached
 ) (response bool uint))
 ```
 
-**Errors:**
-- `u100` — Vault not found
-- `u101` — Vault is still locked (current block < unlock-height)
-- `u102` — Nothing to withdraw (balance is zero)
-- `u103` — Unauthorized (caller is not vault owner)
+---
+
+#### `withdraw-amount`
+Partially withdraws a specified amount from the vault.
+
+```clarity
+(define-public (withdraw-amount
+  (vault-id uint)
+  (amount uint)
+) (response bool uint))
+```
 
 ---
 
-### Read-Only Functions
-
-#### `get-vault`
-Returns vault details for a given owner and vault ID.
+#### `emergency-withdraw`
+Emergency withdrawal with configurable penalty (0-10% in basis points).
 
 ```clarity
-(define-read-only (get-vault
-  (owner principal)
-  (vault-id uint)
-) (optional { balance: uint, unlock-height: uint, label: string-ascii }))
+(define-public (emergency-withdraw (vault-id uint))
+  (response bool uint))
+```
+
+---
+
+#### Ownership Transfer
+```clarity
+(define-public (initiate-ownership-transfer (vault-id uint) (new-owner principal))
+(define-public (accept-ownership-transfer (vault-id uint))
+(define-public (cancel-ownership-transfer (vault-id uint))
+```
+
+---
+
+#### Multi-Beneficiary
+```clarity
+(define-public (add-beneficiary (vault-id uint) (beneficiary principal) (shares uint))
+(define-public (remove-beneficiary (vault-id uint) (beneficiary principal))
+(define-public (update-beneficiary-shares (vault-id uint) (beneficiary principal) (new-shares uint))
+(define-public (withdraw-as-beneficiary (vault-id uint) (amount uint))
+```
+
+---
+
+### Read-Only Functions (flut.clar)
+
+#### `get-vault`
+Returns vault details for a given vault ID.
+
+```clarity
+(define-read-only (get-vault (vault-id uint))
+  (optional { owner: principal, amount: uint, unlock-height: uint,
+              withdrawn: bool, last-deposit-height: uint,
+              total-deposited: uint, ... }))
 ```
 
 #### `get-vault-count`
-Returns the total number of vaults created by a principal.
+Returns the total number of vaults created.
 
 ```clarity
-(define-read-only (get-vault-count (owner principal)) uint)
+(define-read-only (get-vault-count) (response uint uint))
 ```
 
-#### `is-unlocked`
-Returns `true` if the vault has passed its lock period.
+#### `is-vault-unlocked`
+Returns `true` if the vault has passed its unlock height.
 
 ```clarity
-(define-read-only (is-unlocked (owner principal) (vault-id uint)) bool)
+(define-read-only (is-vault-unlocked (vault-id uint)) (response bool uint))
 ```
 
 ---
@@ -217,22 +266,8 @@ This table mirrors the constants defined in `contracts/flut.clar` so that fronte
 can display meaningful messages when a transaction fails. When the contract returns `(err uXXX)`
 these codes correspond to the rows below.
 
-> **Tip:** the contract exposes a read-only function `get-error-description` which returns a human
-> readable string for a given numeric code. You can call this helper directly from your frontend or
-> mirror the mapping in your UI (see `web/src/utils/VaultContractAPI.ts` for an example).
->
-> **Example (frontend)**:
-> ```ts
-> import { formatError, VaultContractAPI } from './web/src/utils/VaultContractAPI';
->
-> try {
->   const result = await contract.createVault(100, 1000000);
->   VaultContractAPI.checkResult(result);
-> } catch (err) {
->   console.error('Vault creation failed:', err.message);
->   alert('Error: ' + err.message);
-> }
-> ```
+> **Tip:** you can call `get-error-description` from **flut-test.clar** or reference the numeric
+> codes below in your frontend error-handling logic.
 
 | Code | Constant | Meaning |
 |------|----------|---------|
@@ -303,32 +338,29 @@ cd flut
 ```
 flut/
 ├── contracts/
-│   └── flut.clar       # Main Clarity smart contract
+│   ├── flut.clar             # Core vault contract
+│   ├── flut-nft.clar         # Vault NFT receipt
+│   ├── flut-goals.clar       # Savings goal tracker
+│   ├── flut-streaks.clar     # Recurring deposit streaks
+│   └── flut-split.clar       # Group savings splits
 ├── tests/
-│   └── flut_test.ts    # Clarinet unit tests
+│   ├── flut_test.ts          # Core vault tests
+│   ├── flut-nft_test.ts      # NFT receipt tests
+│   ├── flut-goals_test.ts    # Goal tracker tests
+│   ├── flut-streaks_test.ts  # Streak tests
+│   ├── flut-split_test.ts    # Split tests
+│   ├── flut-test.clar        # Legacy Clarity tests
+│   └── vault-enhancements-test.clar
 ├── frontend/
-│   ├── src/
-│   │   ├── App.tsx              # Root app + routing
-│   │   ├── main.tsx             # Entry point
-│   │   ├── pages/
-│   │   │   ├── Dashboard.tsx    # Home / vault list
-│   │   │   └── VaultDetail.tsx  # Individual vault view
-│   │   ├── components/
-│   │   │   ├── CreateVaultModal.tsx
-│   │   │   ├── VaultCard.tsx
-│   │   │   ├── WalletConnect.tsx
-│   │   │   └── Countdown.tsx
-│   │   └── lib/
-│   │       ├── contract.ts      # Contract call helpers
-│   │       └── stacks.ts        # Stacks network config
-│   ├── index.html
-│   └── vite.config.ts
+│   └── src/                  # Next.js frontend
+├── web/
+│   └── src/                  # React (Vite) frontend
 ├── Clarinet.toml
 ├── settings/
-│   ├── Devnet.toml
-│   └── Mainnet.toml
-├── README.md
-└── package.json
+│   └── Devnet.toml
+├── deployments/
+│   └── default.mainnet-plan.yaml
+└── README.md
 ```
 
 ---
@@ -454,7 +486,7 @@ npm run preview
 - **No admin keys** — the contract has no owner, admin functions, or upgrade mechanism. Once deployed, it runs exactly as written.
 - **Principal-based access control** — only the vault creator can withdraw from their own vault. This is enforced at the contract level, not the frontend.
 - **No reentrancy risk** — Clarity is not Turing-complete and does not support reentrancy by design.
-- **Block height as time** — the contract uses `burn-block-height` (Bitcoin block height) as its clock, which is more tamper-resistant than Stacks block height.
+- **Block height as time** — the contract uses Stacks `block-height` for lock timing, which maps to Bitcoin block height via Stacks consensus.
 - **Audit status** — this contract has not been formally audited. Use at your own risk and start with small amounts.
 
 ---
@@ -462,10 +494,17 @@ npm run preview
 ## Roadmap
 
 - [x] Core vault contract (create, deposit, withdraw)
+- [x] Partial withdrawals (withdraw-amount)
+- [x] Deposit cooldown (144 blocks between deposits)
+- [x] Vault balance caps (max single deposit 1M STX, max balance 5M STX)
+- [x] Multi-beneficiary vaults with share-based distribution
+- [x] Emergency withdrawal with configurable penalty (0-10%)
+- [x] Ownership transfer (initiate, accept, cancel)
+- [x] Vault NFT receipt (flut-nft.clar)
+- [x] Savings goals (flut-goals.clar)
+- [x] Recurring deposit streaks (flut-streaks.clar)
+- [x] Group savings splits (flut-split.clar)
 - [x] Next.js frontend with wallet connect
-- [ ] Multi-beneficiary vaults (send to another address on unlock)
-- [ ] Emergency unlock with time penalty (e.g. 10% fee for early withdrawal)
-- [ ] Vault NFT receipt — mint an NFT representing your locked vault
 - [ ] Yield integration — route locked STX into Stacking while vaulted
 - [ ] Mobile-responsive PWA
 - [ ] Contract audit

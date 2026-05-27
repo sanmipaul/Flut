@@ -386,6 +386,17 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "create-split: succeeds with exactly one member",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const creator = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(500), types.list([types.principal(creator.address)])], creator.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
+  }
+});
+
+Clarinet.test({
   name: "full lifecycle: 2-member split contribute and claim",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const w1 = accounts.get('wallet_1')!;
@@ -810,6 +821,25 @@ Clarinet.test({
     ]);
     assertEquals(block.receipts[0].result, '(ok u0)');
     assertEquals(block.receipts[1].result, '(ok u1)');
+  }
+});
+
+Clarinet.test({
+  name: "create-split: succeeds with exactly five members (maximum capacity)",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const w1 = accounts.get('wallet_1')!;
+    const w2 = accounts.get('wallet_2')!;
+    const w3 = accounts.get('wallet_3')!;
+    const w4 = accounts.get('wallet_4')!;
+    const w5 = accounts.get('wallet_5')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-split', 'create-split', [types.uint(1000), types.list([
+        types.principal(w1.address), types.principal(w2.address),
+        types.principal(w3.address), types.principal(w4.address),
+        types.principal(w5.address)
+      ])], w1.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(ok u0)');
   }
 });
 
