@@ -55,3 +55,14 @@ Clarinet.test({
     assertEquals(block.receipts[0].result, '(err u3)');
   }
 });
+
+Clarinet.test({
+  name: "start-streak: rejects zero interval",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'start-streak', [types.uint(500), types.uint(0)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u4)');
+  }
+});
