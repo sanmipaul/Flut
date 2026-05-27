@@ -118,21 +118,28 @@ The Flut protocol consists of five Clarity contracts:
 
 ---
 
-### Data Structures
+### Data Structures (flut.clar)
 
 ```clarity
-;; Vault entry stored per user per vault-id
-(define-map vaults
-  { owner: principal, vault-id: uint }
-  {
-    balance: uint,          ;; STX balance in micro-STX
-    unlock-height: uint,    ;; Bitcoin block height to unlock
-    label: (string-ascii 64) ;; Human-readable vault name
-  }
-)
+;; Vault entry indexed by vault-id
+(define-map vaults {vault-id: uint}
+  { owner: principal,
+    amount: uint,                              ;; STX balance in micro-STX
+    unlock-height: uint,                       ;; Block height to unlock
+    withdrawn: bool,                           ;; Whether funds have been withdrawn
+    last-deposit-height: uint,                 ;; Block of most recent deposit
+    total-deposited: uint,                     ;; Lifetime deposits
+    is-emergency-withdrawal-enabled: bool,     ;; Emergency withdrawal toggle
+    emergency-withdrawal-penalty-bps: uint })  ;; Penalty rate in basis points
 
-;; Track number of vaults per user
-(define-map vault-count principal uint)
+;; Multi-beneficiary support
+(define-map vault-beneficiaries {vault-id: uint, beneficiary: principal}
+  {shares: uint, withdrawn-amount: uint})
+(define-map vault-total-shares {vault-id: uint} {total: uint})
+(define-map vault-beneficiary-count {vault-id: uint} {count: uint})
+
+;; Ownership transfer
+(define-map pending-owner {vault-id: uint} {new-owner: principal})
 ```
 
 ---
