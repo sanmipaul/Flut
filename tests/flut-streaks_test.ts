@@ -79,6 +79,17 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "get-streak-next-deposit-block: returns ERR-NO-STREAK for user without streak",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet = accounts.get('wallet_1')!;
+    const block = chain.mineBlock([
+      Tx.contractCall('flut-streaks', 'get-streak-next-deposit-block', [types.principal(wallet.address)], wallet.address)
+    ]);
+    assertEquals(block.receipts[0].result, '(err u2)');
+  }
+});
+
+Clarinet.test({
   name: "get-streak-next-deposit-block: returns last-deposit plus interval",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet = accounts.get('wallet_1')!;
